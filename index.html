@@ -508,6 +508,8 @@ function setupFirebase(){
     firebaseApp = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
+    window.auth = auth;
+    window.db = db;
     state.cloudEnabled=true;
     auth.onAuthStateChanged(function(user){
       authReady=true;
@@ -518,6 +520,8 @@ function setupFirebase(){
     });
   }catch(e){
     state.cloudEnabled=false;
+    window.auth = null;
+    window.db = null;
     updateAuthUi();
   }
 }
@@ -757,13 +761,55 @@ init();
     setTimeout(function(){ try{ input.focus(); }catch(e){} },30);
   }
 
+  function renderAdminError(err){
+    var body=document.getElementById('adminBody');
+    var sub=document.getElementById('adminSub');
+    var code=(err && (err.code||err.name))?String(err.code||err.name):'';
+    var msg=(err && err.message)?String(err.message):String(err||'Error desconocido');
+    var tips=[];
+
+    if(!window.db){
+      code = code || 'db-unavailable';
+      tips.push('Firestore no está inicializado en esta página o Firebase ha fallado al arrancar.');
+      tips.push('Revisa la configuración de Firebase del proyecto publicado.');
+    } else if(code.indexOf('permission-denied')!==-1){
+      tips.push('Las reglas de Firestore están bloqueando la lectura de users o progress.');
+      tips.push('En el proyecto de pruebas o definitivo debes permitir lectura al administrador o al usuario autenticado que quieras usar.');
+    } else if(code.indexOf('failed-precondition')!==-1){
+      tips.push('Firestore pide crear un índice o terminar alguna configuración pendiente del proyecto.');
+    } else if(code.indexOf('unavailable')!==-1){
+      tips.push('Firestore no responde ahora mismo o el servicio no está habilitado en ese proyecto.');
+      tips.push('Comprueba en Firebase Console que Firestore Database está creado.');
+    } else {
+      tips.push('Comprueba si Firestore Database está creado en este proyecto.');
+      tips.push('Comprueba también las reglas y que existan las colecciones users y progress.');
+    }
+
+    sub.textContent='Diagnóstico de Firestore';
+    body.innerHTML=''
+      + '<div class="admin-msg" style="text-align:left;padding:0;">'
+      +   '<div class="admin-box" style="margin-bottom:10px;">'
+      +     '<div class="small">Código</div><strong style="font-size:18px;word-break:break-word;">'+esc(code||'sin-código')+'</strong>'
+      +   '</div>'
+      +   '<div class="admin-box" style="margin-bottom:10px;">'
+      +     '<div class="small">Mensaje real</div><strong style="font-size:16px;line-height:1.4;word-break:break-word;">'+esc(msg)+'</strong>'
+      +   '</div>'
+      +   '<div class="admin-box">'
+      +     '<div class="small" style="margin-bottom:8px;">Qué revisar</div>'
+      +     '<div style="font-size:13px;line-height:1.6;">'+tips.map(function(t){ return '• '+esc(t); }).join('<br>')+'</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
   async function loadPanel(){
     var body=document.getElementById('adminBody');
     var sub=document.getElementById('adminSub');
     sub.textContent='Consultando Firestore...';
     body.innerHTML='<div class="admin-msg">Cargando estadísticas de usuarios...</div>';
     try{
-      if(!window.db) throw new Error('Firestore no está disponible');
+      if(!window.db) throw { code:'db-unavailable', message:'window.db es null o undefined. Firestore no quedó inicializado en la página.' };
+      if(!window.db.collection || typeof window.db.collection!=='function') throw { code:'db-invalid', message:'window.db existe pero no tiene el método collection().' };
+
       var us=await window.db.collection('users').get();
       var ps=await window.db.collection('progress').get();
       var progByUid={};
@@ -805,9 +851,10 @@ init();
         +   '<div class="admin-box"><div class="small">Sesiones</div><strong>'+totalSessions+'</strong></div>'
         +   '<div class="admin-box"><div class="small">Acierto global</div><strong>'+globalAcc.toFixed(1)+'%</strong></div>'
         + '</div>'
-        + (cards || '<div class="admin-msg">Sin otros usuarios aún.</div>');
+        + (cards || '<div class="admin-msg">No hay otros usuarios con datos todavía.</div>');
     }catch(e){
-      body.innerHTML='<div class="admin-msg">Error: '+esc(String(e.message||e))+'</div>';
+      renderAdminError(e);
+      try{ console.error('ADMIN_PANEL_FIRESTORE_ERROR', e); }catch(_e){}
     }
   }
 
