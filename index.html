@@ -428,6 +428,41 @@ function totalAnsweredCount(store){
   for(var i=0;i<SUBJECTS.length;i++){ var key=SUBJECTS[i].short; total+=(((store[key]||{}).overall||{}).answered||0); }
   return total;
 }
+function saveLocalProgress(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ensureProgressShape(progressStore||{})));
+  }catch(e){}
+}
+async function saveProgressToCloud(force){
+  if(!authReady || !auth || !db || !auth.currentUser) return;
+
+  if(!force){
+    if(saveCloudTimer) clearTimeout(saveCloudTimer);
+    saveCloudTimer=setTimeout(function(){
+      saveProgressToCloud(true);
+    }, 700);
+    return;
+  }
+
+  if(saveCloudTimer){
+    clearTimeout(saveCloudTimer);
+    saveCloudTimer=null;
+  }
+  if(cloudSyncInFlight) return;
+  cloudSyncInFlight=true;
+
+  try{
+    await db.collection('progress').doc(auth.currentUser.uid).set({
+      version:CLOUD_DOC_VERSION,
+      updatedAt:new Date().toISOString(),
+      progress:ensureProgressShape(cloneData(progressStore||{}))
+    }, {merge:true});
+  }catch(e){
+    console.error('No se pudo guardar el progreso en la nube:', e);
+  }finally{
+    cloudSyncInFlight=false;
+  }
+}
 function subjectWeight(sub){
   if(!sub || !sub.overall) return 0;
   return (sub.overall.answered||0)*10 + (sub.overall.sessions||0);
@@ -534,7 +569,17 @@ function setupFirebase(){
       authReady=true;
       state.authUser=user||null;
       updateAuthUi();
-      if(user){ applyCloudProgress(user); }
+      if(user){
+        try{
+          db.collection('users').doc(user.uid).set({
+            email:user.email||'',
+            displayName:user.displayName||user.email||'Sin nombre',
+            photoURL:user.photoURL||'',
+            lastActive:new Date().toISOString()
+          },{merge:true});
+        }catch(metaErr){}
+        applyCloudProgress(user);
+      }
       else{ progressStore=loadProgress(); renderAfterProgressRefresh(); }
     });
   }catch(e){
