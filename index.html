@@ -318,6 +318,15 @@ var METRIC_DEFS = [
 function isAdminUser(){
   return !!(state.authUser && state.authUser.email && String(state.authUser.email).toLowerCase()==='gomis89@gmail.com');
 }
+function isTrackedStudentEmail(email){
+  if(!email) return false;
+  return String(email).toLowerCase()!==ADMIN_PANEL_EMAIL.toLowerCase();
+}
+function displayNameForRecord(d){
+  if(d && d.displayName) return d.displayName;
+  if(d && d.email) return d.email;
+  return 'Sin nombre';
+}
 function createAdminUi(){
   if(adminUi.button) return;
   adminUi.button=document.createElement('button');
@@ -400,13 +409,24 @@ function renderAdminError(message){
 }
 function renderAdminData(data){
   if(!adminUi.content) return;
-  function buildList(title, items, emptyText){
+  function buildTable(title, rows, columns, emptyText){
     var html='<div class="panel" style="padding:14px;margin-top:14px;"><h3 style="margin-top:0;">'+escapeHtml(title)+'</h3>';
-    if(items && items.length){
-      for(var i=0;i<items.length;i++){
-        var item=items[i];
-        html+='<div class="history-item"><strong>'+escapeHtml(item.label)+'</strong><div class="small">'+escapeHtml(item.time)+'</div></div>';
+    if(rows && rows.length){
+      html+='<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;">';
+      html+='<thead><tr>';
+      for(var c=0;c<columns.length;c++){
+        html+='<th style="text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);">'+escapeHtml(columns[c].label)+'</th>';
       }
+      html+='</tr></thead><tbody>';
+      for(var r=0;r<rows.length;r++){
+        html+='<tr>';
+        for(var c2=0;c2<columns.length;c2++){
+          var value=rows[r][columns[c2].key];
+          html+='<td style="padding:10px 8px;border-bottom:1px solid var(--line);">'+escapeHtml(value==null?'':String(value))+'</td>';
+        }
+        html+='</tr>';
+      }
+      html+='</tbody></table></div>';
     }else{
       html+='<div class="empty">'+escapeHtml(emptyText)+'</div>';
     }
@@ -415,15 +435,24 @@ function renderAdminData(data){
   }
   adminUi.content.innerHTML='' +
     '<div class="stats-grid">' +
-      '<div class="stat-card"><div>Activos ahora</div><div class="n">'+String(data.activeNow||0)+'</div></div>' +
-      '<div class="stat-card"><div>Visitas hoy</div><div class="n">'+String(data.today||0)+'</div></div>' +
-      '<div class="stat-card"><div>Visitas totales</div><div class="n">'+String(data.total||0)+'</div></div>' +
-      '<div class="stat-card"><div>Visitas con email</div><div class="n">'+String(data.emailCount||0)+'</div></div>' +
+      '<div class="stat-card"><div>Alumnos activos ahora</div><div class="n">'+String(data.activeNow||0)+'</div></div>' +
+      '<div class="stat-card"><div>Alumnos hoy</div><div class="n">'+String(data.todayUsers||0)+'</div></div>' +
+      '<div class="stat-card"><div>Alumnos totales</div><div class="n">'+String(data.totalUsers||0)+'</div></div>' +
+      '<div class="stat-card"><div>Sesiones logueadas</div><div class="n">'+String(data.loggedSessions||0)+'</div></div>' +
       '<div class="stat-card"><div>Analytics</div><div class="n" style="font-size:18px;">'+escapeHtml(data.analyticsStatus)+'</div></div>' +
     '</div>' +
-    buildList('Accesos con email', data.recentEmail, 'Todavía no hay accesos identificados por email.') +
-    buildList('Todos los accesos', data.recentAll, 'Aún no hay accesos registrados en el panel.');
+    buildTable('Alumnos activos ahora', data.activeRows, [
+      {key:'name', label:'Nombre'},
+      {key:'email', label:'Email'},
+      {key:'lastSeen', label:'Última actividad'}
+    ], 'Ahora mismo no hay alumnos logueados activos.') +
+    buildTable('Últimos accesos logueados', data.recentRows, [
+      {key:'name', label:'Nombre'},
+      {key:'email', label:'Email'},
+      {key:'time', label:'Acceso'}
+    ], 'Todavía no hay accesos logueados registrados.');
 }
+
 function todayKey(){
   var d=new Date();
   var m=String(d.getMonth()+1).padStart(2,'0');
@@ -442,6 +471,7 @@ async function startTelemetry(){
     await db.collection('app_visits').doc(telemetrySessionId).set({
       sessionId: telemetrySessionId,
       email: state.authUser && state.authUser.email ? state.authUser.email : '',
+      displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
       visitedAtMs: Date.now(),
       dateKey: todayKey(),
       userAgent: navigator.userAgent || ''
@@ -451,6 +481,7 @@ async function startTelemetry(){
     await db.collection('app_presence').doc(telemetrySessionId).set({
       sessionId: telemetrySessionId,
       email: state.authUser && state.authUser.email ? state.authUser.email : '',
+      displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
       startedAtMs: Date.now(),
       lastSeenMs: Date.now()
     }, {merge:true});
@@ -460,6 +491,7 @@ async function startTelemetry(){
       await db.collection('app_presence').doc(telemetrySessionId).set({
         sessionId: telemetrySessionId,
         email: state.authUser && state.authUser.email ? state.authUser.email : '',
+        displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
         lastSeenMs: Date.now()
       }, {merge:true});
     }catch(e){}
@@ -473,271 +505,58 @@ async function refreshAdminPanel(){
     var threshold=now-(2*60*1000);
     var visitsSnap=await db.collection('app_visits').get();
     var presenceSnap=await db.collection('app_presence').where('lastSeenMs','>=',threshold).get();
-    var recentSnap=await db.collection('app_visits').orderBy('visitedAtMs','desc').limit(8).get();
-    var total=visitsSnap.size||0;
-    var today=0;
+    var recentSnap=await db.collection('app_visits').orderBy('visitedAtMs','desc').limit(20).get();
+
+    var uniqueAll = {};
+    var uniqueToday = {};
+    var activeMap = {};
+    var loggedSessions = 0;
+
     visitsSnap.forEach(function(doc){
       var d=doc.data()||{};
-      if(d.dateKey===todayKey()) today++;
+      var email=(d.email||'').toLowerCase();
+      if(!isTrackedStudentEmail(email)) return;
+      loggedSessions++;
+      uniqueAll[email]={name:displayNameForRecord(d), email:d.email||email};
+      if(d.dateKey===todayKey()) uniqueToday[email]={name:displayNameForRecord(d), email:d.email||email};
     });
-    var recentAll=[];
-    var recentEmail=[];
-    var emailCount=0;
-    visitsSnap.forEach(function(doc){
+
+    presenceSnap.forEach(function(doc){
       var d=doc.data()||{};
-      if(d.email) emailCount++;
+      var email=(d.email||'').toLowerCase();
+      if(!isTrackedStudentEmail(email)) return;
+      var when=d.lastSeenMs ? new Date(d.lastSeenMs).toLocaleString('es-ES') : 'Sin fecha';
+      activeMap[email]={name:displayNameForRecord(d), email:d.email||email, lastSeen:when};
     });
+
+    var recentRows=[];
+    var seenRecent={};
     recentSnap.forEach(function(doc){
       var d=doc.data()||{};
-      var when=d.visitedAtMs ? new Date(d.visitedAtMs) : null;
-      var item={
-        label: d.email ? d.email : 'Acceso anónimo',
-        time: when ? when.toLocaleString('es-ES') : 'Sin fecha'
-      };
-      recentAll.push(item);
-      if(d.email) recentEmail.push(item);
+      var email=(d.email||'').toLowerCase();
+      if(!isTrackedStudentEmail(email)) return;
+      if(seenRecent[email]) return;
+      seenRecent[email]=true;
+      var when=d.visitedAtMs ? new Date(d.visitedAtMs).toLocaleString('es-ES') : 'Sin fecha';
+      recentRows.push({name:displayNameForRecord(d), email:d.email||email, time:when});
     });
+
+    var activeRows=Object.keys(activeMap).sort().map(function(email){ return activeMap[email]; });
+
     renderAdminData({
-      activeNow: presenceSnap.size||0,
-      today: today,
-      total: total,
-      emailCount: emailCount,
+      activeNow: activeRows.length,
+      todayUsers: Object.keys(uniqueToday).length,
+      totalUsers: Object.keys(uniqueAll).length,
+      loggedSessions: loggedSessions,
       analyticsStatus: analytics ? 'Conectado' : 'Pendiente',
-      recentAll: recentAll,
-      recentEmail: recentEmail
+      activeRows: activeRows,
+      recentRows: recentRows
     });
   }catch(e){
     renderAdminError('No se pudieron leer las estadísticas. Revisa las reglas de Firestore si fuese necesario.');
   }
 }
 
-function currentData(){ return state.subject ? SUBJECT_DATA[state.subject.short] : null; }
-function getModeKeysForSubject(subjectShort){ if(subjectShort==='Sostenibilidad' || subjectShort==='IPE II') return ['cuestionario','examen']; var keys=['cuestionario','practicas','examen']; if(subjectShort==='TPIE' || subjectShort==='PIICT') keys.push('examen1'); return keys; }
-function getAvailableModeKeys(){ return state.subject ? getModeKeysForSubject(state.subject.short) : ['cuestionario','practicas','examen']; }
-function getExamBank(data, mode){ if(mode==='examen1' && data && data.exam1QuestionBank && data.exam1QuestionBank.length) return data.exam1QuestionBank; return data.questionBank || []; }
-function getBankCountForMode(data, mode){ return getExamBank(data, mode).length; }
-function isExamMode(mode){ return mode==='examen' || mode==='examen1'; }
-function getCombinedExamStats(sub){
-  var exam=sub.modes.examen || emptyMode();
-  var exam1=sub.modes.examen1 || emptyMode();
-  var sessions=(exam.sessions||0)+(exam1.sessions||0);
-  var totalScore=(exam.totalScore||0)+(exam1.totalScore||0);
-  var bestCandidates=[];
-  if(typeof exam.bestScore==='number') bestCandidates.push(exam.bestScore);
-  if(typeof exam1.bestScore==='number') bestCandidates.push(exam1.bestScore);
-  var best=bestCandidates.length?Math.max.apply(null, bestCandidates):null;
-  var latestScore=null;
-  if(sub.history && sub.history.length){
-    for(var i=0;i<sub.history.length;i++){
-      if(isExamMode(sub.history[i].mode) && typeof sub.history[i].score==='number'){ latestScore=sub.history[i].score; break; }
-    }
-  }
-  return {sessions:sessions, totalScore:totalScore, bestScore:best, lastScore:latestScore};
-}
-function shuffle(arr){ var copy=arr.slice(); for(var i=copy.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=copy[i]; copy[i]=copy[j]; copy[j]=t; } return copy; }
-function sample(arr,count){ return shuffle(arr).slice(0, Math.min(count, arr.length)); }
-function showScreen(name){ for(var k in screens){ screens[k].className='screen'; } screens[name].className='screen active'; var isHome=name==='home'; els.homeTopBtn.style.display=isHome?'none':'inline-flex'; els.progressBtn.style.display='inline-flex'; els.shareRegistryTopBtn.style.display='none'; if(els.themeBtn) els.themeBtn.style.display=isHome?'inline-flex':'none'; if(els.authControls) els.authControls.style.display=isHome?'inline-flex':'none'; if(document.body){ document.body.classList.toggle('quiz-active',name==='quiz'); } }
-function renderSubjects(){ els.subjectGrid.innerHTML=''; for(var i=0;i<SUBJECTS.length;i++){ var s=SUBJECTS[i]; var btn=document.createElement('button'); btn.className='subject-card'+(s.available?'':' locked'); btn.innerHTML='<div class="badge '+(s.available?'ok':'soon')+'">'+(s.available?'Disponible':'Próximamente')+'</div><h3>'+escapeHtml(s.short)+'</h3><div class="small">'+escapeHtml(s.name)+'</div>'; if(s.available){ (function(subject){ btn.addEventListener('click', function(){ state.subject=subject; renderModeMenu(); showScreen('menu'); }); })(s); } btn.disabled=!s.available; els.subjectGrid.appendChild(btn); } }
-function renderModeMenu(){ hidePracticePicker(); els.menuSubjectTitle.textContent=state.subject?state.subject.name:''; els.modeMenu.innerHTML=''; var modeKeys=getAvailableModeKeys(); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; for(var i=0;i<modeKeys.length;i++){ var key=modeKeys[i], mode=MODES[key], desc=mode.description; if(isSost && key==='cuestionario') desc='10 preguntas aleatorias del banco de Sostenibilidad.'; if(isSost && key==='examen') desc='10 preguntas tipo test con corrección por fórmula (los errores restan 1/6).'; if(isEnglish && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y hasta 6 de un único caso práctico. Si el caso tiene menos preguntas, se completa con banco general. Las incorrectas restan 1/4.'; if(state.subject && state.subject.short==='IPE II' && key==='examen') desc='Examen de 20 preguntas del banco general de IPE II con corrección por fórmula.'; if(isPIICT && key==='examen1') desc='Incluye un bloque especial con preguntas de la clase clave del 08/04/2026.'; if(isPIICT && key==='examen1'){ var wrap=document.createElement('div'); wrap.className='mode-card-wrap'; var btn=document.createElement('button'); btn.className='mode-card'; btn.innerHTML='<div class="badge mode">'+mode.title+'</div><h3>'+mode.title+'</h3><p class="small">'+desc+'</p>'; (function(modeKey){ btn.addEventListener('click', function(){ startMode(modeKey); }); })(key); var infoRow=document.createElement('div'); infoRow.className='mode-info-row'; var infoBtn=document.createElement('button'); infoBtn.type='button'; infoBtn.className='mode-info-btn'; infoBtn.textContent='?'; infoBtn.setAttribute('aria-label','Más información sobre Examen 1'); infoBtn.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); alert('Examen 1 de PIICT\n\nIncluye 30 preguntas preparadas en la clase importante del 08/04/2026. En cada intento salen 10 aleatorias de ese bloque. El resto del examen se completa con preguntas del banco general y con el caso práctico correspondiente.'); }); infoRow.appendChild(infoBtn); wrap.appendChild(btn); wrap.appendChild(infoRow); els.modeMenu.appendChild(wrap); continue; } var btn=document.createElement('button'); btn.className='mode-card'; btn.innerHTML='<div class="badge mode">'+mode.title+'</div><h3>'+mode.title+'</h3><p class="small">'+desc+'</p>'; (function(modeKey){ btn.addEventListener('click', function(){ startMode(modeKey); }); })(key); els.modeMenu.appendChild(btn); } var listBtn=document.createElement('button'); listBtn.className='mode-card purple'; listBtn.innerHTML='<div class="badge mode">Consulta</div><h3>Lista de preguntas</h3><p class="small">'+(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del cuestionario de Sostenibilidad.':'Ver todas las preguntas del cuestionario o del test de prácticas.'))+'</p>'; listBtn.addEventListener('click', function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); }); els.modeMenu.appendChild(listBtn); }
-function hidePracticePicker(){ els.practicePickerPanel.style.display='none'; els.practiceCaseList.innerHTML=''; }
-function getPracticeCardTitle(c, index){ var raw=(c && c.title ? String(c.title) : ('Caso práctico '+(index+1))); raw=raw.replace(/\s+/g,' ').trim(); if(raw.length>58) raw=raw.slice(0,55).trim()+'…'; return raw; }
-
-function renderPracticePicker(){ var data=currentData(); if(!data || !data.practicalCases || !data.practicalCases.length){ alert('Esta asignatura todavía no tiene casos prácticos cargados.'); return; } els.practiceCaseList.innerHTML=''; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i], btn=document.createElement('button'); btn.className='mode-card'; btn.type='button'; var cardTitle=getPracticeCardTitle(c, i); btn.innerHTML='<div class="badge mode">'+escapeHtml(c.block||('Caso '+(i+1)))+'</div><h3>'+escapeHtml(cardTitle)+'</h3><p class="small">'+c.questions.length+' preguntas de práctica disponibles.</p>'; (function(index){ btn.addEventListener('click', function(){ startPracticeCase(index); }); })(i); els.practiceCaseList.appendChild(btn); }
-  els.practicePickerPanel.style.display='block';
-}
-
-function flattenPracticeQuestions(data){ var out=[]; if(!data || !data.practicalCases) return out; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i]; for(var j=0;j<c.questions.length;j++){ out.push({caseTitle:c.title||('Caso práctico '+(i+1)), block:c.block||'', section:c.title||'', q:c.questions[j].q, options:c.questions[j].options.slice(), correct:c.questions[j].correct}); } } return out; }
-function renderQuestionListScreen(type){ var data=currentData(); if(!data) return; var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; state.listViewType=(isSost && type==='practicas')?'cuestionario':(type||'cuestionario'); els.listSubjectTitle.textContent=state.subject?state.subject.name:''; els.listQuizBtn.textContent=isEnglish?'Banco de preguntas':'Cuestionario'; els.listQuizBtn.className='btn small'+(state.listViewType==='cuestionario'?' active':''); els.listPracticeBtn.style.display=(state.subject && getModeKeysForSubject(state.subject.short).indexOf('practicas')!==-1)?'inline-flex':'none'; els.listPracticeBtn.className='btn small'+(state.listViewType==='practicas'?' active':''); if(els.listExam1Btn){ els.listExam1Btn.style.display=(state.subject && (state.subject.short==='TPIE' || state.subject.short==='PIICT') && data.exam1QuestionBank && data.exam1QuestionBank.length)?'inline-flex':'none'; els.listExam1Btn.className='btn small'+(state.listViewType==='examen1'?' active':''); }
-  var items=[], title='';
-  if(state.listViewType==='practicas'){ items=flattenPracticeQuestions(data); title='Test de prácticas'; }
-  else if(state.listViewType==='examen1'){ items=(data.exam1QuestionBank||[]).map(function(q){ return {section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||''}; }); title='Examen 1'; }
-  else { items=(data.questionBank||[]).map(function(q){ return {section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||''}; }); title='Cuestionario'; }
-  els.listCountInfo.textContent=title+' · '+items.length+' preguntas disponibles.';
-  els.questionListWrap.innerHTML='';
-  if(!items.length){ els.questionListWrap.innerHTML='<div class="empty">No hay preguntas cargadas en este contenedor.</div>'; showScreen('list'); return; }
-  for(var i=0;i<items.length;i++){ var it=items[i], wrap=document.createElement('div'); wrap.className='question-list-item'; var meta=[]; if(it.section) meta.push(it.section); if(it.tag) meta.push(it.tag); if(it.caseTitle) meta.push(it.caseTitle); if(it.block) meta.push(it.block); var html='<div><strong>'+(i+1)+'. '+escapeHtml(it.q)+'</strong></div>'; if(meta.length) html+='<div class="small" style="margin-top:6px;">'+escapeHtml(meta.join(' · '))+'</div>'; html+='<ol type="A">'; for(var k=0;k<it.options.length;k++){ html+='<li class="'+(k===it.correct?'correct-answer':'')+'">'+escapeHtml(it.options[k])+(k===it.correct?' ✓':'')+'</li>'; } html+='</ol>'; wrap.innerHTML=html; els.questionListWrap.appendChild(wrap); }
-  showScreen('list');
-}
-
-function startPracticeCase(caseIndex){ var data=currentData(); if(!data || !data.practicalCases || !data.practicalCases.length) return; var c = (typeof caseIndex==='number' && caseIndex>=0 && caseIndex<data.practicalCases.length) ? data.practicalCases[caseIndex] : data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; state.selectedPracticeCaseIndex = caseIndex;
-  state.mode='practicas'; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); var qs=c.questions.slice(); state.sessionItems=[]; for(var j=0;j<qs.length;j++) state.sessionItems.push(enrichCaseQuestion(qs[j], c, 'Test de prácticas')); hidePracticePicker(); renderQuestion(); showScreen('quiz');
-}
-
-function makeExamBlock(data, mode){ var bank=getExamBank(data, mode); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isIPE=state.subject && state.subject.short==='IPE II'; var bankLabel=(mode==='examen1')?'Bloque 1 — Examen 1':(isSost?'Examen':'Bloque 1 — Cuestionario'); if(!data.practicalCases || !data.practicalCases.length || isSost || isIPE){ var fallbackCount=isSost ? 10 : (isEnglish ? ENGLISH_EXAM_COUNT : (isIPE ? 20 : 30)); var fallback=sample(bank,fallbackCount); var onlyBank=[]; for(var x=0;x<fallback.length;x++) onlyBank.push(enrichBankQuestion(fallback[x], MODES[mode].title)); return onlyBank; } if(isEnglish){ var englishTotal=ENGLISH_EXAM_COUNT; var englishCaseTarget=6; var englishCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var englishCaseQs=shuffle(englishCase.questions).slice(0, englishCaseTarget); var englishBankCount=englishTotal-englishCaseQs.length; var englishBlock1=sample(bank, englishBankCount); var englishItems=[]; var e; for(e=0;e<englishBlock1.length;e++){ englishItems.push(enrichBankQuestion(englishBlock1[e], 'Bloque 1 — Banco general')); } for(e=0;e<englishCaseQs.length;e++){ englishItems.push(enrichCaseQuestion(englishCaseQs[e], englishCase, 'Bloque 2 — Caso práctico')); } return englishItems; } if(mode==='examen1' && isPIICT){ var specialBank=(data.exam1QuestionBank||[]); var specialQs=sample(specialBank, 10); var generalQs=sample(data.questionBank||[], 14); var piictCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var piictCaseQs=shuffle(piictCase.questions).slice(0,6); var piictItems=[]; var p; for(p=0;p<specialQs.length;p++){ piictItems.push(enrichBankQuestion(specialQs[p], 'Bloque 1 — Clase importante')); } for(p=0;p<generalQs.length;p++){ piictItems.push(enrichBankQuestion(generalQs[p], 'Bloque 1 — Banco general')); } for(p=0;p<piictCaseQs.length;p++){ piictItems.push(enrichCaseQuestion(piictCaseQs[p], piictCase, 'Bloque 2 — Caso práctico')); } return piictItems; } var block1=sample(bank,24); var examCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var caseQs=shuffle(examCase.questions).slice(0,6); var items=[]; var i; for(i=0;i<block1.length;i++){ items.push(enrichBankQuestion(block1[i], bankLabel)); } for(i=0;i<caseQs.length;i++){ items.push(enrichCaseQuestion(caseQs[i], examCase, 'Bloque 2 — Caso práctico')); } return items; }
-function enrichBankQuestion(q, block){ return { type:'bank', block:block, section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||'' }; }
-function enrichCaseQuestion(q, c, block){ return { type:'case', block:block, caseTitle:c.title, caseStatement:c.statement, section:c.title||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:c.block||'' }; }
-function startMode(mode){ var data=currentData(); if(!data) return; state.selectedPracticeCaseIndex=null; if(mode==='practicas'){ renderPracticePicker(); return; } hidePracticePicker(); state.mode=mode; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); if(mode==='cuestionario'){ var questionCount=(state.subject && state.subject.short==='Sostenibilidad')?10:30; var bank=sample(data.questionBank,questionCount); state.sessionItems=[]; for(var i=0;i<bank.length;i++) state.sessionItems.push(enrichBankQuestion(bank[i], 'Cuestionario')); } else { state.sessionItems=makeExamBlock(data, mode); } renderQuestion(); showScreen('quiz'); }
-function renderQuestion(){ var item=state.sessionItems[state.currentIndex]; if(!item){ finishSession(); return; } els.quizSubjectTitle.textContent=state.subject.name; els.modeBadge.textContent=MODES[state.mode].title; els.blockInfo.textContent=item.block||''; els.counterInfo.textContent='Pregunta '+(state.currentIndex+1)+' de '+state.sessionItems.length; els.progressBar.style.width=((state.currentIndex)/state.sessionItems.length*100)+'%'; els.sectionTag.textContent=(item.section?item.section:'')+(item.tag?' · '+item.tag:''); els.questionText.textContent=item.q; els.optionsWrap.innerHTML=''; els.nextBtn.disabled=true; state.currentAnswered=false;
-  if(item.type==='case'){ els.casePanel.style.display='block'; els.caseTitle.textContent=item.caseTitle||''; els.caseStatement.textContent=item.caseStatement||''; } else { els.casePanel.style.display='none'; els.caseTitle.textContent=''; els.caseStatement.textContent=''; }
-  for(var i=0;i<item.options.length;i++){ (function(index){ var b=document.createElement('button'); b.className='option'; b.textContent=item.options[index]; b.addEventListener('click', function(){ if(state.currentAnswered) return; answerQuestion(index); }); els.optionsWrap.appendChild(b); })(i); }
-}
-function answerQuestion(selected){ var item=state.sessionItems[state.currentIndex]; state.answers[state.currentIndex]={selected:selected}; state.currentAnswered=true; var nodes=els.optionsWrap.children; for(var i=0;i<nodes.length;i++){ if(i===item.correct) nodes[i].className='option correct'; else if(i===selected) nodes[i].className='option wrong'; nodes[i].disabled=true; }
-  els.nextBtn.disabled=false;
-}
-function nextQuestion(){ if(!state.currentAnswered) return; state.currentIndex++; if(state.currentIndex>=state.sessionItems.length){ finishSession(); } else { renderQuestion(); } }
-function calculateExamScore(correct, wrong, total){ var T = total===30 ? 3 : (total===20 ? 4 : 6); var score=((correct-(wrong/T))/total)*10; if(score<0) score=0; return Math.round(score*100)/100; }
-function finishSession(){ var total=state.sessionItems.length, correct=0, wrong=0, blank=0; for(var i=0;i<state.sessionItems.length;i++){ var item=state.sessionItems[i], ans=state.answers[i]; if(!ans || typeof ans.selected!=='number'){ blank++; } else if(ans.selected===item.correct){ correct++; } else { wrong++; } }
-  els.statCorrect.textContent=String(correct); els.statWrong.textContent=String(wrong); els.statBlank.textContent=String(blank); els.resultsTitle.textContent='Resultados · '+MODES[state.mode].title; els.bankCount.textContent=String(getBankCountForMode(currentData(), state.mode)); els.caseCount.textContent=String(currentData().practicalCases.length); var score = null; if(isExamMode(state.mode)){ score=calculateExamScore(correct, wrong, total); els.scoreCard.style.display='block'; els.scoreNumber.textContent=score.toFixed(2); els.scoreFormulaText.textContent='Nota = (B - (E / T)) / N × 10'; } else { els.scoreCard.style.display='none'; }
-  els.mistakesWrap.innerHTML=''; for(var j=0;j<state.sessionItems.length;j++){ var q=state.sessionItems[j], a=state.answers[j]; var wrap=document.createElement('div'); wrap.className='mistake'; var html='<div><strong>'+(j+1)+'. '+escapeHtml(q.q)+'</strong></div>'; html+='<div class="small" style="margin-top:6px;">'+escapeHtml(q.section||'')+(q.tag?' · '+escapeHtml(q.tag):'')+'</div>'; for(var k=0;k<q.options.length;k++){ var cls='review-option'; if(k===q.correct) cls+=' correct'; if(a && a.selected===k && k!==q.correct) cls+=' wrong'; html+='<div class="'+cls+'">'+escapeHtml(q.options[k])+'</div>'; } wrap.innerHTML=html; els.mistakesWrap.appendChild(wrap); }
-  var duration=(new Date()).getTime()-state.sessionStartedAt; updateProgress(state.subject.short, state.mode, {correct:correct, wrong:wrong, blank:blank, total:total, timeMs:duration, score:score, finishedAt:(new Date()).toISOString(), items:state.sessionItems, answers:state.answers}); state.lastSummary={correct:correct, wrong:wrong, blank:blank, total:total, score:score}; showScreen('results'); }
-
-function isFirebaseConfigured(){
-  return !!(window.firebase && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('PEGA_AQUI_')!==0);
-}
-function createAuthUi(){
-  var wrap=document.createElement('div');
-  wrap.id='authControls';
-  wrap.innerHTML='<button class="btn small primary" id="authActionBtn" type="button">Login</button>';
-  var toolbar=document.querySelector('.toolbar');
-  if(toolbar) toolbar.appendChild(wrap);
-  els.authControls=wrap;
-  els.authActionBtn=document.getElementById('authActionBtn');
-}
-function updateAuthUi(){
-  if(!els.authActionBtn) return;
-  els.authActionBtn.className='btn small '+(state.authUser ? 'danger' : 'primary');
-  els.authActionBtn.textContent=state.authUser ? 'Cerrar sesión' : 'Login';
-  if(state.authUser){
-    els.authActionBtn.title=state.authUser.displayName || state.authUser.email || 'Sesión iniciada';
-  }else if(!isFirebaseConfigured()){
-    els.authActionBtn.title='Configura Firebase para iniciar sesión';
-  }else{
-    els.authActionBtn.title='Entrar con Google';
-  }
-}
-function cloneData(obj){ return JSON.parse(JSON.stringify(obj)); }
-function ensureProgressShape(obj){
-  var safe=(obj && typeof obj==='object') ? obj : {};
-  for(var i=0;i<SUBJECTS.length;i++){ var s=SUBJECTS[i]; if(!safe[s.short]) safe[s.short]=emptySubject(); }
-  return safe;
-}
-function totalAnsweredCount(store){
-  var total=0;
-  if(!store) return 0;
-  for(var i=0;i<SUBJECTS.length;i++){ var key=SUBJECTS[i].short; total+=(((store[key]||{}).overall||{}).answered||0); }
-  return total;
-}
-function subjectWeight(sub){
-  if(!sub || !sub.overall) return 0;
-  return (sub.overall.answered||0)*10 + (sub.overall.sessions||0);
-}
-function subjectLastPlayed(sub){
-  return (sub && sub.overall && sub.overall.lastPlayed) ? String(sub.overall.lastPlayed) : '';
-}
-function mergeWeakQuestions(a,b){
-  var out={}, k;
-  a=a||{}; b=b||{};
-  for(k in a){ if(Object.prototype.hasOwnProperty.call(a,k)){ out[k]=cloneData(a[k]); } }
-  for(k in b){ if(Object.prototype.hasOwnProperty.call(b,k)){ if(!out[k]) out[k]=cloneData(b[k]); else out[k].wrong=(out[k].wrong||0)+(b[k].wrong||0); } }
-  return out;
-}
-function mergeHistory(a,b){
-  var arr=(a||[]).concat(b||[]);
-  arr.sort(function(x,y){ return String((y&&y.finishedAt)||'').localeCompare(String((x&&x.finishedAt)||'')); });
-  var seen={}, out=[];
-  for(var i=0;i<arr.length;i++){
-    var item=arr[i]||{};
-    var key=[item.mode,item.correct,item.wrong,item.blank,item.total,item.score,item.finishedAt].join('|');
-    if(seen[key]) continue;
-    seen[key]=1;
-    out.push(item);
-    if(out.length>=30) break;
-  }
-  return out;
-}
-function mergeProgressStores(localData, cloudData){
-  var merged={};
-  localData=ensureProgressShape(cloneData(localData||{}));
-  cloudData=ensureProgressShape(cloneData(cloudData||{}));
-  for(var i=0;i<SUBJECTS.length;i++){
-    var key=SUBJECTS[i].short, ls=localData[key]||emptySubject(), cs=cloudData[key]||emptySubject();
-    var pickCloud=false;
-    var ll=subjectLastPlayed(ls), cl=subjectLastPlayed(cs);
-    if(cl && (!ll || cl>ll)) pickCloud=true;
-    else if(ll===cl && subjectWeight(cs)>subjectWeight(ls)) pickCloud=true;
-    var primary=pickCloud?cs:ls;
-    var secondary=pickCloud?ls:cs;
-    merged[key]=cloneData(primary);
-    merged[key].weakQuestions=mergeWeakQuestions(primary.weakQuestions, secondary.weakQuestions);
-    merged[key].history=mergeHistory(primary.history, secondary.history);
-  }
-  return ensureProgressShape(merged);
-}
-async function applyCloudProgress(user){
-  var localData=loadProgress();
-  var remoteData={};
-  try{
-    var snap=await db.collection('progress').doc(user.uid).get();
-    if(snap.exists){
-      var payload=snap.data()||{};
-      remoteData=payload.progress||{};
-    }
-  }catch(e){}
-  progressStore=mergeProgressStores(localData, remoteData);
-  saveLocalProgress();
-  await saveProgressToCloud(true);
-  renderAfterProgressRefresh();
-}
-function renderAfterProgressRefresh(){
-  if(state.progressSubject) renderProgress();
-  if(document.getElementById('screen-list').classList.contains('active') && state.subject && state.mode){ renderQuestionListScreen(state.mode); }
-}
-async function signInWithGoogle(){
-  if(!isFirebaseConfigured()){ alert('Primero tienes que pegar la configuración de Firebase dentro del archivo HTML.'); return; }
-  try{
-    var provider=new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({prompt:'select_account'});
-    var result=await auth.signInWithPopup(provider);
-    if(result && result.user){
-      state.authUser=result.user;
-      updateAuthUi();
-    }
-  }catch(e){
-    alert('No se pudo iniciar sesión con Google.');
-  }
-}
-async function signOutGoogle(){
-  if(!auth) return;
-  var ok=window.confirm('¿Quieres cerrar la sesión de Google en esta app?');
-  if(!ok) return;
-  try{ await saveProgressToCloud(true); }catch(e){}
-  try{
-    await auth.signOut();
-    state.authUser=null;
-    updateAuthUi();
-    alert('Sesión cerrada correctamente.');
-  }catch(e2){
-    alert('No se pudo cerrar la sesión.');
-  }
-}
-function setupFirebase(){
-  if(!isFirebaseConfigured()) return;
-  try{
-    firebaseApp = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    try{ analytics = firebase.analytics ? firebase.analytics() : null; }catch(eAnalytics){ analytics = null; }
-    state.cloudEnabled=true;
-    startTelemetry();
-    auth.onAuthStateChanged(function(user){
-      authReady=true;
-      state.authUser=user||null;
-      updateAuthUi();
-      updateAdminUiVisibility();
-      try{ db.collection('app_presence').doc(telemetrySessionId).set({ email:user && user.email ? user.email : '', lastSeenMs:Date.now() }, {merge:true}); }catch(ePresence){}
-      if(user){ applyCloudProgress(user); }
-      else{ progressStore=loadProgress(); renderAfterProgressRefresh(); }
-    });
-  }catch(e){
-    state.cloudEnabled=false;
-    updateAuthUi();
-    updateAdminUiVisibility();
-  }
-}
-
-function emptyMode(){ return {sessions:0, answered:0, correct:0, wrong:0, blank:0, totalTimeMs:0, totalScore:0, bestScore:null, lastScore:null}; }
-function emptySubject(){ return { overall:{sessions:0, answered:0, correct:0, wrong:0, blank:0, totalTimeMs:0, days:{}, lastPlayed:null}, modes:{cuestionario:emptyMode(), practicas:emptyMode(), examen:emptyMode(), examen1:emptyMode()}, history:[], weakQuestions:{} }; }
-function loadProgress(){ var raw=''; try{ raw=localStorage.getItem(STORAGE_KEY)||''; }catch(e){} var obj={}; if(raw){ try{ obj=JSON.parse(raw); }catch(e2){ obj={}; } } return ensureProgressShape(obj); }
 function saveProgress(){ saveLocalProgress(); saveProgressToCloud(false); }
 function updateProgress(subjectShort, mode, entry){ var sub=progressStore[subjectShort] || emptySubject(); progressStore[subjectShort]=sub; var ov=sub.overall, md=sub.modes[mode] || emptyMode(); sub.modes[mode]=md; var answered=entry.correct+entry.wrong; ov.sessions++; ov.answered+=answered; ov.correct+=entry.correct; ov.wrong+=entry.wrong; ov.blank+=entry.blank; ov.totalTimeMs+=entry.timeMs||0; ov.lastPlayed=entry.finishedAt; var dayKey=(entry.finishedAt||'').slice(0,10); if(dayKey) ov.days[dayKey]=1; md.sessions++; md.answered+=answered; md.correct+=entry.correct; md.wrong+=entry.wrong; md.blank+=entry.blank; md.totalTimeMs+=entry.timeMs||0; if(typeof entry.score==='number'){ md.totalScore+=entry.score; md.lastScore=entry.score; md.bestScore=(md.bestScore===null)?entry.score:Math.max(md.bestScore,entry.score); }
   sub.history.unshift({mode:mode, correct:entry.correct, wrong:entry.wrong, blank:entry.blank, total:entry.total, score:entry.score, finishedAt:entry.finishedAt, percent: answered?Math.round(entry.correct/answered*1000)/10:0}); if(sub.history.length>30) sub.history=sub.history.slice(0,30);
