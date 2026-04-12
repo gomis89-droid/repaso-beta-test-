@@ -622,9 +622,10 @@ init();
 </script>
 
 <script>
-/* ── PANEL ADMIN ── solo para gomis89@gmail.com ── */
+/* ── PANEL ADMIN ── solo para gomis89@gmail.com + código 5291 ── */
 (function(){
   var ADMIN_EMAIL = 'gomis89@gmail.com';
+  var ADMIN_CODE = '5291';
 
   function saveUserMeta(user){
     if(!user || !window.db) return;
@@ -640,16 +641,24 @@ init();
 
   var style=document.createElement('style');
   style.textContent=[
-    '#adminFab{position:fixed;bottom:22px;right:20px;z-index:9999;width:38px;height:38px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:17px;font-weight:900;box-shadow:0 4px 16px rgba(220,38,38,.5);cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;}',
-    '#adminFab:hover{transform:scale(1.1);}',
+    '#adminFab{position:fixed;bottom:14px;right:14px;z-index:9999;width:30px;height:30px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:15px;font-weight:900;box-shadow:0 4px 14px rgba(220,38,38,.32);cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;opacity:.82;}',
+    '#adminFab:hover{transform:scale(1.05);opacity:1;}',
     '#adminOverlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;}',
     '#adminOverlay.open{display:flex;}',
-    '#adminModal{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:min(560px,100%);max-height:80dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);}',
+    '#adminModal{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:min(680px,100%);max-height:84dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);}',
     '#adminHead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);}',
     '#adminHead h3{margin:0;font-size:16px;}',
     '#adminHead small{color:var(--muted);font-size:12px;display:block;margin-top:2px;}',
     '#adminClose{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0;}',
     '#adminBody{overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;}',
+    '.admin-gate{display:grid;gap:12px;}',
+    '.admin-gate input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);outline:none;}',
+    '.admin-gate input:focus{border-color:var(--accent);}',
+    '.admin-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}',
+    '.admin-error{font-size:12px;color:#dc2626;min-height:16px;}',
+    '.admin-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:4px;}',
+    '.admin-box{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel2);}',
+    '.admin-box strong{display:block;font-size:20px;margin-top:4px;}',
     '.auc{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel2);}',
     '.auc-name{font-weight:700;font-size:14px;}',
     '.auc-email{font-size:11px;color:var(--muted);margin-bottom:8px;}',
@@ -664,14 +673,23 @@ init();
 
   var fab=document.createElement('button');
   fab.id='adminFab';
-  fab.title='Usuarios';
-  fab.innerHTML='&#128065;';
+  fab.title='Admin';
+  fab.textContent='¿?';
   document.body.appendChild(fab);
 
   var overlay=document.createElement('div');
   overlay.id='adminOverlay';
-  overlay.innerHTML='<div id="adminModal"><div id="adminHead"><div><h3>&#128065; Usuarios conectados</h3><small id="adminSub">Cargando...</small></div><button id="adminClose">&#x2715;</button></div><div id="adminBody"><div class="admin-msg">Consultando...</div></div></div>';
+  overlay.innerHTML=''
+    + '<div id="adminModal">'
+    +   '<div id="adminHead">'
+    +     '<div><h3>Panel de administrador</h3><small id="adminSub">Acceso restringido</small></div>'
+    +     '<button id="adminClose">&#x2715;</button>'
+    +   '</div>'
+    +   '<div id="adminBody"></div>'
+    + '</div>';
   document.body.appendChild(overlay);
+
+  var isUnlocked=false;
 
   document.getElementById('adminClose').addEventListener('click',function(){ overlay.classList.remove('open'); });
   overlay.addEventListener('click',function(e){ if(e.target===overlay) overlay.classList.remove('open'); });
@@ -680,9 +698,9 @@ init();
     if(!iso) return 'nunca';
     var d=new Date(iso), diff=Date.now()-d;
     if(diff<60000) return 'ahora';
-    if(diff<3600000) return Math.floor(diff/60000)+'m';
-    if(diff<86400000) return Math.floor(diff/3600000)+'h';
-    return Math.floor(diff/86400000)+'d';
+    if(diff<3600000) return Math.floor(diff/60000)+' min';
+    if(diff<86400000) return Math.floor(diff/3600000)+' h';
+    return Math.floor(diff/86400000)+' d';
   }
   function dotCls(iso){
     if(!iso) return '';
@@ -697,50 +715,108 @@ init();
     for(var i=0;i<SUBS.length;i++){
       var sub=(prog||{})[SUBS[i]];
       if(!sub||!sub.overall||!sub.overall.sessions) continue;
-      s+=sub.overall.sessions||0; a+=sub.overall.answered||0;
-      c+=sub.overall.correct||0; ms+=sub.overall.totalTimeMs||0;
+      s+=sub.overall.sessions||0;
+      a+=sub.overall.answered||0;
+      c+=sub.overall.correct||0;
+      ms+=sub.overall.totalTimeMs||0;
       subs.push(SUBS[i]);
     }
     return {sessions:s,answered:a,correct:c,timeMin:Math.round(ms/60000),subjects:subs};
   }
   function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  function renderGate(){
+    var body=document.getElementById('adminBody');
+    var sub=document.getElementById('adminSub');
+    sub.textContent='Introduce el código para continuar';
+    body.innerHTML=''
+      + '<div class="admin-gate">'
+      +   '<div class="small">Acceso exclusivo del administrador.</div>'
+      +   '<input id="adminCodeInput" type="password" inputmode="numeric" maxlength="4" placeholder="Código" autocomplete="off">'
+      +   '<div id="adminError" class="admin-error"></div>'
+      +   '<div class="admin-actions">'
+      +     '<button class="btn ghost" id="adminCancelBtn" type="button">Cancelar</button>'
+      +     '<button class="btn primary" id="adminUnlockBtn" type="button">Entrar</button>'
+      +   '</div>'
+      + '</div>';
+    var input=document.getElementById('adminCodeInput');
+    var err=document.getElementById('adminError');
+    function tryUnlock(){
+      if((input.value||'').trim()===ADMIN_CODE){
+        isUnlocked=true;
+        loadPanel();
+      }else{
+        err.textContent='Código incorrecto.';
+        input.value='';
+        input.focus();
+      }
+    }
+    document.getElementById('adminCancelBtn').addEventListener('click',function(){ overlay.classList.remove('open'); });
+    document.getElementById('adminUnlockBtn').addEventListener('click',tryUnlock);
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter') tryUnlock(); });
+    setTimeout(function(){ try{ input.focus(); }catch(e){} },30);
+  }
+
   async function loadPanel(){
     var body=document.getElementById('adminBody');
     var sub=document.getElementById('adminSub');
-    body.innerHTML='<div class="admin-msg">Consultando Firestore...</div>';
+    sub.textContent='Consultando Firestore...';
+    body.innerHTML='<div class="admin-msg">Cargando estadísticas de usuarios...</div>';
     try{
+      if(!window.db) throw new Error('Firestore no está disponible');
       var us=await window.db.collection('users').get();
       var ps=await window.db.collection('progress').get();
       var progByUid={};
       ps.forEach(function(d){ progByUid[d.id]=(d.data()||{}).progress||{}; });
       var users=[];
       us.forEach(function(d){
-        var u=d.data();
-        if(u.email===ADMIN_EMAIL) return;
+        var u=d.data()||{};
+        if((u.email||'')===ADMIN_EMAIL) return;
         users.push({uid:d.id,email:u.email||'',name:u.displayName||u.email||'Usuario',last:u.lastActive||'',prog:progByUid[d.id]||{}});
       });
       users.sort(function(a,b){ return (b.last||'').localeCompare(a.last||''); });
-      sub.textContent=users.length+' usuario'+(users.length!==1?'s':'')+' registrado'+(users.length!==1?'s':'');
-      if(!users.length){ body.innerHTML='<div class="admin-msg">Sin otros usuarios aún.</div>'; return; }
-      body.innerHTML='';
+
+      var totalUsers=users.length;
+      var totalSessions=0;
+      var totalAnswered=0;
+      var totalCorrect=0;
+      var totalMinutes=0;
+      var activeToday=0;
+      var cards='';
+
       for(var i=0;i<users.length;i++){
         var u=users[i], t=totals(u.prog);
         var acc=t.answered?Math.round(t.correct/t.answered*1000)/10:0;
         var dc=dotCls(u.last);
-        var card=document.createElement('div');
-        card.className='auc';
-        card.innerHTML='<div class="auc-name"><span class="dot '+dc+'"></span>'+esc(u.name)+'</div><div class="auc-email">'+esc(u.email)+' · activo hace '+rel(u.last)+'</div><div class="auc-row"><span class="auc-stat">Sesiones <strong>'+t.sessions+'</strong></span><span class="auc-stat">Respondidas <strong>'+t.answered+'</strong></span><span class="auc-stat">Acierto <strong>'+acc.toFixed(1)+'%</strong></span><span class="auc-stat">Tiempo <strong>'+t.timeMin+' min</strong></span>'+(t.subjects.length?'<span class="auc-stat">Asignaturas <strong>'+esc(t.subjects.join(', '))+'</strong></span>':'')+'</div>';
-        body.appendChild(card);
+        totalSessions+=t.sessions;
+        totalAnswered+=t.answered;
+        totalCorrect+=t.correct;
+        totalMinutes+=t.timeMin;
+        if(u.last && (Date.now()-new Date(u.last))<86400000) activeToday++;
+        cards += '<div class="auc"><div class="auc-name"><span class="dot '+dc+'"></span>'+esc(u.name)+'</div><div class="auc-email">'+esc(u.email)+' · activo hace '+rel(u.last)+'</div><div class="auc-row"><span class="auc-stat">Sesiones <strong>'+t.sessions+'</strong></span><span class="auc-stat">Respondidas <strong>'+t.answered+'</strong></span><span class="auc-stat">Acierto <strong>'+acc.toFixed(1)+'%</strong></span><span class="auc-stat">Tiempo <strong>'+t.timeMin+' min</strong></span>'+(t.subjects.length?'<span class="auc-stat">Asignaturas <strong>'+esc(t.subjects.join(', '))+'</strong></span>':'')+'</div></div>';
       }
+
+      var globalAcc=totalAnswered?Math.round(totalCorrect/totalAnswered*1000)/10:0;
+      sub.textContent=totalUsers+' usuario'+(totalUsers!==1?'s':'')+' registrado'+(totalUsers!==1?'s':'');
+      body.innerHTML=''
+        + '<div class="admin-summary">'
+        +   '<div class="admin-box"><div class="small">Usuarios</div><strong>'+totalUsers+'</strong></div>'
+        +   '<div class="admin-box"><div class="small">Activos 24 h</div><strong>'+activeToday+'</strong></div>'
+        +   '<div class="admin-box"><div class="small">Sesiones</div><strong>'+totalSessions+'</strong></div>'
+        +   '<div class="admin-box"><div class="small">Acierto global</div><strong>'+globalAcc.toFixed(1)+'%</strong></div>'
+        + '</div>'
+        + (cards || '<div class="admin-msg">Sin otros usuarios aún.</div>');
     }catch(e){
       body.innerHTML='<div class="admin-msg">Error: '+esc(String(e.message||e))+'</div>';
     }
   }
 
-  fab.addEventListener('click',function(){ overlay.classList.add('open'); loadPanel(); });
+  fab.addEventListener('click',function(){
+    overlay.classList.add('open');
+    if(isUnlocked) loadPanel();
+    else renderGate();
+  });
 
-  /* Esperar a que Firebase auth esté listo y suscribirse */
   function attachAuthListener(){
     if(window.firebase && window.firebase.auth){
       try{
@@ -748,6 +824,10 @@ init();
         authInst.onAuthStateChanged(function(user){
           var isAdmin=user && user.email===ADMIN_EMAIL;
           fab.style.display=isAdmin?'flex':'none';
+          if(!isAdmin){
+            isUnlocked=false;
+            overlay.classList.remove('open');
+          }
           if(user) saveUserMeta(user);
         });
         return true;
@@ -756,7 +836,6 @@ init();
     return false;
   }
 
-  /* Intentar suscribirse; si Firebase todavía no cargó, reintentar */
   if(!attachAuthListener()){
     var tries=0;
     var ticker=setInterval(function(){
@@ -766,28 +845,6 @@ init();
   }
 
 })();
-
-function showNormas(){
-  alert(`Normas de puntuación:
-
-- 30 preguntas → cada fallo resta 1/3
-- 20 preguntas → cada fallo resta 1/4
-- 10 preguntas (Sostenibilidad) → cada fallo resta 1/6
-
-Fórmula:
-Nota = ((B - (E / T)) / N) × 10
-
-B = correctas
-E = incorrectas
-T = 3 (30p), 4 (20p), 6 (10p)
-N = total de preguntas
-
-Asignaturas:
-- PIICT → 30 preguntas
-- TPIDA → 30 preguntas
-- TPIE → 30 preguntas
-- Sostenibilidad → 10 preguntas`);
-}
 </script>
 
 </body></html>
