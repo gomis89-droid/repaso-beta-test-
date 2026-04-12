@@ -400,25 +400,29 @@ function renderAdminError(message){
 }
 function renderAdminData(data){
   if(!adminUi.content) return;
-  var recentHtml='';
-  if(data.recent && data.recent.length){
-    recentHtml='<div class="panel" style="padding:14px;margin-top:14px;"><h3 style="margin-top:0;">Últimos accesos</h3>';
-    for(var i=0;i<data.recent.length;i++){
-      var item=data.recent[i];
-      recentHtml+='<div class="history-item"><strong>'+escapeHtml(item.label)+'</strong><div class="small">'+escapeHtml(item.time)+'</div></div>';
+  function buildList(title, items, emptyText){
+    var html='<div class="panel" style="padding:14px;margin-top:14px;"><h3 style="margin-top:0;">'+escapeHtml(title)+'</h3>';
+    if(items && items.length){
+      for(var i=0;i<items.length;i++){
+        var item=items[i];
+        html+='<div class="history-item"><strong>'+escapeHtml(item.label)+'</strong><div class="small">'+escapeHtml(item.time)+'</div></div>';
+      }
+    }else{
+      html+='<div class="empty">'+escapeHtml(emptyText)+'</div>';
     }
-    recentHtml+='</div>';
-  }else{
-    recentHtml='<div class="panel" style="padding:14px;margin-top:14px;"><div class="empty">Aún no hay accesos registrados en el panel.</div></div>';
+    html+='</div>';
+    return html;
   }
   adminUi.content.innerHTML='' +
     '<div class="stats-grid">' +
       '<div class="stat-card"><div>Activos ahora</div><div class="n">'+String(data.activeNow||0)+'</div></div>' +
       '<div class="stat-card"><div>Visitas hoy</div><div class="n">'+String(data.today||0)+'</div></div>' +
       '<div class="stat-card"><div>Visitas totales</div><div class="n">'+String(data.total||0)+'</div></div>' +
+      '<div class="stat-card"><div>Visitas con email</div><div class="n">'+String(data.emailCount||0)+'</div></div>' +
       '<div class="stat-card"><div>Analytics</div><div class="n" style="font-size:18px;">'+escapeHtml(data.analyticsStatus)+'</div></div>' +
     '</div>' +
-    recentHtml;
+    buildList('Accesos con email', data.recentEmail, 'Todavía no hay accesos identificados por email.') +
+    buildList('Todos los accesos', data.recentAll, 'Aún no hay accesos registrados en el panel.');
 }
 function todayKey(){
   var d=new Date();
@@ -476,21 +480,31 @@ async function refreshAdminPanel(){
       var d=doc.data()||{};
       if(d.dateKey===todayKey()) today++;
     });
-    var recent=[];
+    var recentAll=[];
+    var recentEmail=[];
+    var emailCount=0;
+    visitsSnap.forEach(function(doc){
+      var d=doc.data()||{};
+      if(d.email) emailCount++;
+    });
     recentSnap.forEach(function(doc){
       var d=doc.data()||{};
       var when=d.visitedAtMs ? new Date(d.visitedAtMs) : null;
-      recent.push({
+      var item={
         label: d.email ? d.email : 'Acceso anónimo',
         time: when ? when.toLocaleString('es-ES') : 'Sin fecha'
-      });
+      };
+      recentAll.push(item);
+      if(d.email) recentEmail.push(item);
     });
     renderAdminData({
       activeNow: presenceSnap.size||0,
       today: today,
       total: total,
+      emailCount: emailCount,
       analyticsStatus: analytics ? 'Conectado' : 'Pendiente',
-      recent: recent
+      recentAll: recentAll,
+      recentEmail: recentEmail
     });
   }catch(e){
     renderAdminError('No se pudieron leer las estadísticas. Revisa las reglas de Firestore si fuese necesario.');
