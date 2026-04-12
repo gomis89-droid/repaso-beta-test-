@@ -262,7 +262,6 @@ Cada usuario conserva su propio progreso por separado y no se mezcla con el de o
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 <script>
 (function(){
 
@@ -285,24 +284,14 @@ var FIREBASE_CONFIG = {
   projectId: 'repaso-examenes',
   storageBucket: 'repaso-examenes.firebasestorage.app',
   messagingSenderId: '842480086166',
-  appId: '1:842480086166:web:38d4ef770e2d9e03fd26b7',
-  measurementId: 'G-KL3R449ZWQ'
+  appId: '1:842480086166:web:38d4ef770e2d9e03fd26b7'
 };
 var firebaseApp = null;
 var auth = null;
 var db = null;
-var analytics = null;
 var authReady = false;
 var cloudSyncInFlight = false;
 var saveCloudTimer = null;
-var ADMIN_PANEL_EMAIL = 'gomis89@gmail.com';
-var ADMIN_PANEL_PIN = '5291';
-var telemetrySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-var telemetryStarted = false;
-var telemetryHeartbeatTimer = null;
-var adminUnlocked = false;
-var adminUi = { button:null, overlay:null, content:null };
-
 var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario' };
 var screens = {
   home: document.getElementById('screen-home'), menu: document.getElementById('screen-menu'), quiz: document.getElementById('screen-quiz'), results: document.getElementById('screen-results'), list: document.getElementById('screen-list'), progress: document.getElementById('screen-progress')
@@ -314,214 +303,6 @@ var progressStore = loadProgress();
 var METRIC_DEFS = [
   {key:'sessions', label:'Sesiones'}, {key:'accuracy', label:'% de acierto'}, {key:'failure', label:'% de fallo'}, {key:'answered', label:'Preguntas respondidas'}, {key:'time', label:'Tiempo total'}, {key:'days', label:'Días de estudio'}, {key:'examBest', label:'Mejor nota de examen'}, {key:'examAvg', label:'Nota media de examen'}, {key:'examLast', label:'Última nota de examen'}
 ];
-
-function isAdminUser(){
-  return !!(state.authUser && state.authUser.email && String(state.authUser.email).toLowerCase()==='gomis89@gmail.com');
-}
-function isTrackedStudentEmail(email){
-  return !!(email && String(email).toLowerCase()!==ADMIN_PANEL_EMAIL.toLowerCase());
-}
-function displayNameForRecord(d){
-  return (d && d.displayName) ? d.displayName : ((d && d.email) ? d.email : 'Sin nombre');
-}
-function createAdminUi(){
-  if(adminUi.button) return;
-  adminUi.button=document.createElement('button');
-  adminUi.button.type='button';
-  adminUi.button.textContent='¿?';
-  adminUi.button.setAttribute('aria-label','Abrir panel oculto');
-  adminUi.button.style.position='fixed';
-  adminUi.button.style.right='14px';
-  adminUi.button.style.bottom='14px';
-  adminUi.button.style.zIndex='9999';
-  adminUi.button.style.width='42px';
-  adminUi.button.style.height='42px';
-  adminUi.button.style.borderRadius='999px';
-  adminUi.button.style.border='none';
-  adminUi.button.style.background='#dc2626';
-  adminUi.button.style.color='#fff';
-  adminUi.button.style.fontWeight='900';
-  adminUi.button.style.fontSize='18px';
-  adminUi.button.style.boxShadow='0 8px 24px rgba(0,0,0,.25)';
-  adminUi.button.style.display='none';
-  adminUi.button.addEventListener('click', onAdminButtonClick);
-  document.body.appendChild(adminUi.button);
-
-  adminUi.overlay=document.createElement('div');
-  adminUi.overlay.style.position='fixed';
-  adminUi.overlay.style.inset='0';
-  adminUi.overlay.style.background='rgba(0,0,0,.45)';
-  adminUi.overlay.style.zIndex='9998';
-  adminUi.overlay.style.display='none';
-  adminUi.overlay.style.padding='18px';
-  adminUi.overlay.innerHTML='' +
-    '<div style="max-width:760px;margin:0 auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px;max-height:calc(100vh - 36px);overflow:auto;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">' +
-        '<div><div class="badge mode">Panel oculto</div><h3 style="margin:10px 0 0;">Uso de la app</h3></div>' +
-        '<button type="button" id="adminCloseBtn" class="btn ghost small">Cerrar</button>' +
-      '</div>' +
-      '<div class="small" style="margin-bottom:14px;">Solo visible para gomis89@gmail.com. Datos orientativos de uso y actividad.</div>' +
-      '<div id="adminPanelContent"></div>' +
-    '</div>';
-  document.body.appendChild(adminUi.overlay);
-  adminUi.content=adminUi.overlay.querySelector('#adminPanelContent');
-  adminUi.overlay.querySelector('#adminCloseBtn').addEventListener('click', closeAdminPanel);
-  adminUi.overlay.addEventListener('click', function(ev){ if(ev.target===adminUi.overlay) closeAdminPanel(); });
-}
-function updateAdminUiVisibility(){
-  createAdminUi();
-  adminUi.button.style.display=isAdminUser() ? 'flex' : 'none';
-  adminUi.button.style.alignItems='center';
-  adminUi.button.style.justifyContent='center';
-  if(!isAdminUser()) closeAdminPanel();
-}
-function onAdminButtonClick(){
-  if(!isAdminUser()) return;
-  if(!adminUnlocked){
-    var pin=window.prompt('Introduce la clave del panel oculto:','');
-    if(pin!==ADMIN_PANEL_PIN){
-      alert('Clave incorrecta.');
-      return;
-    }
-    adminUnlocked=true;
-  }
-  openAdminPanel();
-}
-function closeAdminPanel(){
-  if(adminUi.overlay) adminUi.overlay.style.display='none';
-}
-function openAdminPanel(){
-  if(!adminUi.overlay) createAdminUi();
-  adminUi.overlay.style.display='block';
-  renderAdminLoading();
-  refreshAdminPanel();
-}
-function renderAdminLoading(){
-  if(!adminUi.content) return;
-  adminUi.content.innerHTML='<div class="small">Cargando datos...</div>';
-}
-function renderAdminError(message){
-  if(!adminUi.content) return;
-  adminUi.content.innerHTML='<div class="empty">'+escapeHtml(message||'No se pudieron cargar los datos.')+'</div>';
-}
-function renderAdminData(data){
-  if(!adminUi.content) return;
-  function buildTable(title, rows, emptyText){
-    var html='<div class="panel" style="padding:14px;margin-top:14px;"><h3 style="margin-top:0;">'+escapeHtml(title)+'</h3>';
-    if(rows && rows.length){
-      html+='<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;">';
-      html+='<thead><tr><th style="text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);">Nombre</th><th style="text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);">Email</th><th style="text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);">Hora</th></tr></thead><tbody>';
-      for(var i=0;i<rows.length;i++){
-        html+='<tr><td style="padding:10px 8px;border-bottom:1px solid var(--line);">'+escapeHtml(rows[i].name)+'</td><td style="padding:10px 8px;border-bottom:1px solid var(--line);">'+escapeHtml(rows[i].email)+'</td><td style="padding:10px 8px;border-bottom:1px solid var(--line);">'+escapeHtml(rows[i].time)+'</td></tr>';
-      }
-      html+='</tbody></table></div>';
-    }else{
-      html+='<div class="empty">'+escapeHtml(emptyText)+'</div>';
-    }
-    html+='</div>';
-    return html;
-  }
-  adminUi.content.innerHTML='' +
-    '<div class="stats-grid">' +
-      '<div class="stat-card"><div>Alumnos activos ahora</div><div class="n">'+String(data.activeNow||0)+'</div></div>' +
-      '<div class="stat-card"><div>Alumnos hoy</div><div class="n">'+String(data.todayUsers||0)+'</div></div>' +
-      '<div class="stat-card"><div>Alumnos totales</div><div class="n">'+String(data.totalUsers||0)+'</div></div>' +
-      '<div class="stat-card"><div>Sesiones logueadas</div><div class="n">'+String(data.loggedSessions||0)+'</div></div>' +
-      '<div class="stat-card"><div>Analytics</div><div class="n" style="font-size:18px;">'+escapeHtml(data.analyticsStatus)+'</div></div>' +
-    '</div>' +
-    buildTable('Alumnos activos ahora', data.activeRows, 'No hay alumnos logueados activos ahora mismo.') +
-    buildTable('Últimos accesos logueados', data.recentRows, 'Todavía no hay accesos logueados registrados.');
-}
-function todayKey(){
-  var d=new Date();
-  var m=String(d.getMonth()+1).padStart(2,'0');
-  var day=String(d.getDate()).padStart(2,'0');
-  return d.getFullYear()+'-'+m+'-'+day;
-}
-function trackAnalyticsEvent(name, params){
-  try{
-    if(analytics && analytics.logEvent){ analytics.logEvent(name, params||{}); }
-  }catch(e){}
-}
-async function startTelemetry(){
-  if(telemetryStarted || !db) return;
-  telemetryStarted=true;
-  try{
-    await db.collection('app_visits').doc(telemetrySessionId).set({
-      sessionId: telemetrySessionId,
-      email: state.authUser && state.authUser.email ? state.authUser.email : '',
-      displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
-      visitedAtMs: Date.now(),
-      dateKey: todayKey(),
-      userAgent: navigator.userAgent || ''
-    }, {merge:true});
-  }catch(e){}
-  try{
-    await db.collection('app_presence').doc(telemetrySessionId).set({
-      sessionId: telemetrySessionId,
-      email: state.authUser && state.authUser.email ? state.authUser.email : '',
-      displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
-      startedAtMs: Date.now(),
-      lastSeenMs: Date.now()
-    }, {merge:true});
-  }catch(e){}
-  telemetryHeartbeatTimer=setInterval(async function(){
-    try{
-      await db.collection('app_presence').doc(telemetrySessionId).set({
-        sessionId: telemetrySessionId,
-        email: state.authUser && state.authUser.email ? state.authUser.email : '',
-        displayName: state.authUser && state.authUser.displayName ? state.authUser.displayName : '',
-        lastSeenMs: Date.now()
-      }, {merge:true});
-    }catch(e){}
-  }, 45000);
-  trackAnalyticsEvent('app_open', {source:'repaso_app'});
-}
-async function refreshAdminPanel(){
-  if(!db){ renderAdminError('Firebase no está disponible todavía.'); return; }
-  try{
-    var now=Date.now();
-    var threshold=now-(2*60*1000);
-    var visitsSnap=await db.collection('app_visits').get();
-    var presenceSnap=await db.collection('app_presence').where('lastSeenMs','>=',threshold).get();
-    var recentSnap=await db.collection('app_visits').orderBy('visitedAtMs','desc').limit(8).get();
-    var total=visitsSnap.size||0;
-    var today=0;
-    visitsSnap.forEach(function(doc){
-      var d=doc.data()||{};
-      if(d.dateKey===todayKey()) today++;
-    });
-    var recentAll=[];
-    var recentEmail=[];
-    var emailCount=0;
-    visitsSnap.forEach(function(doc){
-      var d=doc.data()||{};
-      if(d.email) emailCount++;
-    });
-    recentSnap.forEach(function(doc){
-      var d=doc.data()||{};
-      var when=d.visitedAtMs ? new Date(d.visitedAtMs) : null;
-      var item={
-        label: d.email ? d.email : 'Acceso anónimo',
-        time: when ? when.toLocaleString('es-ES') : 'Sin fecha'
-      };
-      recentAll.push(item);
-      if(d.email) recentEmail.push(item);
-    });
-    renderAdminData({
-      activeNow: presenceSnap.size||0,
-      today: today,
-      total: total,
-      emailCount: emailCount,
-      analyticsStatus: analytics ? 'Conectado' : 'Pendiente',
-      recentAll: recentAll,
-      recentEmail: recentEmail
-    });
-  }catch(e){
-    renderAdminError('No se pudieron leer las estadísticas. Revisa las reglas de Firestore si fuese necesario.');
-  }
-}
-
 function currentData(){ return state.subject ? SUBJECT_DATA[state.subject.short] : null; }
 function getModeKeysForSubject(subjectShort){ if(subjectShort==='Sostenibilidad' || subjectShort==='IPE II') return ['cuestionario','examen']; var keys=['cuestionario','practicas','examen']; if(subjectShort==='TPIE' || subjectShort==='PIICT') keys.push('examen1'); return keys; }
 function getAvailableModeKeys(){ return state.subject ? getModeKeysForSubject(state.subject.short) : ['cuestionario','practicas','examen']; }
@@ -727,22 +508,17 @@ function setupFirebase(){
     firebaseApp = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
     auth = firebase.auth();
     db = firebase.firestore();
-    try{ analytics = firebase.analytics ? firebase.analytics() : null; }catch(eAnalytics){ analytics = null; }
     state.cloudEnabled=true;
-    startTelemetry();
     auth.onAuthStateChanged(function(user){
       authReady=true;
       state.authUser=user||null;
       updateAuthUi();
-      updateAdminUiVisibility();
-      try{ db.collection('app_presence').doc(telemetrySessionId).set({ email:user && user.email ? user.email : '', lastSeenMs:Date.now() }, {merge:true}); }catch(ePresence){}
       if(user){ applyCloudProgress(user); }
       else{ progressStore=loadProgress(); renderAfterProgressRefresh(); }
     });
   }catch(e){
     state.cloudEnabled=false;
     updateAuthUi();
-    updateAdminUiVisibility();
   }
 }
 
@@ -846,6 +622,253 @@ init();
 </script>
 
 <script>
+/* ============================================================
+   PANEL DE ADMINISTRADOR — solo visible para gomis89@gmail.com
+   ============================================================ */
+(function(){
+  var ADMIN_EMAIL = 'gomis89@gmail.com';
+
+  /* ── Guardar metadatos del usuario en Firestore ── */
+  function saveUserMeta(user){
+    if(!user || !db) return;
+    try{
+      db.collection('users').doc(user.uid).set({
+        email: user.email || '',
+        displayName: user.displayName || user.email || 'Sin nombre',
+        photoURL: user.photoURL || '',
+        lastActive: new Date().toISOString()
+      }, { merge: true });
+    }catch(e){}
+  }
+
+  /* ── Inyectar estilos del panel ── */
+  var style = document.createElement('style');
+  style.textContent = `
+    #adminFab{
+      position:fixed;bottom:22px;right:20px;z-index:9999;
+      width:36px;height:36px;border-radius:50%;border:none;
+      background:#dc2626;color:#fff;font-size:16px;font-weight:900;
+      box-shadow:0 4px 14px rgba(220,38,38,.55);cursor:pointer;
+      display:none;align-items:center;justify-content:center;
+      transition:transform .15s,box-shadow .15s;
+      line-height:1;
+    }
+    #adminFab:hover{transform:scale(1.12);box-shadow:0 6px 20px rgba(220,38,38,.7);}
+    #adminOverlay{
+      position:fixed;inset:0;z-index:10000;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+      display:none;align-items:center;justify-content:center;padding:16px;
+    }
+    #adminOverlay.open{display:flex;}
+    #adminModal{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);
+      width:min(560px,100%);max-height:80dvh;
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    #adminModalHead{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:16px 20px;border-bottom:1px solid var(--line);
+      gap:10px;
+    }
+    #adminModalHead h3{margin:0;font-size:17px;color:var(--text);}
+    #adminModalHead small{color:var(--muted);font-size:12px;}
+    #adminCloseBtn{
+      width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+      background:var(--panel2);color:var(--text);font-size:18px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    }
+    #adminModalBody{overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+    .admin-user-card{
+      border:1px solid var(--line);border-radius:14px;
+      padding:14px 16px;background:var(--panel2);
+    }
+    .admin-user-card .au-name{font-weight:700;font-size:15px;color:var(--text);}
+    .admin-user-card .au-email{font-size:12px;color:var(--muted);margin-bottom:8px;}
+    .admin-user-card .au-stats{display:flex;gap:14px;flex-wrap:wrap;}
+    .admin-user-card .au-stat{font-size:13px;color:var(--muted);}
+    .admin-user-card .au-stat strong{color:var(--text);}
+    .admin-loading{color:var(--muted);font-size:14px;text-align:center;padding:20px;}
+    .admin-empty{color:var(--muted);font-size:14px;text-align:center;padding:20px;}
+    .au-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#6b7280;}
+    .au-dot.online{background:#16a34a;}
+    .au-dot.recent{background:#d97706;}
+  `;
+  document.head.appendChild(style);
+
+  /* ── FAB button ── */
+  var fab = document.createElement('button');
+  fab.id = 'adminFab';
+  fab.title = 'Panel de usuarios';
+  fab.innerHTML = '👁';
+  document.body.appendChild(fab);
+
+  /* ── Modal ── */
+  var overlay = document.createElement('div');
+  overlay.id = 'adminOverlay';
+  overlay.innerHTML = `
+    <div id="adminModal">
+      <div id="adminModalHead">
+        <div>
+          <h3>👁 Usuarios conectados</h3>
+          <small id="adminSubtitle">Cargando…</small>
+        </div>
+        <button id="adminCloseBtn" title="Cerrar">×</button>
+      </div>
+      <div id="adminModalBody">
+        <div class="admin-loading">Consultando Firestore…</div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById('adminCloseBtn').addEventListener('click', function(){
+    overlay.classList.remove('open');
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) overlay.classList.remove('open');
+  });
+
+  /* ── Calcular totales desde progressStore ── */
+  function getUserTotals(progressData){
+    var totalSessions=0, totalAnswered=0, totalCorrect=0, totalWrong=0, totalTimeMs=0;
+    var subjects=[];
+    var SUBS=['PIICT','TPIDA','TPIE','Sostenibilidad','IPE II','Inglés'];
+    for(var i=0;i<SUBS.length;i++){
+      var s=progressData[SUBS[i]];
+      if(!s || !s.overall) continue;
+      var ov=s.overall;
+      if(!ov.sessions) continue;
+      totalSessions+=ov.sessions||0;
+      totalAnswered+=ov.answered||0;
+      totalCorrect+=ov.correct||0;
+      totalWrong+=ov.wrong||0;
+      totalTimeMs+=ov.totalTimeMs||0;
+      subjects.push(SUBS[i]);
+    }
+    return {sessions:totalSessions, answered:totalAnswered, correct:totalCorrect, wrong:totalWrong, timeMs:totalTimeMs, subjects:subjects};
+  }
+
+  function relativeTime(isoStr){
+    if(!isoStr) return 'nunca';
+    var d=new Date(isoStr), now=new Date();
+    var diff=now-d;
+    if(diff<60000) return 'ahora mismo';
+    if(diff<3600000) return Math.floor(diff/60000)+' min';
+    if(diff<86400000) return Math.floor(diff/3600000)+'h';
+    if(diff<7*86400000) return Math.floor(diff/86400000)+'d';
+    return d.toLocaleDateString('es-ES');
+  }
+
+  function dotClass(isoStr){
+    if(!isoStr) return '';
+    var diff=new Date()-new Date(isoStr);
+    if(diff<30*60*1000) return 'online';
+    if(diff<24*3600*1000) return 'recent';
+    return '';
+  }
+
+  /* ── Cargar y mostrar usuarios ── */
+  async function loadAdminPanel(){
+    var body = document.getElementById('adminModalBody');
+    var subtitle = document.getElementById('adminSubtitle');
+    body.innerHTML = '<div class="admin-loading">Consultando Firestore…</div>';
+
+    try{
+      /* Usuarios (metadatos) */
+      var usersSnap = await db.collection('users').get();
+      /* Progreso */
+      var progressSnap = await db.collection('progress').get();
+
+      var progressByUid = {};
+      progressSnap.forEach(function(doc){
+        progressByUid[doc.id] = doc.data().progress || {};
+      });
+
+      var users = [];
+      usersSnap.forEach(function(doc){
+        var u = doc.data();
+        if(u.email === ADMIN_EMAIL) return; /* excluir admin */
+        users.push({uid: doc.id, email: u.email, displayName: u.displayName, lastActive: u.lastActive, photoURL: u.photoURL, progress: progressByUid[doc.id]||{}});
+      });
+
+      /* ordenar por lastActive desc */
+      users.sort(function(a,b){ return (b.lastActive||'').localeCompare(a.lastActive||''); });
+
+      subtitle.textContent = users.length + ' usuario' + (users.length!==1?'s':'') + ' registrado' + (users.length!==1?'s':'');
+
+      if(!users.length){
+        body.innerHTML = '<div class="admin-empty">No hay otros usuarios registrados aún.</div>';
+        return;
+      }
+
+      body.innerHTML = '';
+      for(var i=0;i<users.length;i++){
+        var u=users[i];
+        var stats=getUserTotals(u.progress);
+        var acc=stats.answered?Math.round(stats.correct/stats.answered*1000)/10:0;
+        var timeMin=Math.round(stats.timeMs/60000);
+        var dc=dotClass(u.lastActive);
+        var card=document.createElement('div');
+        card.className='admin-user-card';
+        card.innerHTML=`
+          <div class="au-name"><span class="au-dot ${dc}"></span>${escapeHtml(u.displayName||u.email||'Usuario')}</div>
+          <div class="au-email">${escapeHtml(u.email||'')} · activo ${relativeTime(u.lastActive)}</div>
+          <div class="au-stats">
+            <div class="au-stat">Sesiones <strong>${stats.sessions}</strong></div>
+            <div class="au-stat">Respondidas <strong>${stats.answered}</strong></div>
+            <div class="au-stat">Acierto <strong>${acc.toFixed(1)}%</strong></div>
+            <div class="au-stat">Tiempo <strong>${timeMin} min</strong></div>
+            ${stats.subjects.length?'<div class="au-stat">Asignaturas <strong>'+escapeHtml(stats.subjects.join(', '))+'</strong></div>':''}
+          </div>
+        `;
+        body.appendChild(card);
+      }
+    }catch(e){
+      body.innerHTML = '<div class="admin-empty">Error al cargar datos: '+escapeHtml(String(e.message||e))+'</div>';
+    }
+  }
+
+  fab.addEventListener('click', function(){
+    overlay.classList.add('open');
+    loadAdminPanel();
+  });
+
+  /* ── Mostrar/ocultar FAB según usuario logueado ── */
+  /* Hookeamos updateAuthUi original */
+  var _origUpdateAuthUi = typeof updateAuthUi === 'function' ? updateAuthUi : null;
+  function updateAdminFab(){
+    var isAdmin = state.authUser && state.authUser.email === ADMIN_EMAIL;
+    fab.style.display = isAdmin ? 'flex' : 'none';
+    if(isAdmin && db) saveUserMeta(state.authUser);
+  }
+
+  /* Observar cambios de estado de auth usando MutationObserver sobre el botón de login */
+  /* y también interceptar la función original */
+  if(_origUpdateAuthUi){
+    window.updateAuthUi = function(){
+      _origUpdateAuthUi.apply(this, arguments);
+      updateAdminFab();
+    };
+    /* También guardar meta de otros usuarios al hacer login */
+    var _origSetupFirebase = setupFirebase;
+    window.setupFirebase = function(){
+      _origSetupFirebase.apply(this, arguments);
+    };
+  }
+
+  /* Comprobar periódicamente (por si setupFirebase ya corrió) */
+  var _fabCheck = setInterval(function(){
+    updateAdminFab();
+    /* Hookeamos saveProgressToCloud para guardar meta */
+    if(state.authUser && db){
+      saveUserMeta(state.authUser);
+      clearInterval(_fabCheck);
+    }
+  }, 800);
+
+})();
+
 function showNormas(){
   alert(`Normas de puntuación:
 
