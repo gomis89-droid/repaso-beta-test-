@@ -107,10 +107,11 @@ html.dark .topbar{background:rgba(8,13,24,.88)}
 }
 .subject-meta-top{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:14px;
   width:100%;
+  min-height:96px;
 }
 .subject-head{
   display:contents;
@@ -122,6 +123,9 @@ html.dark .topbar{background:rgba(8,13,24,.88)}
   font-size:42px;
   margin:0;
   flex:0 0 84px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 .subject-status-gif{
   width:96px;
@@ -131,6 +135,7 @@ html.dark .topbar{background:rgba(8,13,24,.88)}
   border-radius:14px;
   background:rgba(255,255,255,.08);
   margin:0;
+  display:block;
 }
 .subject-status-gif.empty,.subject-status-gif-empty{opacity:.28;filter:grayscale(1);visibility:hidden}
 
@@ -196,6 +201,8 @@ html.dark .topbar{background:rgba(8,13,24,.88)}
   }
   .subject-meta-top{
     gap:12px;
+    min-height:124px;
+    align-items:center;
   }
   .subject-icon-pill{
     width:88px;
@@ -225,6 +232,8 @@ html.dark .topbar{background:rgba(8,13,24,.88)}
 @media(max-width:480px){
   .subject-meta-top{
     gap:10px;
+    min-height:132px;
+    align-items:center;
   }
   .subject-icon-pill{
     width:84px;
