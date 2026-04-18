@@ -837,11 +837,8 @@ body.quiz-active{}
     <div class="card hero">
       <div class="exam-countdown" id="examCountdown" aria-live="polite">
         <div class="exam-countdown-top">
-          <div>
-            <div class="exam-countdown-label">&#x23F3; Cuenta atrás para los exámenes</div>
-            <div class="exam-countdown-date">Empiezan el 10/05/2026 a las 09:00</div>
-          </div>
-          <div class="hero-chip" style="margin:0;">Inicio oficial · 10/05/2026</div>
+          <div class="exam-countdown-label">&#x23F3; Cuenta atrás para los exámenes</div>
+          <div class="hero-chip" style="margin:0;">Inicio oficial · 10/05/2026 · 09:00</div>
         </div>
         <div class="exam-countdown-grid">
           <div class="exam-countdown-box">
@@ -857,7 +854,6 @@ body.quiz-active{}
             <div class="exam-countdown-unit">Minutos</div>
           </div>
         </div>
-        <div class="exam-countdown-status" id="examCountdownStatus">Calculando tiempo restante...</div>
       </div>
       <h2>Hola, hoy toca <span class="accent">machacar</span> el temario &#x1F4AA;</h2>
       <p class="hero-sub">Elige una asignatura y dale caña al repaso. El examen se acerca.</p>
@@ -1975,14 +1971,14 @@ function updateExamCountdown(){
   var hoursEl=document.getElementById('examCountdownHours');
   var minutesEl=document.getElementById('examCountdownMinutes');
   var statusEl=document.getElementById('examCountdownStatus');
-  if(!wrap || !daysEl || !hoursEl || !minutesEl || !statusEl) return;
+  if(!wrap || !daysEl || !hoursEl || !minutesEl) return;
 
   var diff=getExamCountdownTarget().getTime()-Date.now();
   if(diff<=0){
     daysEl.textContent='0';
     hoursEl.textContent='00';
     minutesEl.textContent='00';
-    statusEl.textContent='Los exámenes ya han empezado. Mucha mierda 🍀';
+    if(statusEl) statusEl.textContent='Los exámenes ya han empezado. Mucha mierda 🍀';
     wrap.classList.add('is-live');
     return;
   }
@@ -1996,7 +1992,7 @@ function updateExamCountdown(){
   daysEl.textContent=String(days);
   hoursEl.textContent=String(hours).padStart(2,'0');
   minutesEl.textContent=String(minutes).padStart(2,'0');
-  statusEl.textContent='Faltan '+days+' día'+(days===1?'':'s')+', '+hours+' hora'+(hours===1?'':'s')+' y '+minutes+' minuto'+(minutes===1?'':'s')+'.';
+  if(statusEl) statusEl.textContent='Faltan '+days+' día'+(days===1?'':'s')+', '+hours+' hora'+(hours===1?'':'s')+' y '+minutes+' minuto'+(minutes===1?'':'s')+'.';
 }
 function initExamCountdown(){
   updateExamCountdown();
@@ -2563,6 +2559,77 @@ init();
   ].join('');
   document.head.appendChild(adminVisualStyle);
 
+  /* ── OPTION A — Clean dashboard styles ── */
+  var adminOptAStyle=document.createElement('style');
+  adminOptAStyle.textContent=[
+    '.a-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}',
+    '@media (max-width:700px){.a-kpis{grid-template-columns:1fr 1fr;}}',
+    '.a-kpi{background:var(--card,#fff);border:1px solid var(--line);border-radius:16px;padding:16px 18px;}',
+    '.a-kpi .l{font-size:11px;font-weight:700;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.08em;}',
+    '.a-kpi .v{font-size:32px;font-weight:800;margin-top:4px;line-height:1;color:var(--ink,#1a1530);}',
+    '.a-kpi .s{font-size:12px;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);margin-top:4px;}',
+    '.a-kpi.hl{background:linear-gradient(135deg,var(--p1,#ff7a59),var(--p3,#8b5cf6));color:#fff;border:0;}',
+    '.a-kpi.hl .l,.a-kpi.hl .s{color:rgba(255,255,255,.8);}',
+    '.a-kpi.hl .v{color:#fff;}',
+    '.a-quota{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--paper-2,#f3ece1);border-radius:12px;margin-bottom:20px;font-size:13px;color:var(--ink,#1a1530);flex-wrap:wrap;}',
+    '.a-quota .bar{flex:1;height:6px;background:color-mix(in oklab,var(--ink,#1a1530) 10%,transparent);border-radius:99px;overflow:hidden;min-width:140px;}',
+    '.a-quota .bar>i{display:block;height:100%;background:#22c55e;border-radius:99px;transition:width .3s;}',
+    '.a-quota.warn .bar>i{background:#f59e0b;}',
+    '.a-quota.danger .bar>i{background:#ef4444;}',
+    '.a-users-head{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px;gap:12px;flex-wrap:wrap;}',
+    '.a-users-head h3{margin:0;font-size:16px;font-weight:700;color:var(--ink,#1a1530);}',
+    '.a-search{background:var(--paper-2,#f3ece1);border:0;padding:9px 14px;border-radius:10px;font-size:13px;width:240px;color:var(--ink,#1a1530);font-family:inherit;}',
+    '.a-search:focus{outline:2px solid var(--p3,#8b5cf6);outline-offset:1px;}',
+    '.a-row{display:grid;grid-template-columns:40px 1fr auto auto auto auto 20px;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:var(--card,#fff);cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;}',
+    '.a-row:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.06);border-color:var(--p3,#8b5cf6);}',
+    '.a-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--p1,#ff7a59),var(--p3,#8b5cf6));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}',
+    '.a-info{min-width:0;}',
+    '.a-info .n{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;color:var(--ink,#1a1530);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+    '.a-info .e{font-size:12px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+    '.a-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}',
+    '.a-dot.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18);}',
+    '.a-dot.rec{background:#f59e0b;}',
+    '.a-dot.off{background:#cbd5e1;}',
+    '.a-stat{text-align:right;min-width:70px;}',
+    '.a-stat .lbl{font-size:10px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}',
+    '.a-stat .val{font-weight:800;font-size:15px;color:var(--ink,#1a1530);}',
+    '.a-when{font-size:12px;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);min-width:80px;text-align:right;}',
+    '.a-caret{color:color-mix(in oklab,var(--ink,#1a1530) 35%,transparent);font-size:18px;text-align:center;}',
+    '@media (max-width:900px){.a-row{grid-template-columns:40px 1fr auto;}.a-row .a-stat:nth-of-type(2),.a-row .a-stat:nth-of-type(3),.a-row .a-when,.a-row .a-caret{display:none;}}',
+    /* User detail modal */
+    '#userDetailOverlay{position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);}',
+    '#userDetailOverlay.open{display:flex;animation:fadeIn .2s ease;}',
+    '@keyframes fadeIn{from{opacity:0}to{opacity:1}}',
+    '#userDetailModal{background:var(--card,#fff);border-radius:22px;width:min(880px,100%);max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);animation:slideUp .25s cubic-bezier(.2,.9,.3,1);}',
+    '@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}',
+    '.ud-head{display:flex;align-items:center;gap:16px;padding:22px 26px;border-bottom:1px solid var(--line);}',
+    '.ud-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--p1,#ff7a59),var(--p3,#8b5cf6));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;}',
+    '.ud-title{flex:1;min-width:0;}',
+    '.ud-title h3{margin:0;font-size:22px;font-weight:800;color:var(--ink,#1a1530);display:flex;align-items:center;gap:8px;}',
+    '.ud-title .em{font-size:13px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);margin-top:2px;word-break:break-all;}',
+    '.ud-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--paper-2,#f3ece1);color:var(--ink,#1a1530);font-size:18px;cursor:pointer;flex-shrink:0;}',
+    '.ud-close:hover{background:rgba(220,38,38,.12);color:#dc2626;}',
+    '.ud-body{overflow-y:auto;padding:22px 26px 26px;flex:1;display:flex;flex-direction:column;gap:18px;}',
+    '.ud-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}',
+    '@media (max-width:600px){.ud-kpis{grid-template-columns:1fr 1fr;}}',
+    '.ud-kpi{background:var(--paper-2,#f3ece1);border-radius:12px;padding:14px;}',
+    '.ud-kpi .l{font-size:10px;font-weight:700;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.05em;}',
+    '.ud-kpi .v{font-size:24px;font-weight:800;margin-top:2px;color:var(--ink,#1a1530);}',
+    '.ud-section h4{margin:0 0 10px;font-size:12px;font-weight:700;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.06em;}',
+    '.ud-subj-table{width:100%;border-collapse:collapse;font-size:13px;}',
+    '.ud-subj-table th{text-align:left;padding:8px 10px;font-size:11px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);font-weight:700;}',
+    '.ud-subj-table td{padding:10px;border-bottom:1px solid var(--line);color:var(--ink,#1a1530);}',
+    '.ud-subj-table tr:last-child td{border-bottom:0;}',
+    '.ud-hist-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}',
+    '.ud-hist-row:last-child{border:0;}',
+    '.ud-hist-mode{background:color-mix(in oklab,var(--p3,#8b5cf6) 15%,transparent);color:var(--p3,#8b5cf6);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;flex-shrink:0;}',
+    '.ud-hist-subj{font-weight:600;flex:1;min-width:0;color:var(--ink,#1a1530);}',
+    '.ud-hist-stats{font-size:12px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);}',
+    '.ud-hist-date{font-size:11px;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);margin-left:8px;}',
+    '.ud-empty{padding:24px;text-align:center;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);font-size:13px;border:1px dashed var(--line);border-radius:12px;}',
+  ].join('');
+  document.head.appendChild(adminOptAStyle);
+
   /* ── FAB ── */
   var fab=document.createElement('button');
   fab.id='adminFab'; fab.title='Admin'; fab.textContent='⚙';
@@ -2585,6 +2652,16 @@ init();
     + '<div id="adminBody"></div>'
     + '</div>';
   document.body.appendChild(overlay);
+
+  /* User detail overlay */
+  var udOverlay=document.createElement('div');
+  udOverlay.id='userDetailOverlay';
+  udOverlay.innerHTML='<div id="userDetailModal"><div class="ud-head"><div class="ud-avatar" id="udAvatar">?</div><div class="ud-title"><h3 id="udName">-</h3><div class="em" id="udEmail">-</div></div><button class="ud-close" id="udClose">&#x2715;</button></div><div class="ud-body" id="udBody"></div></div>';
+  document.body.appendChild(udOverlay);
+  document.getElementById('udClose').addEventListener('click',function(){ udOverlay.classList.remove('open'); });
+  udOverlay.addEventListener('click',function(e){ if(e.target===udOverlay) udOverlay.classList.remove('open'); });
+
+  var currentUsers=[];
 
   var isUnlocked=false;
   var currentTab='users';
@@ -2769,69 +2846,122 @@ init();
       var globalAcc=totalAnswered?Math.round(totalCorrect/totalAnswered*1000)/10:0;
       sub.textContent=totalUsers+' usuario'+(totalUsers!==1?'s':'')+' registrado'+(totalUsers!==1?'s':'');
 
-      var html='<div class="admin-page">'+renderQuotaWidget(quota)
-        +'<div class="admin-kpi-grid">'
-        +kpiCard('Total usuarios', String(totalUsers), 'Excluye tu cuenta admin')
-        +kpiCard('Activos hoy', String(activeToday), 'Con actividad en 24 h')
-        +kpiCard('Activos 7 días', String(active7d), 'Seguimiento reciente')
-        +kpiCard('Sesiones totales', String(totalSessions), 'Sumadas desde progress')
-        +kpiCard('Acierto global', globalAcc.toFixed(1)+'%', totalAnswered+' respuestas evaluadas')
-        +'</div>';
+      currentUsers=users;
+      /* Quota compact */
+      var qUsed=(quota&&quota.used)||0, qLimit=(quota&&quota.limit)||20000, qPct=qLimit?Math.min(100,Math.round(qUsed/qLimit*100)):0;
+      var qCls=qPct>=80?'danger':(qPct>=50?'warn':'');
+      var qResetTxt=(quota&&quota.nextReset)?new Date(quota.nextReset).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      var quotaHtml='<div class="a-quota '+qCls+'"><span>💾</span><span><b>Firebase:</b> '+qUsed.toLocaleString('es-ES')+' / '+qLimit.toLocaleString('es-ES')+' escrituras hoy</span><div class="bar"><i style="width:'+qPct+'%"></i></div><span><b>'+qPct+'%</b>'+(qResetTxt?(' · reinicio '+esc(qResetTxt)):'')+'</span></div>';
+
+      var html='<div class="admin-page">'
+        +'<div class="a-kpis">'
+        +'<div class="a-kpi hl"><div class="l">Total usuarios</div><div class="v">'+totalUsers+'</div><div class="s">Excluye tu cuenta admin</div></div>'
+        +'<div class="a-kpi"><div class="l">Activos hoy</div><div class="v">'+activeToday+'</div><div class="s">Con actividad en 24 h</div></div>'
+        +'<div class="a-kpi"><div class="l">Sesiones totales</div><div class="v">'+totalSessions+'</div><div class="s">Sumadas de todos</div></div>'
+        +'<div class="a-kpi"><div class="l">Acierto global</div><div class="v">'+globalAcc.toFixed(1)+'%</div><div class="s">'+totalAnswered.toLocaleString('es-ES')+' respuestas</div></div>'
+        +'</div>'
+        +quotaHtml
+        +'<div class="a-users-head"><h3>👥 Usuarios</h3><input class="a-search" id="aUserSearch" placeholder="Buscar por nombre o email..."></div>'
+        +'<div id="aUsersList">';
 
       if(!users.length){
-        html+=adminSection('Usuarios','Todavía no hay usuarios registrados en Firestore.','<div class="admin-empty">No hay usuarios registrados todavía.</div>');
+        html+='<div class="admin-empty">No hay usuarios registrados todavía.</div>';
       } else {
-        var list='';
         for(var j=0;j<users.length;j++){
           var u=users[j], t=totalsFromProg(u.prog);
           var acc=t.answered?Math.round(t.correct/t.answered*1000)/10:0;
           var dc=dotCls(u.last);
-          var subjRows='';
-          for(var k=0;k<ALL_SUBJECTS.length;k++){
-            var sk=ALL_SUBJECTS[k], ss=subjectStats(u.prog, sk);
-            if(!ss) continue;
-            subjRows+='<tr><td style="font-weight:600;">'+esc(sk)+'</td><td>'+ss.sessions+'</td><td>'+ss.answered+'</td><td>'+ss.acc.toFixed(1)+'%</td><td>'+ss.timeMin+' min</td><td>'+ss.days+' días</td><td>'+scorePill(ss.examBest)+'</td><td>'+scorePill(ss.examAvg)+'</td></tr>';
-          }
-          var histRows='', allHist=[];
-          for(var h=0;h<ALL_SUBJECTS.length;h++){
-            var sh=ALL_SUBJECTS[h], subData=(u.prog||{})[sh];
-            if(!subData||!subData.history) continue;
-            for(var hi=0;hi<subData.history.length;hi++) allHist.push(Object.assign({},subData.history[hi],{subject:sh}));
-          }
-          allHist.sort(function(a,b){ return (b.finishedAt||'').localeCompare(a.finishedAt||''); });
-          for(var hr=0;hr<Math.min(8,allHist.length);hr++){
-            var he=allHist[hr];
-            var modeLabel={'cuestionario':'Quiz','practicas':'Prácticas','examen':'Examen','examen1':'Examen 1','examenTotal':'Exam Total'}[he.mode]||he.mode||'?';
-            histRows+='<div class="hist-row"><span class="hist-mode">'+esc(modeLabel)+'</span><span style="font-size:12px;font-weight:600;flex:1;">'+esc(he.subject||'')+'</span><span style="font-size:11px;color:var(--muted);">'+he.correct+' ✓ '+he.wrong+' ✗ '+he.blank+' —'+(typeof he.score==='number'?' · '+scorePill(he.score):'')+'</span><span style="font-size:11px;color:var(--muted);margin-left:8px;">'+fullDate(he.finishedAt)+'</span></div>';
-          }
-          list+='<div class="auc" id="auc-'+j+'">'
-            +'<div class="auc-header" onclick="var d=document.getElementById(\'aucdet-'+j+'\');d.classList.toggle(\'open\');this.querySelector(\'.auc-toggle\').textContent=d.classList.contains(\'open\')?\'▲ Ocultar\':\'▼ Detalles\'">'
-            +'<div class="auc-avatar">'+esc(initials(u.name))+'</div>'
-            +'<div class="auc-info"><div class="auc-name"><span class="dot '+dc+'"></span>'+esc(u.name)+'</div><div class="auc-email">'+esc(u.email)+' · activo hace '+rel(u.last)+'</div></div>'
-            +'<div class="auc-stats"><span class="auc-stat">Sesiones <strong>'+t.sessions+'</strong></span><span class="auc-stat">Acierto <strong>'+acc.toFixed(1)+'%</strong></span><span class="auc-stat">Tiempo <strong>'+t.timeMin+' min</strong></span></div>'
-            +'<button class="auc-toggle">▼ Detalles</button></div>'
-            +'<div class="auc-detail" id="aucdet-'+j+'">'
-            +(subjRows?'<div style="overflow-x:auto;"><table class="subj-table"><thead><tr><th>Asignatura</th><th>Sesiones</th><th>Respondidas</th><th>Acierto</th><th>Tiempo</th><th>Días</th><th>Mejor nota</th><th>Media exam.</th></tr></thead><tbody>'+subjRows+'</tbody></table></div>':'<div class="admin-empty" style="padding:16px;">Sin actividad por asignatura todavía.</div>')
-            +(histRows?'<div class="user-history"><h5>Últimas sesiones</h5>'+histRows+'</div>':'')
-            +'</div></div>';
+          var dotClass=dc==='on'?'on':(dc==='rec'?'rec':'off');
+          html+='<div class="a-row" data-uix="'+j+'" data-search="'+esc((u.name||'')+' '+(u.email||'')).toLowerCase()+'">'
+            +'<div class="a-avatar">'+esc(initials(u.name))+'</div>'
+            +'<div class="a-info"><div class="n"><span class="a-dot '+dotClass+'"></span>'+esc(u.name)+'</div><div class="e">'+esc(u.email)+'</div></div>'
+            +'<div class="a-stat"><div class="lbl">Sesiones</div><div class="val">'+t.sessions+'</div></div>'
+            +'<div class="a-stat"><div class="lbl">Acierto</div><div class="val">'+acc.toFixed(1)+'%</div></div>'
+            +'<div class="a-stat"><div class="lbl">Tiempo</div><div class="val">'+t.timeMin+' min</div></div>'
+            +'<div class="a-when">'+rel(u.last)+'</div>'
+            +'<div class="a-caret">›</div>'
+            +'</div>';
         }
-        html+='<div class="admin-two-col">'
-          +adminSection('Usuarios registrados','Vista más visual con el mismo detalle de antes. Pulsa en cada tarjeta para abrir estadísticas y últimas sesiones.','<div class="admin-users-grid">'+list+'</div>')
-          +'<div class="admin-stack">'
-          +adminSection('Resumen rápido','Indicadores que ayudan a leer el estado general sin entrar en cada usuario.','<div class="admin-mini-list">'
-            +'<div class="admin-mini-item"><span>Usuarios visibles</span><strong>'+totalUsers+'</strong></div>'
-            +'<div class="admin-mini-item"><span>Sesiones acumuladas</span><strong>'+totalSessions+'</strong></div>'
-            +'<div class="admin-mini-item"><span>Respuestas totales</span><strong>'+totalAnswered+'</strong></div>'
-            +'<div class="admin-mini-item"><span>Asignaturas con datos</span><strong>'+ALL_SUBJECTS.length+'</strong></div>'
-          +'</div>')
-          +adminSection('Lectura del panel','El punto verde marca actividad reciente. El desplegable conserva las tablas por asignatura y el histórico de sesiones como en tu versión anterior.','<div class="admin-note"><b>Consejo:</b> usa esta pestaña para revisar quién estudia más, qué usuarios están activos y cómo evolucionan las notas de examen sin perder los detalles técnicos que ya tenías.</div>')
-          +'</div></div>';
       }
+      html+='</div>';
       body.innerHTML=html+'</div>';
+
+      /* Attach handlers */
+      var rows=body.querySelectorAll('.a-row');
+      for(var rx=0;rx<rows.length;rx++){
+        (function(row){
+          row.addEventListener('click',function(){ openUserDetail(parseInt(row.getAttribute('data-uix'),10)); });
+        })(rows[rx]);
+      }
+      var searchEl=document.getElementById('aUserSearch');
+      if(searchEl){
+        searchEl.addEventListener('input',function(){
+          var q=this.value.toLowerCase().trim();
+          var all=body.querySelectorAll('.a-row');
+          for(var si=0;si<all.length;si++){
+            all[si].style.display=(!q||all[si].getAttribute('data-search').indexOf(q)!==-1)?'':'none';
+          }
+        });
+      }
     }catch(e){
       renderAdminError(e);
       try{ console.error('ADMIN_USERS_ERROR',e); }catch(_){}
     }
+  }
+
+  /* ── USER DETAIL MODAL ── */
+  function openUserDetail(ix){
+    var u=currentUsers[ix]; if(!u) return;
+    var t=totalsFromProg(u.prog);
+    var acc=t.answered?(t.correct/t.answered*100):0;
+    var dc=dotCls(u.last), dotClass=dc==='on'?'on':(dc==='rec'?'rec':'off');
+    document.getElementById('udAvatar').textContent=initials(u.name);
+    document.getElementById('udName').innerHTML='<span class="a-dot '+dotClass+'" style="margin-right:4px;"></span>'+esc(u.name);
+    document.getElementById('udEmail').textContent=u.email+' · activo hace '+rel(u.last);
+
+    /* compute best exam score across all subjects */
+    var bestOverall=null;
+    for(var bk=0;bk<ALL_SUBJECTS.length;bk++){
+      var ssb=subjectStats(u.prog, ALL_SUBJECTS[bk]);
+      if(ssb && typeof ssb.examBest==='number') bestOverall=(bestOverall===null)?ssb.examBest:Math.max(bestOverall,ssb.examBest);
+    }
+
+    var body=document.getElementById('udBody');
+    var subjRows='', subjCount=0;
+    for(var k=0;k<ALL_SUBJECTS.length;k++){
+      var sk=ALL_SUBJECTS[k], ss=subjectStats(u.prog, sk);
+      if(!ss) continue;
+      subjCount++;
+      subjRows+='<tr><td style="font-weight:700;">'+esc(sk)+'</td><td>'+ss.sessions+'</td><td>'+ss.answered+'</td><td>'+ss.acc.toFixed(1)+'%</td><td>'+ss.timeMin+' min</td><td>'+ss.days+' d</td><td>'+scorePill(ss.examBest)+'</td><td>'+scorePill(ss.examAvg)+'</td></tr>';
+    }
+    var histRows='', allHist=[];
+    for(var h=0;h<ALL_SUBJECTS.length;h++){
+      var sh=ALL_SUBJECTS[h], subData=(u.prog||{})[sh];
+      if(!subData||!subData.history) continue;
+      for(var hi=0;hi<subData.history.length;hi++) allHist.push(Object.assign({},subData.history[hi],{subject:sh}));
+    }
+    allHist.sort(function(a,b){ return (b.finishedAt||'').localeCompare(a.finishedAt||''); });
+    for(var hr=0;hr<Math.min(12,allHist.length);hr++){
+      var he=allHist[hr];
+      var modeLabel={'cuestionario':'Quiz','practicas':'Prácticas','examen':'Examen','examen1':'Examen 1','examenTotal':'Exam Total','examenPersonalizado':'Personalizado'}[he.mode]||he.mode||'?';
+      histRows+='<div class="ud-hist-row"><span class="ud-hist-mode">'+esc(modeLabel)+'</span><span class="ud-hist-subj">'+esc(he.subject||'')+'</span><span class="ud-hist-stats">'+he.correct+' ✓ · '+he.wrong+' ✗ · '+he.blank+' —'+(typeof he.score==='number'?(' · '+scorePill(he.score)):'')+'</span><span class="ud-hist-date">'+fullDate(he.finishedAt)+'</span></div>';
+    }
+
+    body.innerHTML=
+      '<div class="ud-kpis">'
+      +'<div class="ud-kpi"><div class="l">Sesiones</div><div class="v">'+t.sessions+'</div></div>'
+      +'<div class="ud-kpi"><div class="l">Acierto</div><div class="v">'+acc.toFixed(1)+'%</div></div>'
+      +'<div class="ud-kpi"><div class="l">Tiempo</div><div class="v">'+t.timeMin+'m</div></div>'
+      +'<div class="ud-kpi"><div class="l">Mejor nota</div><div class="v">'+(bestOverall!==null?bestOverall.toFixed(1):'—')+'</div></div>'
+      +'</div>'
+      +'<div class="ud-section"><h4>📚 Por asignatura ('+subjCount+')</h4>'
+      +(subjRows?'<div style="overflow-x:auto;"><table class="ud-subj-table"><thead><tr><th>Asignatura</th><th>Sesiones</th><th>Resp.</th><th>Acierto</th><th>Tiempo</th><th>Días</th><th>Mejor</th><th>Media ex.</th></tr></thead><tbody>'+subjRows+'</tbody></table></div>':'<div class="ud-empty">Sin actividad por asignatura todavía.</div>')
+      +'</div>'
+      +'<div class="ud-section"><h4>🕐 Últimas sesiones</h4>'
+      +(histRows?histRows:'<div class="ud-empty">Sin histórico de sesiones.</div>')
+      +'</div>';
+
+    udOverlay.classList.add('open');
   }
 
   /* ── CONNECTIONS TAB ── */
