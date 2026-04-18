@@ -2632,7 +2632,9 @@ init();
     '.day-header::before{content:"";height:1px;flex:0 0 24px;background:var(--line);}',
     '.day-header::after{content:"";height:1px;flex:1;background:var(--line);}',
     '.day-header .count{background:var(--paper-2,#f3ece1);color:color-mix(in oklab,var(--ink,#1a1530) 70%,transparent);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:none;}',
-    '.c-row{display:grid;grid-template-columns:40px 1fr auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
+    '.c-row{display:grid;grid-template-columns:40px 1fr auto auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
+    '.fb-chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:color-mix(in oklab,var(--p1,#ff7a45) 12%,transparent);color:color-mix(in oklab,var(--p1,#ff7a45) 85%,var(--ink,#1a1530));white-space:nowrap;font-variant-numeric:tabular-nums;}',
+    '.fb-chip.warn{background:rgba(239,68,68,.14);color:#dc2626;}',
     '.c-row .a-when,.c-row .a-info{min-width:0;}',
     '.c-device{font-size:13px;color:color-mix(in oklab,var(--ink,#1a1530) 70%,transparent);white-space:nowrap;}',
     '.c-time{font-family:"Outfit",sans-serif;font-size:16px;font-weight:700;color:var(--ink,#1a1530);font-variant-numeric:tabular-nums;}',
@@ -2642,9 +2644,9 @@ init();
     '.c-pill.live{background:rgba(239,68,68,.14);color:#dc2626;position:relative;padding-left:18px;}',
     '.c-pill.live::before{content:"";position:absolute;left:7px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:#dc2626;border-radius:50%;animation:pulse 1.6s infinite;}',
     '@keyframes pulse{0%,100%{opacity:1;transform:translateY(-50%) scale(1)}50%{opacity:.4;transform:translateY(-50%) scale(1.4)}}',
-    '@media (max-width:800px){.c-row{grid-template-columns:40px 1fr auto;}.c-row .c-device,.c-row .c-time{display:none;}}',
-    '.g-row{display:grid;grid-template-columns:40px 1fr auto auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
-    '@media (max-width:900px){.g-row{grid-template-columns:40px 1fr auto auto;}.g-row .c-device,.g-row .a-when:not(:last-child){display:none;}}',
+    '@media (max-width:800px){.c-row{grid-template-columns:40px 1fr auto auto;}.c-row .c-device,.c-row .c-time{display:none;}}',
+    '.g-row{display:grid;grid-template-columns:40px 1fr auto auto auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
+    '@media (max-width:900px){.g-row{grid-template-columns:40px 1fr auto auto auto;}.g-row .c-device,.g-row .a-when:not(:last-child){display:none;}.g-row .c-time:nth-of-type(2){display:none;}}',
   ].join('');
   document.head.appendChild(adminOptAStyle);
 
@@ -3025,11 +3027,14 @@ init();
             var recent=e.timestamp&&((Date.now()-new Date(e.timestamp))<3600000);
             var pill=recent?'<span class="c-pill ok">● Reciente</span>':'<span class="c-pill muted">Histórico</span>';
             var time=e.timestamp?e.timestamp.slice(11,16):'--:--';
+            /* 1 escritura por login · cuota Spark = 20.000/día */
+            var fbPct=(1/20000*100).toFixed(3)+'%';
             html+='<div class="c-row" data-search="'+esc((e.displayName||'')+' '+(e.email||'')).toLowerCase()+'">'
               +'<div class="a-avatar">'+esc(initials(e.displayName||e.email))+'</div>'
               +'<div class="a-info"><div class="n">'+esc(e.displayName||e.email||'?')+'</div><div class="e">'+esc(e.email||'Sin email')+'</div></div>'
               +'<div class="c-time">'+esc(time)+'</div>'
               +'<div class="c-device">'+esc(deviceShort(e.ua||''))+'</div>'
+              +'<span class="fb-chip" title="≈1 escritura · '+fbPct+' de la cuota diaria Firebase (20.000)">'+fbPct+'</span>'
               +pill
               +'</div>';
           }
@@ -3099,12 +3104,19 @@ init();
             var vid=e.visitorId||'—';
             var tStart=started?started.slice(11,16):'--:--';
             var tLast=e.lastSeen?e.lastSeen.slice(11,16):'--:--';
+            /* Estimación: 1 escritura al iniciar + 1 ping cada 30s + 1 al cerrar */
+            var durMs=Number(e.durationMs||0);
+            var writes=1+Math.round(durMs/30000)+1;
+            var pctNum=writes/20000*100;
+            var fbPct=(pctNum<0.01?'<0.01':pctNum.toFixed(2))+'%';
+            var fbCls=pctNum>=1?'fb-chip warn':'fb-chip';
             html+='<div class="g-row" data-search="'+esc((name||'')+' '+vid).toLowerCase()+'">'
               +'<div class="a-avatar">'+esc(initials(name||vid))+'</div>'
               +'<div class="a-info"><div class="n">'+esc(name)+'</div><div class="e">'+esc(vid)+'</div></div>'
               +'<div class="c-time">'+esc(tStart)+'→'+esc(tLast)+'</div>'
               +'<div class="c-time">'+esc(durationText(e.durationMs))+'</div>'
               +'<div class="c-device">'+esc(deviceShort(e.ua||''))+'</div>'
+              +'<span class="'+fbCls+'" title="≈'+writes+' escrituras · '+fbPct+' de la cuota diaria Firebase (20.000)">'+fbPct+'</span>'
               +pill
               +'</div>';
           }
