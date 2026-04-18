@@ -2627,6 +2627,24 @@ init();
     '.ud-hist-stats{font-size:12px;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);}',
     '.ud-hist-date{font-size:11px;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);margin-left:8px;}',
     '.ud-empty{padding:24px;text-align:center;color:color-mix(in oklab,var(--ink,#1a1530) 50%,transparent);font-size:13px;border:1px dashed var(--line);border-radius:12px;}',
+    /* Connections & Guests clean rows */
+    '.day-header{display:flex;align-items:center;gap:10px;margin:18px 0 10px;font-size:12px;font-weight:800;color:color-mix(in oklab,var(--ink,#1a1530) 55%,transparent);text-transform:uppercase;letter-spacing:.08em;}',
+    '.day-header::before{content:"";height:1px;flex:0 0 24px;background:var(--line);}',
+    '.day-header::after{content:"";height:1px;flex:1;background:var(--line);}',
+    '.day-header .count{background:var(--paper-2,#f3ece1);color:color-mix(in oklab,var(--ink,#1a1530) 70%,transparent);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:none;}',
+    '.c-row{display:grid;grid-template-columns:40px 1fr auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
+    '.c-row .a-when,.c-row .a-info{min-width:0;}',
+    '.c-device{font-size:13px;color:color-mix(in oklab,var(--ink,#1a1530) 70%,transparent);white-space:nowrap;}',
+    '.c-time{font-family:"Outfit",sans-serif;font-size:16px;font-weight:700;color:var(--ink,#1a1530);font-variant-numeric:tabular-nums;}',
+    '.c-pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;}',
+    '.c-pill.ok{background:rgba(34,197,94,.15);color:#15803d;}',
+    '.c-pill.muted{background:var(--paper-2,#f3ece1);color:color-mix(in oklab,var(--ink,#1a1530) 60%,transparent);}',
+    '.c-pill.live{background:rgba(239,68,68,.14);color:#dc2626;position:relative;padding-left:18px;}',
+    '.c-pill.live::before{content:"";position:absolute;left:7px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:#dc2626;border-radius:50%;animation:pulse 1.6s infinite;}',
+    '@keyframes pulse{0%,100%{opacity:1;transform:translateY(-50%) scale(1)}50%{opacity:.4;transform:translateY(-50%) scale(1.4)}}',
+    '@media (max-width:800px){.c-row{grid-template-columns:40px 1fr auto;}.c-row .c-device,.c-row .c-time{display:none;}}',
+    '.g-row{display:grid;grid-template-columns:40px 1fr auto auto auto auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:var(--card,#fff);}',
+    '@media (max-width:900px){.g-row{grid-template-columns:40px 1fr auto auto;}.g-row .c-device,.g-row .a-when:not(:last-child){display:none;}}',
   ].join('');
   document.head.appendChild(adminOptAStyle);
 
@@ -2972,60 +2990,60 @@ init();
     body.innerHTML='<div class="admin-msg">⏳ Cargando historial...</div>';
     try{
       if(!window.db) throw {code:'db-unavailable',message:'Firestore no inicializado.'};
-      var data=await Promise.all([
-        window.db.collection('connections').orderBy('timestamp','desc').limit(100).get(),
-        getQuotaUsageSummary()
-      ]);
-      var snap=data[0], quota=data[1];
-      var byDay={}, dayOrder=[], allEmails={}, totalVisible=0;
+      var snap=await window.db.collection('connections').orderBy('timestamp','desc').limit(100).get();
+      var byDay={}, dayOrder=[], allEmails={}, totalVisible=0, lastConn=null;
       snap.forEach(function(d){
         var item=d.data()||{};
         if((item.email||'')===ADMIN_EMAIL) return;
         totalVisible++;
         var ts=item.timestamp||'';
+        if(!lastConn||ts>lastConn) lastConn=ts;
         var day=ts?ts.slice(0,10):'sin-fecha';
         if(!byDay[day]){ byDay[day]=[]; dayOrder.push(day); }
         byDay[day].push(item);
         if(item.email) allEmails[item.email]=1;
       });
       sub.textContent=totalVisible+' conexiones registradas · '+Object.keys(allEmails).length+' usuarios únicos';
-      var html='<div class="admin-page">'+renderQuotaWidget(quota)
-        +'<div class="admin-kpi-grid">'
-        +kpiCard('Conexiones totales', String(totalVisible), 'Últimos 100 registros')
-        +kpiCard('Usuarios únicos', String(Object.keys(allEmails).length), 'Excluye tu cuenta admin')
-        +kpiCard('Días con actividad', String(dayOrder.length), 'Agrupado por fecha')
+      var uniqueCount=Object.keys(allEmails).length;
+      var html='<div class="admin-page">'
+        +'<div class="a-kpis">'
+        +'<div class="a-kpi hl"><div class="l">Conexiones</div><div class="v">'+totalVisible+'</div><div class="s">Últimos 100 registros</div></div>'
+        +'<div class="a-kpi"><div class="l">Usuarios únicos</div><div class="v">'+uniqueCount+'</div><div class="s">Excluye tu cuenta admin</div></div>'
+        +'<div class="a-kpi"><div class="l">Días con actividad</div><div class="v">'+dayOrder.length+'</div><div class="s">Agrupado por fecha</div></div>'
+        +'<div class="a-kpi"><div class="l">Última conexión</div><div class="v" style="font-size:22px;">'+(lastConn?esc(rel(lastConn)):'—')+'</div><div class="s">'+(lastConn?esc(fullDate(lastConn)):'sin datos')+'</div></div>'
         +'</div>';
       if(!totalVisible){
-        html+=adminSection('Conexiones','Aún no hay conexiones registradas.','<div class="admin-empty">Se registrarán a partir de ahora al iniciar sesión con Google.</div>');
+        html+='<div class="admin-empty">Se registrarán a partir de ahora al iniciar sesión con Google.</div>';
       } else {
-        var list='';
+        html+='<div class="a-users-head"><h3>🕐 Historial</h3><input class="a-search" id="aConnSearch" placeholder="Buscar por nombre o email..."></div>';
         for(var di=0;di<dayOrder.length;di++){
           var day=dayOrder[di], entries=byDay[day];
-          list+=dayLabelEs(day,'('+entries.length+' conexiones)')+'<div class="admin-list">';
+          var dayLabel=(day==='sin-fecha')?'Sin fecha':new Date(day+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+          html+='<div class="day-header"><span>'+esc(dayLabel)+'</span><span class="count">'+entries.length+'</span></div>';
           for(var ei=0;ei<entries.length;ei++){
-            var e=entries[ei], status='';
-            list+='<article class="admin-entry"><div class="admin-entry-top"><div><div class="admin-entry-name">'+esc(e.displayName||e.email||'?')+'</div><div class="admin-entry-sub">'+esc(e.email||'Sin email')+' · '+esc(rel(e.timestamp))+'</div></div>'+statePillHtml(e.timestamp&&((Date.now()-new Date(e.timestamp))<3600000)?'Reciente':'Histórico', e.timestamp&&((Date.now()-new Date(e.timestamp))<3600000)?'ok':'muted')+'</div>'
-              +'<div class="admin-detail-grid">'
-              +'<div class="admin-chip-box"><strong>Hora</strong>'+esc(e.timestamp?e.timestamp.slice(11,16):'--:--')+'</div>'
-              +'<div class="admin-chip-box"><strong>Fecha completa</strong>'+esc(fullDate(e.timestamp))+'</div>'
-              +'<div class="admin-chip-box"><strong>Dispositivo</strong>'+esc(deviceShort(e.ua||''))+'</div>'
-              +'</div>'
-              +'<div class="admin-context"><b>User agent:</b> '+esc(e.ua||'Sin dato')+'</div></article>';
+            var e=entries[ei];
+            var recent=e.timestamp&&((Date.now()-new Date(e.timestamp))<3600000);
+            var pill=recent?'<span class="c-pill ok">● Reciente</span>':'<span class="c-pill muted">Histórico</span>';
+            var time=e.timestamp?e.timestamp.slice(11,16):'--:--';
+            html+='<div class="c-row" data-search="'+esc((e.displayName||'')+' '+(e.email||'')).toLowerCase()+'">'
+              +'<div class="a-avatar">'+esc(initials(e.displayName||e.email))+'</div>'
+              +'<div class="a-info"><div class="n">'+esc(e.displayName||e.email||'?')+'</div><div class="e">'+esc(e.email||'Sin email')+'</div></div>'
+              +'<div class="c-time">'+esc(time)+'</div>'
+              +'<div class="c-device">'+esc(deviceShort(e.ua||''))+'</div>'
+              +pill
+              +'</div>';
           }
-          list+='</div>';
         }
-        html+='<div class="admin-two-col">'
-          +adminSection('Historial de conexiones','Cronología más clara y legible, sin perder la fecha, el email ni el dispositivo.','<div class="admin-stack">'+list+'</div>')
-          +'<div class="admin-stack">'
-          +adminSection('Resumen rápido','Referencia visual para entender el tráfico sin leer cada fila.','<div class="admin-mini-list">'
-            +'<div class="admin-mini-item"><span>Conexiones visibles</span><strong>'+totalVisible+'</strong></div>'
-            +'<div class="admin-mini-item"><span>Usuarios únicos</span><strong>'+Object.keys(allEmails).length+'</strong></div>'
-            +'<div class="admin-mini-item"><span>Primer bloque</span><strong>'+(dayOrder[0]?esc(dayOrder[0].split('-').reverse().join('/')):'-')+'</strong></div>'
-          +'</div>')
-          +adminSection('Qué ves aquí','Esta pestaña sirve para comprobar qué cuentas entran con Google, cuándo lo hacen y desde qué dispositivo. La cuota de Firebase se mantiene visible arriba.','<div class="admin-note"><b>Nota:</b> tu propia cuenta admin no se incluye en esta lista para no contaminar los datos.</div>')
-          +'</div></div>';
       }
       body.innerHTML=html+'</div>';
+      var sEl=document.getElementById('aConnSearch');
+      if(sEl){
+        sEl.addEventListener('input',function(){
+          var q=this.value.toLowerCase().trim();
+          var rows=body.querySelectorAll('.c-row');
+          for(var i=0;i<rows.length;i++) rows[i].style.display=(!q||rows[i].getAttribute('data-search').indexOf(q)!==-1)?'':'none';
+        });
+      }
     }catch(e){
       renderAdminError(e);
       try{ console.error('ADMIN_CONNECTIONS_ERROR',e); }catch(_){}
@@ -3040,11 +3058,7 @@ init();
     body.innerHTML='<div class="admin-msg">⏳ Cargando invitados...</div>';
     try{
       if(!window.db) throw {code:'db-unavailable',message:'Firestore no inicializado.'};
-      var data=await Promise.all([
-        window.db.collection(GUEST_COLLECTION).orderBy('lastSeen','desc').limit(100).get(),
-        getQuotaUsageSummary()
-      ]);
-      var snap=data[0], quota=data[1];
+      var snap=await window.db.collection(GUEST_COLLECTION).orderBy('lastSeen','desc').limit(100).get();
       var byDay={}, dayOrder=[], visitors={}, activeNow=0, totalDuration=0, visibleCount=0, convertedCount=0;
       snap.forEach(function(d){
         var item=d.data()||{};
@@ -3058,52 +3072,53 @@ init();
         if(guestIsActive(item.lastSeen||item.startedAt)) activeNow++;
         totalDuration+=Number(item.durationMs||0);
       });
-      if(!visibleCount){
-        body.innerHTML='<div class="admin-page">'+renderQuotaWidget(quota)+adminSection('Invitados','No hay invitados reales ahora mismo. Las sesiones convertidas a Gmail ya no se muestran aquí.','<div class="admin-empty">Sin invitados reales. Cuando alguien entre sin iniciar sesión, aparecerá aquí.</div>')+'</div>';
-        sub.textContent='Sin invitados reales';
-        return;
-      }
       sub.textContent=visibleCount+' sesiones invitado · '+Object.keys(visitors).length+' invitados únicos';
       var avgDuration=visibleCount?durationText(totalDuration/visibleCount):'0 min';
-      var list='';
-      for(var di=0;di<dayOrder.length;di++){
-        var day=dayOrder[di], entries=byDay[day];
-        list+=dayLabelEs(day,'('+entries.length+' sesiones)')+'<div class="admin-list">';
-        for(var ei=0;ei<entries.length;ei++){
-          var e=entries[ei]||{};
-          var started=e.startedAt||'';
-          var active=guestIsActive(e.lastSeen||started);
-          list+='<article class="admin-entry"><div class="admin-entry-top"><div><div class="admin-entry-name">'+esc(e.displayName||guestNameFromId(e.visitorId||''))+'</div><div class="admin-entry-sub">'+esc(e.visitorId||'Sin visitorId')+' · '+esc(rel(e.lastSeen||started))+'</div></div>'
-            +(active?statePillHtml('Activo ahora','ok'):statePillHtml('Inactivo','muted'))+'</div>'
-            +'<div class="admin-detail-grid">'
-            +'<div class="admin-chip-box"><strong>Inicio</strong>'+esc(fullDate(e.startedAt))+'</div>'
-            +'<div class="admin-chip-box"><strong>Última actividad</strong>'+esc(fullDate(e.lastSeen))+'</div>'
-            +'<div class="admin-chip-box"><strong>Duración</strong>'+esc(durationText(e.durationMs))+'</div>'
-            +'<div class="admin-chip-box"><strong>Dispositivo</strong>'+esc(deviceShort(e.ua||''))+'</div>'
-            +'</div>'
-            +'<div class="admin-context"><b>Session ID:</b> '+esc(e.sessionId||'')+'<br><b>Visitor ID:</b> '+esc(e.visitorId||'')+(e.lastPath?'<br><b>Ruta:</b> '+esc(e.lastPath):'')+'</div></article>';
+      var uniqCount=Object.keys(visitors).length;
+      var html='<div class="admin-page">'
+        +'<div class="a-kpis">'
+        +'<div class="a-kpi hl"><div class="l">Sesiones invitado</div><div class="v">'+visibleCount+'</div><div class="s">Sin Gmail · últimos 100</div></div>'
+        +'<div class="a-kpi"><div class="l">Invitados únicos</div><div class="v">'+uniqCount+'</div><div class="s">Calculado por visitorId</div></div>'
+        +'<div class="a-kpi"><div class="l">Activos ahora</div><div class="v">'+activeNow+'</div><div class="s">Ping reciente</div></div>'
+        +'<div class="a-kpi"><div class="l">Duración media</div><div class="v" style="font-size:22px;">'+esc(avgDuration)+'</div><div class="s">Tiempo abierto estimado</div></div>'
+        +'</div>';
+      if(!visibleCount){
+        html+='<div class="admin-empty">Sin invitados reales. Cuando alguien entre sin iniciar sesión, aparecerá aquí.</div>';
+      } else {
+        html+='<div class="a-users-head"><h3>👥 Actividad de invitados</h3><input class="a-search" id="aGuestSearch" placeholder="Buscar por nombre o visitorId..."></div>';
+        for(var di=0;di<dayOrder.length;di++){
+          var day=dayOrder[di], entries=byDay[day];
+          var dayLabel=(day==='sin-fecha')?'Sin fecha':new Date(day+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+          html+='<div class="day-header"><span>'+esc(dayLabel)+'</span><span class="count">'+entries.length+'</span></div>';
+          for(var ei=0;ei<entries.length;ei++){
+            var e=entries[ei]||{};
+            var started=e.startedAt||'';
+            var active=guestIsActive(e.lastSeen||started);
+            var pill=active?'<span class="c-pill live">● Activo</span>':'<span class="c-pill muted">Inactivo</span>';
+            var name=e.displayName||guestNameFromId(e.visitorId||'');
+            var vid=e.visitorId||'—';
+            var tStart=started?started.slice(11,16):'--:--';
+            var tLast=e.lastSeen?e.lastSeen.slice(11,16):'--:--';
+            html+='<div class="g-row" data-search="'+esc((name||'')+' '+vid).toLowerCase()+'">'
+              +'<div class="a-avatar">'+esc(initials(name||vid))+'</div>'
+              +'<div class="a-info"><div class="n">'+esc(name)+'</div><div class="e">'+esc(vid)+'</div></div>'
+              +'<div class="c-time">'+esc(tStart)+'→'+esc(tLast)+'</div>'
+              +'<div class="c-time">'+esc(durationText(e.durationMs))+'</div>'
+              +'<div class="c-device">'+esc(deviceShort(e.ua||''))+'</div>'
+              +pill
+              +'</div>';
+          }
         }
-        list+='</div>';
       }
-      var html='<div class="admin-page">'+renderQuotaWidget(quota)
-        +'<div class="admin-kpi-grid">'
-        +kpiCard('Sesiones invitado', String(visibleCount), 'Sin usuarios con Gmail')
-        +kpiCard('Invitados únicos', String(Object.keys(visitors).length), 'Calculado por visitorId')
-        +kpiCard('Activos ahora', String(activeNow), 'Último ping reciente')
-        +kpiCard('Duración media', esc(avgDuration), 'Tiempo abierto estimado')
-        +'</div>'
-        +'<div class="admin-two-col">'
-        +adminSection('Actividad de invitados','Aquí solo aparecen invitados reales. Las sesiones que pasan a Gmail quedan fuera para evitar duplicados.','<div class="admin-stack">'+list+'</div>')
-        +'<div class="admin-stack">'
-        +adminSection('Resumen rápido','Bloque lateral para lectura rápida del estado actual.','<div class="admin-mini-list">'
-          +'<div class="admin-mini-item"><span>Invitados reales</span><strong>'+Object.keys(visitors).length+'</strong></div>'
-          +'<div class="admin-mini-item"><span>Sesiones visibles</span><strong>'+visibleCount+'</strong></div>'
-          +'<div class="admin-mini-item"><span>Convertidos a Gmail</span><strong>'+convertedCount+'</strong></div>'
-          +'<div class="admin-mini-item"><span>Días con actividad</span><strong>'+dayOrder.length+'</strong></div>'
-        +'</div>')
-        +adminSection('Qué mejora este diseño','Más claridad visual, misma información, y lectura más cómoda en móvil y escritorio.','<div class="admin-note"><b>Incluye:</b> inicio, última actividad, duración, device, visitorId, sessionId, estado actual y la barra de cuota Firebase sin perder detalle técnico.</div>')
-        +'</div></div>';
       body.innerHTML=html+'</div>';
+      var sEl=document.getElementById('aGuestSearch');
+      if(sEl){
+        sEl.addEventListener('input',function(){
+          var q=this.value.toLowerCase().trim();
+          var rows=body.querySelectorAll('.g-row');
+          for(var i=0;i<rows.length;i++) rows[i].style.display=(!q||rows[i].getAttribute('data-search').indexOf(q)!==-1)?'':'none';
+        });
+      }
     }catch(e){
       renderAdminError(e);
       try{ console.error('ADMIN_GUESTS_ERROR',e); }catch(_){}
