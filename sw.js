@@ -48,3 +48,5 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// cache bump mobile tabs v4

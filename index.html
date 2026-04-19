@@ -919,11 +919,15 @@ body.quiz-active{}
   #progressSubjectList .subj-list-title{padding:0 2px 10px}
   #progressSubjectList .progress-tabs-track{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding-bottom:2px}
   #progressSubjectList .progress-tabs-track::-webkit-scrollbar{display:none}
-  #progressSubjectList .subj-row{display:flex;align-items:stretch;min-width:0;margin:0;border-radius:14px;border:1px solid var(--line);background:var(--paper-2)}
-  #progressSubjectList .subj-item{flex:1;min-width:0;padding:12px 12px;font-size:13px;font-weight:800;line-height:1.15;white-space:normal;text-align:center;text-wrap:balance}
-  #progressSubjectList .subj-share{display:none}
+  #progressSubjectList .subj-row{display:grid;grid-template-columns:minmax(0,1fr) 42px;align-items:stretch;min-width:0;margin:0;border-radius:14px;border:1px solid var(--line);background:var(--paper-2);overflow:hidden}
+  #progressSubjectList .subj-item{min-width:0;padding:12px 10px 12px 12px;font-size:13px;font-weight:800;line-height:1.15;white-space:normal;text-align:left;text-wrap:balance}
+  #progressSubjectList .subj-share{display:inline-flex;width:42px;height:auto;margin:0;border-left:1px solid var(--line);border-radius:0;color:color-mix(in oklab,var(--ink) 55%,transparent);background:transparent}
+  #progressSubjectList .subj-share svg{width:16px;height:16px}
+  #progressSubjectList .subj-share:hover{transform:none;background:color-mix(in oklab,var(--p3) 12%,transparent);color:var(--p3)}
   #progressSubjectList .subj-row.active{background:linear-gradient(90deg,var(--p1),var(--p3));border-color:transparent;box-shadow:0 8px 22px color-mix(in oklab,var(--p3) 26%,transparent)}
-  #progressSubjectList .subj-row.active .subj-item{color:#fff}
+  #progressSubjectList .subj-row.active .subj-item,#progressSubjectList .subj-row.active .subj-share{color:#fff}
+  #progressSubjectList .subj-row.active .subj-share{border-left-color:rgba(255,255,255,.18)}
+  #progressSubjectList .subj-row.active .subj-share:hover{background:rgba(255,255,255,.12);color:#fff}
 
   #screen-progress .r-hero-chart,#screen-progress .r-section,#progressKpiList,#progressStreakCard{width:100%;margin:0}
   #screen-progress .r-hero-chart,#screen-progress .r-section{padding:16px;margin-bottom:0}
