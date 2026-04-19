@@ -491,6 +491,9 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;letter-spacing:-0.02
 .btn.ghost{background:transparent}
 .btn.danger{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 30%,transparent)}
 .btn:disabled{opacity:.45;pointer-events:none}
+.install-btn{display:none;background:linear-gradient(135deg,var(--p1),var(--p3));color:#fff;border:none;box-shadow:0 4px 14px color-mix(in oklab,var(--p1) 40%,transparent)}
+.install-btn:hover{box-shadow:0 8px 22px color-mix(in oklab,var(--p1) 50%,transparent)}
+.install-btn.ios{background:color-mix(in oklab,var(--p4) 18%,var(--card));color:var(--ink);border:1px solid color-mix(in oklab,var(--p4) 30%,transparent);box-shadow:none}
 
 .variant-bento .btn{border-radius:10px;border:1.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
 .variant-bento .btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
@@ -797,6 +800,7 @@ textarea.share-preview:focus{outline:none;border-color:var(--p3)}
 .btn.small{padding:8px 13px;font-size:13px}
 @media(max-width:640px){
   .tb-actions{flex-wrap:wrap;justify-content:flex-end;gap:4px}
+  .install-btn{padding:9px 12px;font-size:13px}
 }
 @media(max-width:700px){
   .app{padding:12px 12px 80px}
@@ -987,6 +991,7 @@ body.quiz-active{}
     <button class="btn ghost small" id="homeTopBtn" style="display:none;">&#x2190; Inicio</button>
     <button class="btn ghost small" id="progressBtn">&#x1F4CA; Registro</button>
     <button class="btn ghost small" id="shareRegistryTopBtn" style="display:none;">&#x2197; Compartir</button>
+    <button class="btn small install-btn" id="installAppBtn" type="button" style="display:none;" aria-label="Instalar app" title="Instalar app">&#x1F4F2; Instalar app</button>
     <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar tema" title="Cambiar tema">&#x1F319;</button>
     <!-- authControls injected here by JS -->
   </div>
@@ -1452,12 +1457,12 @@ var db = null;
 var authReady = false;
 var cloudSyncInFlight = false;
 var saveCloudTimer = null;
-var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario' };
+var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario', deferredInstallPrompt:null, installChoice:null };
 var screens = {
   home: document.getElementById('screen-home'), help: document.getElementById('screen-help'), menu: document.getElementById('screen-menu'), quiz: document.getElementById('screen-quiz'), results: document.getElementById('screen-results'), list: document.getElementById('screen-list'), weak: document.getElementById('screen-weak'), progress: document.getElementById('screen-progress'), share: document.getElementById('screen-share')
 };
 var els = {
-  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
+  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), installAppBtn: document.getElementById('installAppBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
 };
 var progressStore = loadProgress();
 var METRIC_DEFS = [
@@ -1532,7 +1537,54 @@ function buildWeakQuestionMap(sub){
 }
 function getWeakQuestionPool(data){ if(!state.subject) return []; var sub=progressStore[state.subject.short] || emptySubject(); var map=buildWeakQuestionMap(sub); var refs=[]; for(var k in map){ if(map[k] && (map[k].wrong||0)>0) refs.push(map[k]); } refs.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); var lookup=buildQuestionLookups(data), out=[], seen={}; for(var i=0;i<refs.length;i++){ var ref=refs[i]||{}; var exactKey=(ref.section||'')+'||'+(ref.q||''); var full=lookup.byExact[exactKey] || lookup.byQ[ref.q||'']; if(!full) continue; var cloned=cloneData(full); cloned.block='Bloque 1 — Más falladas'; var sig=questionSignature(cloned); if(seen[sig]) continue; seen[sig]=1; out.push(cloned); } return out; }
 function buildReviewOptionsHtml(item, selectedIndex, showSelectedWrong){ var html=''; if(!item || !item.options || !item.options.length) return html; for(var k=0;k<item.options.length;k++){ var cls='review-option'; var suffix=''; if(k===item.correct){ cls+=' correct'; suffix=' <strong>✓ Correcta</strong>'; } if(showSelectedWrong && typeof selectedIndex==='number' && selectedIndex===k && k!==item.correct){ cls+=' wrong'; suffix=' <strong>✗ Tu respuesta</strong>'; } html+='<div class="'+cls+'">'+escapeHtml(item.options[k])+suffix+'</div>'; } return html; }
-function showScreen(name){ for(var k in screens){ if(screens[k]) screens[k].className='screen'; } if(screens[name]) screens[name].className='screen active'; var isHome=name==='home'; els.homeTopBtn.style.display=isHome?'none':'inline-flex'; els.progressBtn.style.display=(name==='progress')?'none':'inline-flex'; els.shareRegistryTopBtn.style.display='none'; if(els.themeBtn) els.themeBtn.style.display=isHome?'inline-flex':'none'; if(els.authControls) els.authControls.style.display=isHome?'inline-flex':'none'; if(document.body){ document.body.classList.toggle('quiz-active',name==='quiz'); } }
+
+function isStandaloneMode(){
+  return !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || !!window.navigator.standalone;
+}
+function isIosInstallCapable(){
+  var ua=navigator.userAgent||'';
+  var isIOS=/iphone|ipad|ipod/i.test(ua);
+  var isSafari=/safari/i.test(ua) && !/crios|fxios|edgios|chrome|android/i.test(ua);
+  return isIOS && isSafari && !isStandaloneMode();
+}
+function updateInstallButtonVisibility(){
+  if(!els.installAppBtn) return;
+  var canPrompt=!!state.deferredInstallPrompt;
+  var canManual=isIosInstallCapable();
+  var isHome=(document.getElementById('screen-home') && document.getElementById('screen-home').classList.contains('active'));
+  var show=(canPrompt || canManual) && isHome;
+  els.installAppBtn.style.display=show?'inline-flex':'none';
+  els.installAppBtn.classList.toggle('ios', !!canManual && !canPrompt);
+  els.installAppBtn.innerHTML=(canManual && !canPrompt)?'&#x1F4F2; Añadir a inicio':'&#x1F4F2; Instalar app';
+}
+function showIosInstallHelp(){
+  window.alert('Para instalar la app en iPhone:\n\n1. Pulsa el botón Compartir de Safari.\n2. Elige “Añadir a pantalla de inicio”.\n3. Confirma con “Añadir”.');
+}
+async function triggerInstallApp(){
+  if(state.deferredInstallPrompt){
+    var promptEvent=state.deferredInstallPrompt;
+    state.deferredInstallPrompt=null;
+    try{
+      promptEvent.prompt();
+      var choice=await promptEvent.userChoice;
+      state.installChoice=choice ? choice.outcome : null;
+    }catch(e){}
+    updateInstallButtonVisibility();
+    return;
+  }
+  if(isIosInstallCapable()) showIosInstallHelp();
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  state.deferredInstallPrompt=e;
+  updateInstallButtonVisibility();
+});
+window.addEventListener('appinstalled', function(){
+  state.deferredInstallPrompt=null;
+  state.installChoice='accepted';
+  updateInstallButtonVisibility();
+});
+function showScreen(name){ for(var k in screens){ if(screens[k]) screens[k].className='screen'; } if(screens[name]) screens[name].className='screen active'; var isHome=name==='home'; els.homeTopBtn.style.display=isHome?'none':'inline-flex'; els.progressBtn.style.display=(name==='progress')?'none':'inline-flex'; els.shareRegistryTopBtn.style.display='none'; if(els.themeBtn) els.themeBtn.style.display=isHome?'inline-flex':'none'; if(els.authControls) els.authControls.style.display=isHome?'inline-flex':'none'; if(document.body){ document.body.classList.toggle('quiz-active',name==='quiz'); } updateInstallButtonVisibility(); }
 function getModeScoreStats(sub, mode){
   sub=sub||emptySubject();
   var modes=(sub && sub.modes && typeof sub.modes==='object') ? sub.modes : {};
@@ -2515,7 +2567,7 @@ function init(){ createAuthUi(); updateAuthUi(); setupFirebase(); applySavedThem
   els.listQuizBtn.addEventListener('click', function(){ renderQuestionListScreen('cuestionario'); }); els.listPracticeBtn.addEventListener('click', function(){ renderQuestionListScreen('practicas'); }); if(els.listExam1Btn){ els.listExam1Btn.addEventListener('click', function(){ renderQuestionListScreen('examen1'); }); } els.listBackBtn.addEventListener('click', backSubject); els.listHomeBtn.addEventListener('click', resetHome); if(els.weakBackBtn) els.weakBackBtn.addEventListener('click', backSubject); if(els.weakHomeBtn) els.weakHomeBtn.addEventListener('click', resetHome);
   els.practiceRandomBtn.addEventListener('click', function(){ startPracticeCase(null); }); els.practiceBackBtn.addEventListener('click', hidePracticePicker);
   var _resetBtn=document.getElementById('resetSubjectProgressBtn'); if(_resetBtn) _resetBtn.addEventListener('click', function(){ var short=state.progressSubject || (state.subject&&state.subject.short); if(!short) return; if(window.confirm('¿Seguro que quieres borrar todo el registro de '+subjectDisplayByShort(short)+'? Esta acción no se puede deshacer.')) resetSubjectProgress(short); });
-  els.homeTopBtn.addEventListener('click', resetHome); els.homeBtn.addEventListener('click', resetHome); els.subjectBtn.addEventListener('click', backSubject); els.repeatBtn.addEventListener('click', function(){ startMode(state.mode); }); els.nextBtn.addEventListener('click', nextQuestion); els.exitBtn.addEventListener('click', function(){ if(window.confirm('¿Salir de la sesión? Perderás el progreso actual.')) resetHome(); }); els.themeBtn.addEventListener('click', toggleTheme); els.shareQuestionBtn.addEventListener('click', function(){ var txt=buildQuestionShareText(); if(txt) shareText(txt); }); els.shareActivityBtn.addEventListener('click', function(){ var txt=buildActivityShareText(); if(txt) shareText(txt); }); els.appHelpBtn.addEventListener('click', function(){ showScreen('help'); }); els.helpBackBtn.addEventListener('click', resetHome); els.toggleInfoBtn.addEventListener('click', function(){ els.sectionTag.style.display = els.sectionTag.style.display==='none' ? 'block' : 'none'; });
+  els.homeTopBtn.addEventListener('click', resetHome); els.homeBtn.addEventListener('click', resetHome); if(els.installAppBtn) els.installAppBtn.addEventListener('click', function(){ triggerInstallApp(); }); els.subjectBtn.addEventListener('click', backSubject); els.repeatBtn.addEventListener('click', function(){ startMode(state.mode); }); els.nextBtn.addEventListener('click', nextQuestion); els.exitBtn.addEventListener('click', function(){ if(window.confirm('¿Salir de la sesión? Perderás el progreso actual.')) resetHome(); }); els.themeBtn.addEventListener('click', toggleTheme); els.shareQuestionBtn.addEventListener('click', function(){ var txt=buildQuestionShareText(); if(txt) shareText(txt); }); els.shareActivityBtn.addEventListener('click', function(){ var txt=buildActivityShareText(); if(txt) shareText(txt); }); els.appHelpBtn.addEventListener('click', function(){ showScreen('help'); }); els.helpBackBtn.addEventListener('click', resetHome); els.toggleInfoBtn.addEventListener('click', function(){ els.sectionTag.style.display = els.sectionTag.style.display==='none' ? 'block' : 'none'; });
   els.shareRegistryTopBtn.addEventListener('click', function(){ if(!state.progressSubject){ state.progressSubject=(state.subject && state.subject.short) ? state.subject.short : (getAvailableSubjects()[0] ? getAvailableSubjects()[0].short : 'PIICT'); } showScreen('share'); renderShareScreen(); });
   bindProgressChartChips();
   var _shareBack=document.getElementById('shareBackBtn'); if(_shareBack) _shareBack.addEventListener('click', function(){ renderProgress(); });
@@ -2524,6 +2576,7 @@ function init(){ createAuthUi(); updateAuthUi(); setupFirebase(); applySavedThem
   var _shareNow=document.getElementById('shareMetricsNowBtn'); if(_shareNow) _shareNow.addEventListener('click', function(){ shareText(buildDetailedMetricsText(state.progressSubject, getSelectedShareKeys())); });
   var _dl=document.getElementById('downloadTxtBtn'); if(_dl) _dl.addEventListener('click', function(){ downloadText('registro_'+state.progressSubject+'.txt', buildDetailedMetricsText(state.progressSubject, getSelectedShareKeys())); });
   showScreen('home');
+  updateInstallButtonVisibility();
 }
 
 // ── EXAMEN PERSONALIZADO — config por asignatura (espeja el examen normal) ──

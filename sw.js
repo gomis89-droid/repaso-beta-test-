@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'registro-mobile-tabs-v3';
+const CACHE_VERSION = 'registro-install-v1';
 const CORE_ASSETS = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', event => {
@@ -49,4 +49,4 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// cache bump mobile tabs v4
+// cache bump install v1
