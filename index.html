@@ -2012,60 +2012,98 @@ function renderProgressSparkline(sub){
   var metric=progressChartMetric;
   var hist=(sub&&sub.history)||[];
   el.classList.remove('line-mode');
-  if(metric==='nota'){
-    el.classList.add('line-mode');
-    var scores=[]; for(var i=hist.length-1;i>=0;i--){ var h=hist[i]||{}; if(typeof h.score==='number' && isExamMode(h.mode)) scores.push(h.score); }
-    scores=scores.slice(-15);
-    if(!scores.length){ el.innerHTML='<div class="empty-msg">Sin notas de examen todavía</div>'; return; }
-    var best=Math.max.apply(null, scores);
-    el.innerHTML='<span class="yaxis">10</span><span class="axis-max">mejor '+best.toFixed(1)+'</span><span class="axis-min">0</span>'+buildSparklineSvg(scores, 0, 10);
-  } else if(metric==='acierto'){
-    el.classList.add('line-mode');
-    var pcts=[]; for(var j=hist.length-1;j>=0;j--){ var hh=hist[j]||{}; if(typeof hh.percent==='number') pcts.push(hh.percent); }
-    pcts=pcts.slice(-15);
-    if(!pcts.length){ el.innerHTML='<div class="empty-msg">Sin sesiones registradas</div>'; return; }
-    var bestP=Math.max.apply(null, pcts);
-    el.innerHTML='<span class="yaxis">100%</span><span class="axis-max">mejor '+bestP.toFixed(0)+'%</span><span class="axis-min">0%</span>'+buildSparklineSvg(pcts, 0, 100);
-  } else {
-    /* Sesiones/día — últimos 7 días */
-    var DAY_LETTERS=['D','L','M','X','J','V','S']; /* getDay(): 0=dom ... 6=sab */
-    var DAY_NAMES=['dom','lun','mar','mié','jue','vie','sáb'];
-    var MONTH_ABBR=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    var today=new Date(); today.setHours(12,0,0,0);
-    function localKey(d){ var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+dd; }
-    var days=[]; for(var d=6;d>=0;d--){ var dt=new Date(today); dt.setDate(today.getDate()-d); days.push(dt); }
-    var counts={}; for(var p=0;p<days.length;p++) counts[localKey(days[p])]=0;
-    for(var m2=0;m2<hist.length;m2++){ var e=hist[m2]||{}; var kk=(e.finishedAt||'').slice(0,10); if(kk && counts.hasOwnProperty(kk)) counts[kk]++; }
-    var vals=days.map(function(x){ return counts[localKey(x)]; });
-    var totalSessions=vals.reduce(function(a,b){return a+b;},0);
-    if(!totalSessions){
-      var firstD=days[0], lastD=days[6];
-      var rangeTxt=firstD.getDate()+' – '+lastD.getDate()+' '+MONTH_ABBR[lastD.getMonth()]+' '+lastD.getFullYear();
-      el.innerHTML='<div class="r-bars7"><div class="empty-msg">Sin actividad en los últimos 7 días</div><div class="week-lbl"><b>'+rangeTxt+'</b></div></div>';
-      return;
-    }
-    var mx=Math.max.apply(null, vals)||1;
-    var barsHtml=''; var labelsHtml='';
-    for(var q=0;q<days.length;q++){
-      var day=days[q]; var v=vals[q]; var isToday=(q===days.length-1);
-      var heightPct=(v/mx)*100;
-      var barCls=isToday && v>0 ? 'bar today' : (v===0 ? 'bar zero' : 'bar');
-      var barStyle=v>0 ? ' style="height:'+heightPct.toFixed(1)+'%"' : '';
-      var valStr=v>0 ? String(v) : '&nbsp;';
-      var tipTxt=DAY_NAMES[day.getDay()]+' '+day.getDate()+'/'+(day.getMonth()+1)+' · '+v+' '+(v===1?'sesión':'sesiones');
-      barsHtml+='<div class="col"><span class="val">'+valStr+'</span><div class="'+barCls+'"'+barStyle+'></div><div class="tip">'+(isToday?'<b>'+tipTxt+'</b>':tipTxt)+'</div></div>';
-      var letter=DAY_LETTERS[day.getDay()];
-      labelsHtml+='<span'+(isToday?' class="today"':'')+'>'+letter+'</span>';
-    }
-    var firstDay=days[0], lastDay=days[6];
-    var rangeTxt2;
-    if(firstDay.getMonth()===lastDay.getMonth()){
-      rangeTxt2=firstDay.getDate()+' – '+lastDay.getDate()+' '+MONTH_ABBR[lastDay.getMonth()]+' '+lastDay.getFullYear();
-    } else {
-      rangeTxt2=firstDay.getDate()+' '+MONTH_ABBR[firstDay.getMonth()]+' – '+lastDay.getDate()+' '+MONTH_ABBR[lastDay.getMonth()]+' '+lastDay.getFullYear();
-    }
-    el.innerHTML='<div class="r-bars7"><div class="max-lbl">máx '+mx+'</div><div class="bars">'+barsHtml+'</div><div class="day-labels">'+labelsHtml+'</div><div class="week-lbl"><b>'+rangeTxt2+'</b></div></div>';
+
+  /* Todas las vistas usan ahora la misma estructura semanal por barras */
+  var DAY_LETTERS=['D','L','M','X','J','V','S']; /* getDay(): 0=dom ... 6=sab */
+  var DAY_NAMES=['dom','lun','mar','mié','jue','vie','sáb'];
+  var MONTH_ABBR=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var today=new Date(); today.setHours(12,0,0,0);
+  function localKey(d){ var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+dd; }
+  function weekRangeLabel(firstDay, lastDay){
+    if(firstDay.getMonth()===lastDay.getMonth()) return firstDay.getDate()+' – '+lastDay.getDate()+' '+MONTH_ABBR[lastDay.getMonth()]+' '+lastDay.getFullYear();
+    return firstDay.getDate()+' '+MONTH_ABBR[firstDay.getMonth()]+' – '+lastDay.getDate()+' '+MONTH_ABBR[lastDay.getMonth()]+' '+lastDay.getFullYear();
   }
+  function formatMetricValue(value, metricName, forTip){
+    if(metricName==='nota') return forTip ? value.toFixed(2) : value.toFixed(1);
+    if(metricName==='acierto') return (forTip ? value.toFixed(1) : Math.round(value))+'%';
+    return String(Math.round(value));
+  }
+
+  var days=[]; for(var d=6;d>=0;d--){ var dt=new Date(today); dt.setDate(today.getDate()-d); days.push(dt); }
+  var buckets={};
+  for(var p=0;p<days.length;p++) buckets[localKey(days[p])] = {sum:0,count:0};
+
+  for(var i=0;i<hist.length;i++){
+    var entry=hist[i]||{};
+    var key=(entry.finishedAt||'').slice(0,10);
+    if(!key || !buckets.hasOwnProperty(key)) continue;
+    if(metric==='sesiones'){
+      buckets[key].sum += 1;
+      buckets[key].count += 1;
+    } else if(metric==='nota'){
+      if(typeof entry.score==='number' && isExamMode(entry.mode)){
+        buckets[key].sum += entry.score;
+        buckets[key].count += 1;
+      }
+    } else if(metric==='acierto'){
+      if(typeof entry.percent==='number'){
+        buckets[key].sum += entry.percent;
+        buckets[key].count += 1;
+      }
+    }
+  }
+
+  var vals=[];
+  var activeDays=0;
+  for(var j=0;j<days.length;j++){
+    var bucket=buckets[localKey(days[j])];
+    var value=0;
+    if(bucket && bucket.count){
+      value=(metric==='sesiones') ? bucket.sum : (bucket.sum / bucket.count);
+      activeDays++;
+    }
+    vals.push(value);
+  }
+
+  var firstDay=days[0], lastDay=days[6];
+  var rangeTxt=weekRangeLabel(firstDay, lastDay);
+  if(!activeDays){
+    var emptyMsg='Sin actividad en los últimos 7 días';
+    if(metric==='nota') emptyMsg='Sin notas de examen en los últimos 7 días';
+    else if(metric==='acierto') emptyMsg='Sin sesiones con acierto en los últimos 7 días';
+    el.innerHTML='<div class="r-bars7"><div class="empty-msg">'+emptyMsg+'</div><div class="week-lbl"><b>'+rangeTxt+'</b></div></div>';
+    return;
+  }
+
+  var yMax, maxLbl;
+  if(metric==='nota'){
+    yMax=10;
+    maxLbl='máx 10';
+  } else if(metric==='acierto'){
+    yMax=100;
+    maxLbl='máx 100%';
+  } else {
+    yMax=Math.max.apply(null, vals)||1;
+    maxLbl='máx '+Math.round(yMax);
+  }
+
+  var barsHtml=''; var labelsHtml='';
+  for(var q=0;q<days.length;q++){
+    var day=days[q]; var v=vals[q]; var isToday=(q===days.length-1);
+    var heightPct=(v/(yMax||1))*100;
+    var hasValue=v>0;
+    var barCls=isToday && hasValue ? 'bar today' : (hasValue ? 'bar' : 'bar zero');
+    var barStyle=hasValue ? ' style="height:'+Math.max(heightPct, 3).toFixed(1)+'%"' : '';
+    var valStr=hasValue ? formatMetricValue(v, metric, false) : '&nbsp;';
+    var tipTxt=DAY_NAMES[day.getDay()]+' '+day.getDate()+'/'+(day.getMonth()+1)+' · ';
+    if(metric==='nota') tipTxt+='nota media '+formatMetricValue(v, metric, true);
+    else if(metric==='acierto') tipTxt+='acierto medio '+formatMetricValue(v, metric, true);
+    else tipTxt+=Math.round(v)+' '+(Math.round(v)===1?'sesión':'sesiones');
+    barsHtml+='<div class="col"><span class="val">'+valStr+'</span><div class="'+barCls+'"'+barStyle+'></div><div class="tip">'+(isToday?'<b>'+tipTxt+'</b>':tipTxt)+'</div></div>';
+    labelsHtml+='<span'+(isToday?' class="today"':'')+'>'+DAY_LETTERS[day.getDay()]+'</span>';
+  }
+
+  el.innerHTML='<div class="r-bars7"><div class="max-lbl">'+maxLbl+'</div><div class="bars">'+barsHtml+'</div><div class="day-labels">'+labelsHtml+'</div><div class="week-lbl"><b>'+rangeTxt+'</b></div></div>';
 }
 function renderProgressExamTable(sub, short){
   var body=document.getElementById('progressExamTableBody'); if(!body) return;
