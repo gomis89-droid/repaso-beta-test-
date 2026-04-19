@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'casos-fallados-v4';
+const CACHE_VERSION = 'examen-total-prioridad-v5';
 const CORE_ASSETS = ['./','./index.html','./manifest.json','./icons/icon-32.png','./icons/icon-180.png','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', event => {

@@ -716,6 +716,9 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;letter-spacing:-0.02
 .case-detail-statement{white-space:pre-wrap;line-height:1.7;font-size:14px;color:var(--ink-2);padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--paper-2);margin-bottom:16px}
 .weak-tab-panel{display:none}
 .weak-tab-panel.active{display:block}
+#customCaseSelect{background:var(--paper-2);color:var(--ink);border:1.5px solid var(--line);appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 18px) center,calc(100% - 12px) center;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px !important}
+#customCaseSelect option{background:var(--paper-2);color:var(--ink)}
+#customCaseSelect:focus{border-color:var(--p3);outline:none}
 .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
 .checkbox-card{border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;background:var(--paper-2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;font-size:13.5px;min-height:44px}
 .checkbox-card:hover{border-color:var(--p3);background:color-mix(in oklab,var(--p3) 6%,var(--paper-2));z-index:2}
@@ -1832,7 +1835,56 @@ function startPracticeCase(caseIndex){ var data=currentData(); if(!data || !data
   state.mode='practicas'; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); var qs=c.questions.slice(); state.sessionItems=[]; for(var j=0;j<qs.length;j++) state.sessionItems.push(enrichCaseQuestion(qs[j], c, 'Test de prácticas')); hidePracticePicker(); renderQuestion(); showScreen('quiz');
 }
 
-function makeExamBlock(data, mode){ var bank=getExamBank(data, mode); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isIPE=state.subject && state.subject.short==='IPE II'; var isOptativo=state.subject && state.subject.short==='Optativo'; var isDigital=state.subject && state.subject.short==='Digitalización'; var bankLabel=(mode==='examen1')?'Bloque 1 — Examen 1':(isSost?'Examen':'Bloque 1 — Cuestionario'); if(mode==='examenTotal'){ if(isSost || isDigital){ var total10=10; var totalItems10=[]; var seen10={}; var weakPool10=getWeakQuestionPool(data); var weakQs10=uniqueSample(weakPool10, 6, seen10); var w10; for(w10=0;w10<weakQs10.length;w10++){ var weakItem=cloneData(weakQs10[w10]); weakItem.block='Bloque 1 — Más falladas'; totalItems10.push(weakItem); } var combinedPool=[]; var generalPool=(data.questionBank||[]); var specialPool=(data.exam1QuestionBank||[]); var j; for(j=0;j<generalPool.length;j++){ combinedPool.push(enrichBankQuestion(generalPool[j], 'Bloque 2 — Banco general')); } for(j=0;j<specialPool.length;j++){ combinedPool.push(enrichBankQuestion(specialPool[j], 'Bloque 3 — Banco especial')); } var randomNeed10=Math.max(4, total10-totalItems10.length); var randomQs10=uniqueSample(combinedPool, randomNeed10, seen10); var r10; for(r10=0;r10<randomQs10.length;r10++){ totalItems10.push(cloneData(randomQs10[r10])); } if(totalItems10.length<total10){ var backupPool=[]; for(j=0;j<combinedPool.length;j++){ backupPool.push(cloneData(combinedPool[j])); } var backupQs=uniqueSample(backupPool, total10-totalItems10.length, seen10); for(j=0;j<backupQs.length;j++){ totalItems10.push(cloneData(backupQs[j])); } } return ensureUniqueSessionItems(totalItems10, total10, data, 'Bloque 2 — Banco general'); } var total=((isEnglish||isIPE||isOptativo)?20:30); var weakTarget=total===30?20:10; var totalItems=[]; var weakPool=getWeakQuestionPool(data); var seen={}; var weakQs=uniqueSample(weakPool, weakTarget, seen); for(var w=0;w<weakQs.length;w++){ totalItems.push(cloneData(weakQs[w])); } if(!isIPE && data.practicalCases && data.practicalCases.length){ var totalCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var totalCaseTarget=(isEnglish||isOptativo)?Math.min(6,totalCase.questions.length):6; var totalCaseQs=uniqueSample(totalCase.questions, totalCaseTarget, seen); for(var tc=0;tc<totalCaseQs.length;tc++){ totalItems.push(enrichCaseQuestion(totalCaseQs[tc], totalCase, 'Bloque 2 — Caso práctico')); } } var generalNeed=Math.max(0,total-totalItems.length); var generalQs=uniqueSample(data.questionBank||[], generalNeed, seen); for(var g=0;g<generalQs.length;g++){ totalItems.push(enrichBankQuestion(generalQs[g], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(totalItems, total, data, 'Bloque 3 — Banco general'); } if(mode==='examen1' && isSost){ var sostSpecialBank=(data.exam1QuestionBank||[]); var sostSeen={}; var sostItems=[]; var sostSpecialQs=uniqueSample(sostSpecialBank, 5, sostSeen); var sostGeneralQs=uniqueSample(data.questionBank||[], 5, sostSeen); var s; for(s=0;s<sostSpecialQs.length;s++){ sostItems.push(enrichBankQuestion(sostSpecialQs[s], 'Bloque 1 — Banco especial')); } for(s=0;s<sostGeneralQs.length;s++){ sostItems.push(enrichBankQuestion(sostGeneralQs[s], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(sostItems, 10, data, 'Bloque 2 — Banco general'); } if(mode==='examen1' && isDigital){ var digitalSpecialBank=(data.exam1QuestionBank||[]); var digitalSeen={}; var digitalItems=[]; var digitalSpecialQs=uniqueSample(digitalSpecialBank, 5, digitalSeen); var digitalGeneralQs=uniqueSample(data.questionBank||[], 5, digitalSeen); var d; for(d=0;d<digitalSpecialQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalSpecialQs[d], 'Bloque 1 — Banco especial')); } for(d=0;d<digitalGeneralQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalGeneralQs[d], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(digitalItems, 10, data, 'Bloque 2 — Banco general'); } if(!data.practicalCases || !data.practicalCases.length || isSost || isIPE){ var fallbackCount=isSost ? 10 : (isEnglish ? ENGLISH_EXAM_COUNT : (isIPE ? 20 : (isOptativo ? 20 : 30))); var fallback=uniqueSample(bank,fallbackCount,{}); var onlyBank=[]; for(var x=0;x<fallback.length;x++) onlyBank.push(enrichBankQuestion(fallback[x], MODES[mode].title)); return ensureUniqueSessionItems(onlyBank, fallbackCount, data, MODES[mode].title); } if(mode==='examen1' && isOptativo){ var optSpecialBank=(data.exam1QuestionBank||[]); var optSeen={}; var optItems=[]; var optSpecialQs=uniqueSample(optSpecialBank, 5, optSeen); var optCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var optCaseQs=uniqueSample(optCase.questions, optCase.questions.length, optSeen); var optGeneralCount=Math.max(0, 20-optSpecialQs.length-optCaseQs.length); var optGeneralQs=uniqueSample(data.questionBank||[], optGeneralCount, optSeen); var o; for(o=0;o<optSpecialQs.length;o++){ optItems.push(enrichBankQuestion(optSpecialQs[o], 'Bloque 1 — Banco especial')); } for(o=0;o<optCaseQs.length;o++){ optItems.push(enrichCaseQuestion(optCaseQs[o], optCase, 'Bloque 2 — Caso práctico')); } for(o=0;o<optGeneralQs.length;o++){ optItems.push(enrichBankQuestion(optGeneralQs[o], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(optItems, 20, data, 'Bloque 3 — Banco general'); } if(isEnglish || isOptativo){ var mixedTotal=isEnglish ? ENGLISH_EXAM_COUNT : 20; var mixedSeen={}; var mixedCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var mixedCaseQs=uniqueSample(mixedCase.questions, Math.min(6,mixedCase.questions.length), mixedSeen); var mixedBankCount=mixedTotal-mixedCaseQs.length; var mixedBlock1=uniqueSample(bank, mixedBankCount, mixedSeen); var mixedItems=[]; var e; for(e=0;e<mixedBlock1.length;e++){ mixedItems.push(enrichBankQuestion(mixedBlock1[e], 'Bloque 1 — Banco general')); } for(e=0;e<mixedCaseQs.length;e++){ mixedItems.push(enrichCaseQuestion(mixedCaseQs[e], mixedCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(mixedItems, mixedTotal, data, 'Bloque 1 — Banco general'); } if(mode==='examen1' && isPIICT){ var specialBank=(data.exam1QuestionBank||[]); var piictSeen={}; var specialQs=uniqueSample(specialBank, 10, piictSeen); var generalQs=uniqueSample(data.questionBank||[], 14, piictSeen); var piictCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var piictCaseQs=uniqueSample(piictCase.questions, Math.min(6,piictCase.questions.length), piictSeen); var piictItems=[]; var p; for(p=0;p<specialQs.length;p++){ piictItems.push(enrichBankQuestion(specialQs[p], 'Bloque 1 — Clase importante')); } for(p=0;p<generalQs.length;p++){ piictItems.push(enrichBankQuestion(generalQs[p], 'Bloque 1 — Banco general')); } for(p=0;p<piictCaseQs.length;p++){ piictItems.push(enrichCaseQuestion(piictCaseQs[p], piictCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(piictItems, 30, data, 'Bloque 1 — Banco general'); } var stdSeen={}; var block1=uniqueSample(bank,24,stdSeen); var examCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var caseQs=uniqueSample(examCase.questions, Math.min(6,examCase.questions.length), stdSeen); var items=[]; var i; for(i=0;i<block1.length;i++){ items.push(enrichBankQuestion(block1[i], bankLabel)); } for(i=0;i<caseQs.length;i++){ items.push(enrichCaseQuestion(caseQs[i], examCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(items, 30, data, bankLabel); }
+function makeExamBlock(data, mode){ var bank=getExamBank(data, mode); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isIPE=state.subject && state.subject.short==='IPE II'; var isOptativo=state.subject && state.subject.short==='Optativo'; var isDigital=state.subject && state.subject.short==='Digitalización'; var bankLabel=(mode==='examen1')?'Bloque 1 — Examen 1':(isSost?'Examen':'Bloque 1 — Cuestionario'); if(mode==='examenTotal'){
+  /* NUEVA LÓGICA: Priorizar falladas (con algo de azar) + caso práctico más fallado (al azar entre los fallados) */
+  var etTotal, etWeakTarget, etCaseTarget;
+  if(isSost || isDigital){ etTotal=10; etWeakTarget=10; etCaseTarget=0; }
+  else if(isIPE){ etTotal=20; etWeakTarget=20; etCaseTarget=0; }
+  else if(isEnglish || isOptativo){ etTotal=20; etWeakTarget=14; etCaseTarget=6; }
+  else { etTotal=30; etWeakTarget=24; etCaseTarget=6; }
+  var etSeen={}, etItems=[];
+  /* 1) Falladas: coger top 1.25× del objetivo y barajar → azar dentro del ranking */
+  var etWeakPool=getWeakQuestionPool(data);
+  var etBufferSize=Math.min(etWeakPool.length, Math.max(etWeakTarget, Math.ceil(etWeakTarget*1.25)));
+  var etWeakBuffer=etWeakPool.slice(0, etBufferSize);
+  var etShuffledWeak=shuffle(etWeakBuffer);
+  var etCollectedWeak=0;
+  for(var etW=0; etW<etShuffledWeak.length && etCollectedWeak<etWeakTarget; etW++){
+    var etSigW=questionSignature(etShuffledWeak[etW]);
+    if(etSeen[etSigW]) continue;
+    etSeen[etSigW]=1;
+    var etWItem=cloneData(etShuffledWeak[etW]);
+    etWItem.block='Bloque 1 — Más falladas';
+    etItems.push(etWItem);
+    etCollectedWeak++;
+  }
+  /* 2) Caso práctico (solo si toca): al azar entre los casos con fallos; si ninguno, caso al azar normal */
+  if(etCaseTarget>0 && data.practicalCases && data.practicalCases.length){
+    var etSub = state.subject ? (progressStore[state.subject.short] || emptySubject()) : emptySubject();
+    var etWeakCases = (typeof buildWeakCaseStats==='function') ? buildWeakCaseStats(etSub, data) : [];
+    var etChosenCase=null;
+    if(etWeakCases.length>0){
+      var etPicked=etWeakCases[Math.floor(Math.random()*etWeakCases.length)];
+      for(var etPi=0; etPi<data.practicalCases.length; etPi++){
+        if(data.practicalCases[etPi].title===etPicked.title){ etChosenCase=data.practicalCases[etPi]; break; }
+      }
+    }
+    if(!etChosenCase) etChosenCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)];
+    var etCaseLabel=(etWeakCases.length>0)?'Bloque 2 — Caso práctico más fallado':'Bloque 2 — Caso práctico';
+    var etCaseQs=uniqueSample(etChosenCase.questions||[], Math.min(etCaseTarget, (etChosenCase.questions||[]).length), etSeen);
+    for(var etCq=0; etCq<etCaseQs.length; etCq++){ etItems.push(enrichCaseQuestion(etCaseQs[etCq], etChosenCase, etCaseLabel)); }
+  }
+  /* 3) Rellenar con banco (general + especial si existe) */
+  var etNeedFill=Math.max(0, etTotal-etItems.length);
+  if(etNeedFill>0){
+    var etFillPool=[]; var etGBank=(data.questionBank||[]); var etSBank=(data.exam1QuestionBank||[]); var etJ;
+    for(etJ=0; etJ<etGBank.length; etJ++){ etFillPool.push(enrichBankQuestion(etGBank[etJ], 'Bloque 3 — Banco general')); }
+    if(isSost || isDigital){ for(etJ=0; etJ<etSBank.length; etJ++){ etFillPool.push(enrichBankQuestion(etSBank[etJ], 'Bloque 3 — Banco especial')); } }
+    var etFillQs=uniqueSample(etFillPool, etNeedFill, etSeen);
+    for(var etFi=0; etFi<etFillQs.length; etFi++){ etItems.push(cloneData(etFillQs[etFi])); }
+  }
+  return ensureUniqueSessionItems(etItems, etTotal, data, 'Bloque 3 — Banco general');
+} if(mode==='examen1' && isSost){ var sostSpecialBank=(data.exam1QuestionBank||[]); var sostSeen={}; var sostItems=[]; var sostSpecialQs=uniqueSample(sostSpecialBank, 5, sostSeen); var sostGeneralQs=uniqueSample(data.questionBank||[], 5, sostSeen); var s; for(s=0;s<sostSpecialQs.length;s++){ sostItems.push(enrichBankQuestion(sostSpecialQs[s], 'Bloque 1 — Banco especial')); } for(s=0;s<sostGeneralQs.length;s++){ sostItems.push(enrichBankQuestion(sostGeneralQs[s], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(sostItems, 10, data, 'Bloque 2 — Banco general'); } if(mode==='examen1' && isDigital){ var digitalSpecialBank=(data.exam1QuestionBank||[]); var digitalSeen={}; var digitalItems=[]; var digitalSpecialQs=uniqueSample(digitalSpecialBank, 5, digitalSeen); var digitalGeneralQs=uniqueSample(data.questionBank||[], 5, digitalSeen); var d; for(d=0;d<digitalSpecialQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalSpecialQs[d], 'Bloque 1 — Banco especial')); } for(d=0;d<digitalGeneralQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalGeneralQs[d], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(digitalItems, 10, data, 'Bloque 2 — Banco general'); } if(!data.practicalCases || !data.practicalCases.length || isSost || isIPE){ var fallbackCount=isSost ? 10 : (isEnglish ? ENGLISH_EXAM_COUNT : (isIPE ? 20 : (isOptativo ? 20 : 30))); var fallback=uniqueSample(bank,fallbackCount,{}); var onlyBank=[]; for(var x=0;x<fallback.length;x++) onlyBank.push(enrichBankQuestion(fallback[x], MODES[mode].title)); return ensureUniqueSessionItems(onlyBank, fallbackCount, data, MODES[mode].title); } if(mode==='examen1' && isOptativo){ var optSpecialBank=(data.exam1QuestionBank||[]); var optSeen={}; var optItems=[]; var optSpecialQs=uniqueSample(optSpecialBank, 5, optSeen); var optCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var optCaseQs=uniqueSample(optCase.questions, optCase.questions.length, optSeen); var optGeneralCount=Math.max(0, 20-optSpecialQs.length-optCaseQs.length); var optGeneralQs=uniqueSample(data.questionBank||[], optGeneralCount, optSeen); var o; for(o=0;o<optSpecialQs.length;o++){ optItems.push(enrichBankQuestion(optSpecialQs[o], 'Bloque 1 — Banco especial')); } for(o=0;o<optCaseQs.length;o++){ optItems.push(enrichCaseQuestion(optCaseQs[o], optCase, 'Bloque 2 — Caso práctico')); } for(o=0;o<optGeneralQs.length;o++){ optItems.push(enrichBankQuestion(optGeneralQs[o], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(optItems, 20, data, 'Bloque 3 — Banco general'); } if(isEnglish || isOptativo){ var mixedTotal=isEnglish ? ENGLISH_EXAM_COUNT : 20; var mixedSeen={}; var mixedCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var mixedCaseQs=uniqueSample(mixedCase.questions, Math.min(6,mixedCase.questions.length), mixedSeen); var mixedBankCount=mixedTotal-mixedCaseQs.length; var mixedBlock1=uniqueSample(bank, mixedBankCount, mixedSeen); var mixedItems=[]; var e; for(e=0;e<mixedBlock1.length;e++){ mixedItems.push(enrichBankQuestion(mixedBlock1[e], 'Bloque 1 — Banco general')); } for(e=0;e<mixedCaseQs.length;e++){ mixedItems.push(enrichCaseQuestion(mixedCaseQs[e], mixedCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(mixedItems, mixedTotal, data, 'Bloque 1 — Banco general'); } if(mode==='examen1' && isPIICT){ var specialBank=(data.exam1QuestionBank||[]); var piictSeen={}; var specialQs=uniqueSample(specialBank, 10, piictSeen); var generalQs=uniqueSample(data.questionBank||[], 14, piictSeen); var piictCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var piictCaseQs=uniqueSample(piictCase.questions, Math.min(6,piictCase.questions.length), piictSeen); var piictItems=[]; var p; for(p=0;p<specialQs.length;p++){ piictItems.push(enrichBankQuestion(specialQs[p], 'Bloque 1 — Clase importante')); } for(p=0;p<generalQs.length;p++){ piictItems.push(enrichBankQuestion(generalQs[p], 'Bloque 1 — Banco general')); } for(p=0;p<piictCaseQs.length;p++){ piictItems.push(enrichCaseQuestion(piictCaseQs[p], piictCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(piictItems, 30, data, 'Bloque 1 — Banco general'); } var stdSeen={}; var block1=uniqueSample(bank,24,stdSeen); var examCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var caseQs=uniqueSample(examCase.questions, Math.min(6,examCase.questions.length), stdSeen); var items=[]; var i; for(i=0;i<block1.length;i++){ items.push(enrichBankQuestion(block1[i], bankLabel)); } for(i=0;i<caseQs.length;i++){ items.push(enrichCaseQuestion(caseQs[i], examCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(items, 30, data, bankLabel); }
 function enrichBankQuestion(q, block){ return { type:'bank', block:block, section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||'' }; }
 function enrichCaseQuestion(q, c, block){ return { type:'case', block:block, caseTitle:c.title, caseStatement:c.statement, section:c.title||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:c.block||'' }; }
 function startMode(mode){ var data=currentData(); if(!data) return; state.selectedPracticeCaseIndex=null; if(mode==='examenPersonalizado'){ renderCustomPicker(); return; } if(mode==='practicas'){ renderPracticePicker(); return; } hidePracticePicker(); state.mode=mode; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); if(mode==='cuestionario'){ var questionCount=10; var bank=uniqueSample(data.questionBank,questionCount,{}); state.sessionItems=[]; for(var i=0;i<bank.length;i++) state.sessionItems.push(enrichBankQuestion(bank[i], 'Cuestionario rápido')); state.sessionItems=ensureUniqueSessionItems(state.sessionItems, questionCount, data, 'Cuestionario rápido'); } else { state.sessionItems=makeExamBlock(data, mode); } renderQuestion(); showScreen('quiz'); }
@@ -2747,6 +2799,18 @@ function renderCustomPicker(){
     for(var k=0;k<secs.length;k++){
       html+='<label class="checkbox-card" title="'+escapeHtml(secs[k])+'"><input type="checkbox" data-sec="'+escapeHtml(secs[k])+'" checked> <span class="cb-label">'+escapeHtml(secs[k])+'</span> <span class="small cb-count">('+secsMap[secs[k]]+')</span></label>';
     }
+    /* Cuadradito "Más falladas" — cuenta las preguntas del banco con fallos */
+    var subWeak=progressStore[s.short] || emptySubject();
+    var weakMapCustom=buildWeakQuestionMap(subWeak);
+    var weakCountCustom=0;
+    for(var wcb=0; wcb<bank.length; wcb++){
+      var wbq=bank[wcb];
+      var wkey=(wbq.section||'')+'||'+(wbq.q||'');
+      if(weakMapCustom[wkey] && (weakMapCustom[wkey].wrong||0)>0) weakCountCustom++;
+    }
+    var weakDisabled=(weakCountCustom===0)?' disabled':'';
+    var weakTitle=(weakCountCustom===0)?'No tienes preguntas falladas aún':'Añade tus preguntas falladas al banco para este examen';
+    html+='<label class="checkbox-card" title="'+weakTitle+'" style="border-color:color-mix(in oklab,var(--p1) 40%,var(--line));background:color-mix(in oklab,var(--p1) 6%,var(--paper-2));"><input type="checkbox" data-weak="1"'+weakDisabled+'> <span class="cb-label">🔥 Más falladas</span> <span class="small cb-count">('+weakCountCustom+')</span></label>';
     html+='</div>';
   }
   if(hasCase){
@@ -2774,17 +2838,18 @@ function renderCustomPicker(){
   document.getElementById('customStartBtn').addEventListener('click', function(){
     var selected=[], ns=panel.querySelectorAll('input[data-sec]:checked');
     for(var i=0;i<ns.length;i++) selected.push(ns[i].getAttribute('data-sec'));
-    if(!selected.length && secs.length){ alert('Selecciona al menos una sección del banco.'); return; }
+    var weakChecked=!!panel.querySelector('input[data-weak]:checked');
+    if(!selected.length && !weakChecked && secs.length){ alert('Selecciona al menos una sección del banco o marca "Más falladas".'); return; }
     var caseIdx=-1, cs=document.getElementById('customCaseSelect');
     if(cs) caseIdx=parseInt(cs.value,10);
-    startCustomExam(selected, caseIdx, cfg);
+    startCustomExam(selected, caseIdx, cfg, weakChecked);
   });
 }
 function hideCustomPicker(){
   var panel=document.getElementById('customPickerPanel');
   if(panel){ panel.style.display='none'; panel.innerHTML=''; }
 }
-function startCustomExam(selectedSections, caseIdx, cfg){
+function startCustomExam(selectedSections, caseIdx, cfg, includeWeak){
   var data=currentData(); if(!data) return;
   state.mode='examenPersonalizado';
   state.currentIndex=0; state.answers=[]; state.currentAnswered=false;
@@ -2793,6 +2858,21 @@ function startCustomExam(selectedSections, caseIdx, cfg){
   var bank=data.questionBank||[];
   var secSet={}; for(var i=0;i<selectedSections.length;i++) secSet[selectedSections[i]]=1;
   var filtered=bank.filter(function(q){ return secSet[(q&&q.section)||'']; });
+  /* Si marcó "Más falladas", añadir al pool las preguntas del banco que ha fallado (sin duplicar) */
+  if(includeWeak && state.subject){
+    var subCW=progressStore[state.subject.short] || emptySubject();
+    var weakMapCW=buildWeakQuestionMap(subCW);
+    var inFilteredCW={};
+    for(var fi=0;fi<filtered.length;fi++) inFilteredCW[questionSignature(filtered[fi])]=1;
+    for(var bi=0;bi<bank.length;bi++){
+      var bq=bank[bi];
+      var wkey=(bq.section||'')+'||'+(bq.q||'');
+      if(weakMapCW[wkey] && (weakMapCW[wkey].wrong||0)>0){
+        var sig=questionSignature(bq);
+        if(!inFilteredCW[sig]){ filtered.push(bq); inFilteredCW[sig]=1; }
+      }
+    }
+  }
   if(!filtered.length) filtered=bank.slice();
   var seen={}, items=[];
   if(cfg.caseCount>0 && data.practicalCases && data.practicalCases.length){
