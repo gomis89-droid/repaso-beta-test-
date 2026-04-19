@@ -763,28 +763,29 @@ textarea.share-preview:focus{outline:none;border-color:var(--p3)}
 .stat-card:hover{border-color:var(--p3);transform:translateY(-1px)}
 .stat-card .n{font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--p3);margin-top:4px}
 .stat-card>div:first-child{font-size:12px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
-.mode-card{position:relative;text-align:left;padding:18px 18px 16px;border-radius:22px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;gap:12px;min-height:170px;transition:transform .25s cubic-bezier(.2,.9,.3,1);background:var(--card);border:1px solid var(--line);box-shadow:0 4px 20px rgba(0,0,0,.04)}
+.mode-card{position:relative;text-align:left;padding:20px;border-radius:22px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;gap:10px;min-height:170px;transition:transform .25s cubic-bezier(.2,.9,.3,1);background:var(--card);border:1px solid var(--line);box-shadow:0 4px 20px rgba(0,0,0,.04)}
 .mode-card:hover{transform:translateY(-4px) rotate(.3deg);box-shadow:0 12px 32px rgba(0,0,0,.1)}
-.mode-card h3{font-family:var(--font-display);font-size:23px;font-weight:800;margin:0;color:var(--ink);line-height:1.05;letter-spacing:-.02em}
-.mode-card p.small{display:none}
+.mode-card h3{font-family:var(--font-display);font-size:16px;font-weight:700;margin:0;color:var(--ink)}
+.mode-card p.small{color:var(--ink-2);font-size:13px;line-height:1.45;flex:1}
 .mode-card.purple{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border-color:transparent;box-shadow:0 4px 18px rgba(124,58,237,.3)}
 .mode-card.purple h3{color:#fff}
 .mode-card.purple:hover{box-shadow:0 8px 28px rgba(124,58,237,.45)}
-.mode-card.purple .badge.mode{color:rgba(255,255,255,.75);background:rgba(255,255,255,.14)}
-.mode-card-icon{width:72px;height:72px;display:flex;align-items:center;justify-content:center;font-size:48px;line-height:1;border-radius:22px;background:color-mix(in oklab,var(--mode-color,var(--p3)) 18%,var(--card));border:1px solid color-mix(in oklab,var(--mode-color,var(--p3)) 28%,transparent);margin-bottom:2px;flex-shrink:0}
+.mode-card.purple .small,.mode-card.purple .badge.mode{color:rgba(255,255,255,.75);background:rgba(255,255,255,.14)}
+.mode-card-icon{width:100%;height:44px;display:flex;align-items:center;justify-content:flex-start;font-size:32px;line-height:1;margin-bottom:4px}
 .mode-card-wrap{display:grid;gap:6px}
-.mode-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.mode-card-main{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
-.mode-card .badge.mode{align-self:flex-start;font-size:11px;padding:4px 10px}
-.mode-card-help{display:none;padding:12px 14px;border-radius:14px;border:1px solid color-mix(in oklab,var(--mode-color,var(--p3)) 22%,transparent);background:color-mix(in oklab,var(--mode-color,var(--p3)) 10%,var(--paper-2));color:var(--ink-2);font-size:13px;line-height:1.45}
-.mode-card.open .mode-card-help{display:block}
-.mode-card-footer{display:flex;justify-content:flex-end;margin-top:auto}
-.mode-info-btn{width:32px;height:32px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.14)}
-.mode-info-btn:hover{transform:translateY(-1px)}
-.mode-card.purple .mode-card-help{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.18);color:#fff}
-.mode-card.purple .mode-card-icon{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.18)}
-.mode-card.purple .mode-info-btn{background:rgba(255,255,255,.18);color:#fff}
-.mode-card.purple .mode-info-btn:hover{background:rgba(255,255,255,.24)}
+.mode-info-row{display:flex;justify-content:flex-end;margin-bottom:4px}
+.mode-info-btn{width:26px;height:26px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mode-card-enhanced{min-height:0;padding:18px 18px 16px;gap:10px;justify-content:flex-start}
+.mode-card-enhanced:hover{transform:translateY(-3px) rotate(.15deg)}
+.mode-card-enhanced .mode-card-icon{height:auto;margin-bottom:0;font-size:58px;line-height:1;justify-content:flex-start}
+.mode-card-enhanced h3{font-size:24px;line-height:1.05;margin:0}
+.mode-card-enhanced .mode-card-mini{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.35;min-height:34px}
+.mode-card-enhanced .mode-help-toggle{position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.18);z-index:2}
+.mode-card-enhanced .mode-help-panel{display:none;margin-top:2px;padding:11px 12px;border-radius:12px;background:color-mix(in oklab,var(--p3) 10%,var(--paper-2));border:1px solid color-mix(in oklab,var(--p3) 22%,transparent);color:var(--ink-2);font-size:12.5px;line-height:1.5}
+.mode-card-enhanced.open .mode-help-panel{display:block}
+.mode-card-enhanced.purple .mode-card-mini{color:rgba(255,255,255,.78)}
+.mode-card-enhanced.purple .mode-help-panel{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.18);color:#fff}
+@media(max-width:700px){.mode-card-enhanced .mode-card-icon{font-size:50px}.mode-card-enhanced h3{font-size:21px}.mode-card-enhanced .mode-card-mini{min-height:0}}
 .menu{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:16px}
 .gif-legend{display:grid;gap:10px;margin-top:14px}
 .gif-legend-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--paper-2)}
@@ -1662,65 +1663,70 @@ function renderSubjects(){
 
 function getModeTitleHtml(modeKey, title){ if(modeKey==='examen' || modeKey==='examen1' || modeKey==='examenTotal'){ var meta=getExamModeMeta(modeKey); return '<span class="mode-title-with-icon"><span class="mode-icon">'+meta.icon+'</span><span>'+escapeHtml(title)+'</span></span>'; } return escapeHtml(title); }
 function getModeCardIconHtml(modeKey){ var isExam=(modeKey==='examen'||modeKey==='examen1'||modeKey==='examenTotal'); var icon=(MODES[modeKey]&&MODES[modeKey].icon)||'📋'; return '<span class="mode-card-icon'+(isExam?' exam-icon':'')+'">'+icon+'</span>'; }
-function buildModeCard(opts){
-  var btn=document.createElement('button');
-  btn.className='mode-card'+(opts.purple?' purple':'');
-  if(opts.modeColor) btn.style.setProperty('--mode-color', opts.modeColor);
-  btn.type='button';
-  btn.innerHTML=
-    '<div class="mode-card-head">'
-      + (opts.iconHtml||'')
-      + '<div class="mode-card-main">'
-        + '<div class="badge mode">'+escapeHtml(opts.badge||'Modo')+'</div>'
-        + '<h3>'+escapeHtml(opts.title||'')+'</h3>'
-      + '</div>'
-      + '<span class="mode-info-btn" role="button" tabindex="0" aria-label="Más información sobre '+escapeHtml(opts.title||'este modo')+'">?</span>'
-    + '</div>'
-    + '<div class="mode-card-help">'+escapeHtml(opts.help||'')+'</div>';
-  btn.addEventListener('click', function(){ if(typeof opts.onSelect==='function') opts.onSelect(); });
-  var infoBtn=btn.querySelector('.mode-info-btn');
-  if(infoBtn){
-    var toggleHelp=function(ev){ ev.preventDefault(); ev.stopPropagation(); btn.classList.toggle('open'); };
-    infoBtn.addEventListener('click', toggleHelp);
-    infoBtn.addEventListener('keydown', function(ev){ if(ev.key==='Enter' || ev.key===' '){ toggleHelp(ev); } });
-  }
-  return btn;
+function getModeShortDescription(modeKey){
+  if(modeKey==='cuestionario') return '10 preguntas rápidas para repasar.';
+  if(modeKey==='practicas') return 'Un caso práctico por intento.';
+  if(modeKey==='examen') return 'Simulación tipo examen.';
+  if(modeKey==='examenTotal') return 'Repaso global de las más falladas.';
+  if(modeKey==='examen1') return 'Bloque especial preparado en clase.';
+  if(modeKey==='examenPersonalizado') return 'Elige qué entra en tu examen.';
+  if(modeKey==='consulta') return 'Ver todo el banco disponible.';
+  if(modeKey==='seguimiento') return 'Consulta tus fallos más repetidos.';
+  return 'Más información en la ayuda.';
+}
+function buildModeCard(config){
+  var card=document.createElement('div');
+  card.className='mode-card mode-card-enhanced'+(config.purple?' purple':'');
+  card.setAttribute('role','button');
+  card.tabIndex=0;
+  card.innerHTML=''
+    +'<button type="button" class="mode-help-toggle" aria-label="Más información sobre '+escapeHtml(config.title)+'">?</button>'
+    +(config.iconHtml||'')
+    +'<h3>'+escapeHtml(config.title)+'</h3>'
+    +'<p class="mode-card-mini">'+escapeHtml(config.shortDesc||'')+'</p>'
+    +'<div class="mode-help-panel">'+escapeHtml(config.helpText||'')+'</div>';
+  var helpBtn=card.querySelector('.mode-help-toggle');
+  helpBtn.addEventListener('click', function(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
+    card.classList.toggle('open');
+  });
+  card.addEventListener('click', function(ev){
+    if(ev.target && ev.target.closest('.mode-help-toggle')) return;
+    if(typeof config.onSelect==='function') config.onSelect();
+  });
+  card.addEventListener('keydown', function(ev){
+    if(ev.key==='Enter' || ev.key===' '){
+      ev.preventDefault();
+      if(typeof config.onSelect==='function') config.onSelect();
+    }
+  });
+  return card;
 }
 function renderModeMenu(){ hidePracticePicker(); (function(){
   var s2=state.subject; if(!s2||!els.menuSubjectTitle) return;
   var subP=(progressStore&&progressStore[s2.short])||emptySubject();
-  var exModes=getModeKeysForSubject(s2.short).filter(function(m){return typeof isExamModeForGif==='function'?isExamModeForGif(m):isExamMode(m);});
-  var bests=[];
-  for(var xi=0;xi<exModes.length;xi++){
-    var st=getModeScoreStats(subP, exModes[xi]);
-    if(st && typeof st.bestScore==='number' && !isNaN(st.bestScore)) bests.push(st.bestScore);
-  }
-  var gifHtml='';
-  if(bests.length){
-    var avg=bests.reduce(function(a,b){return a+b;},0)/bests.length;
-    var rx=(typeof getScoreReaction==='function')?getScoreReaction(avg):null;
-    if(rx && rx.src){
-      gifHtml='<img src="'+rx.src+'" alt="'+escapeHtml(rx.alt||'')+'" style="width:96px;height:96px;object-fit:cover;border-radius:18px;flex-shrink:0;box-shadow:0 4px 18px rgba(0,0,0,.18);" />';
-    }
-  }
+  var topGif='';
+  try{ var avg=getSubjectAverageBestExamScore(s2.short); var reaction=getSubjectReaction(avg); if(reaction) topGif='<img src="'+reaction+'" alt="Reacción de estudio" style="width:92px;height:92px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:var(--paper-2);">'; }catch(e){}
+  var gifHtml=topGif||('<div style="width:92px;height:92px;border-radius:18px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;background:var(--paper-2);font-size:34px;">'+escapeHtml(s2.icon||'📘')+'</div>');
   els.menuSubjectTitle.style.textTransform='none';
   els.menuSubjectTitle.style.letterSpacing='normal';
   els.menuSubjectTitle.style.fontSize='';
   els.menuSubjectTitle.style.fontWeight='';
   els.menuSubjectTitle.innerHTML='<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'+gifHtml+'<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;"><span style="font-family:var(--font-display,inherit);font-size:28px;font-weight:800;letter-spacing:-.01em;line-height:1.1;color:'+(s2.color||'var(--p1)')+';">'+escapeHtml(s2.short)+'</span><span style="font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.3;">'+escapeHtml(subjectDisplayName(s2))+'</span></div></div>';
-})(); 
-  els.modeMenu.innerHTML=''; 
-  var modeKeys=getAvailableModeKeys(); 
-  var isSost=state.subject && state.subject.short==='Sostenibilidad'; 
-  var isEnglish=state.subject && state.subject.short==='Inglés'; 
-  var isPIICT=state.subject && state.subject.short==='PIICT'; 
-  var isOptativo=state.subject && state.subject.short==='Optativo'; 
-  var isDigital=state.subject && state.subject.short==='Digitalización'; 
-  for(var i=0;i<modeKeys.length;i++){ 
-    var key=modeKeys[i], mode=MODES[key], desc=mode.description; 
+})();
+  els.modeMenu.innerHTML='';
+  var modeKeys=getAvailableModeKeys();
+  var isSost=state.subject && state.subject.short==='Sostenibilidad';
+  var isEnglish=state.subject && state.subject.short==='Inglés';
+  var isPIICT=state.subject && state.subject.short==='PIICT';
+  var isOptativo=state.subject && state.subject.short==='Optativo';
+  var isDigital=state.subject && state.subject.short==='Digitalización';
+  for(var i=0;i<modeKeys.length;i++){
+    var key=modeKeys[i], mode=MODES[key], desc=mode.description;
     if(isSost && key==='cuestionario') desc='10 preguntas aleatorias del banco general de Sostenibilidad.';
     if(isSost && key==='practicas') desc='Casos prácticos de Sostenibilidad. Puedes elegir un caso concreto o dejar que salga uno aleatorio.';
-    if(isSost && key==='examen') desc='Examen de 10 preguntas del banco general con corrección por fórmula. Los errores restan 1/6.';
+    if(isSost && key==='examen') desc='Examen de 10 preguntas del banco general con corrección por fórmula (los errores restan 1/6).';
     if(isSost && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.';
     if(isEnglish && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y hasta 6 de un único caso práctico. Si el caso tiene menos preguntas, se completa con banco general. Las incorrectas restan 1/4.';
     if(isEnglish && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas, la parte del caso práctico igual que en el examen normal y el resto del banco general. Las incorrectas restan 1/4.';
@@ -1734,38 +1740,26 @@ function renderModeMenu(){ hidePracticePicker(); (function(){
     if(isDigital && key==='examen') desc='Examen de 30 preguntas: 24 del banco general y 6 de un caso práctico. Las incorrectas restan 1/3.';
     if(isDigital && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.';
     if(isDigital && key==='examenTotal') desc='Examen Total de 30 preguntas: prioriza las más falladas, mantiene la parte del caso práctico y completa con banco general. Las incorrectas restan 1/3.';
-    if(isPIICT && key==='examen1') desc='Incluye un bloque especial con preguntas de la clase clave del 08/04/2026.';
+    if(isPIICT && key==='examen1') desc='Examen 1 de PIICT: incluye preguntas preparadas en la clase clave del 08/04/2026 y se completa con banco general y caso práctico.';
     if((state.subject && !isSost && !isEnglish && !isOptativo && state.subject.short!=='IPE II') && key==='examenTotal') desc='Examen Total: se priorizan las preguntas más falladas, se mantiene la parte de caso práctico del examen normal y se completa con banco general sin repetir preguntas. Las incorrectas restan según el número total de preguntas.';
-    var btn=buildModeCard({
+    var card=buildModeCard({
       title: mode.title,
-      badge: mode.title,
       iconHtml: getModeCardIconHtml(key),
-      help: desc,
-      modeColor: state.subject && state.subject.color ? state.subject.color : 'var(--p3)',
+      shortDesc: getModeShortDescription(key),
+      helpText: desc,
       onSelect: (function(modeKey){ return function(){ startMode(modeKey); }; })(key)
     });
-    els.modeMenu.appendChild(btn); 
-  } 
-  var listDesc=(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del banco general y de los casos prácticos de Sostenibilidad.':(isOptativo?'Ver todas las preguntas del banco general y de los casos prácticos de Eficacia energética.':'Ver todas las preguntas del cuestionario o del test de prácticas.')));
-  var listBtn=buildModeCard({
-    title:'Consulta',
-    badge:'Consulta',
-    iconHtml:'<span class="mode-card-icon">📚</span>',
-    help:listDesc,
-    purple:true,
-    onSelect:function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); }
-  });
+    els.modeMenu.appendChild(card);
+  }
+  var listHelp=(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del banco general y de los casos prácticos de Sostenibilidad.':(isOptativo?'Ver todas las preguntas del banco general y de los casos prácticos de Eficacia energética.':'Ver todas las preguntas del cuestionario o del test de prácticas.')));
+  var listBtn=buildModeCard({ title:'Consulta', iconHtml:'<span class="mode-card-icon">📚</span>', shortDesc:getModeShortDescription('consulta'), helpText:listHelp, purple:true, onSelect:function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); } });
   els.modeMenu.appendChild(listBtn);
-  var weakBtn=buildModeCard({
-    title:'Seguimiento',
-    badge:'Seguimiento',
-    iconHtml:'<span class="mode-card-icon">🔥</span>',
-    help:'Ver las preguntas en las que más fallas dentro de esta asignatura. La lista se actualiza automáticamente con cada intento.',
-    purple:true,
-    onSelect:function(){ renderWeakScreen(); }
-  });
+  var weakBtn=buildModeCard({ title:'Seguimiento', iconHtml:'<span class="mode-card-icon">🔥</span>', shortDesc:getModeShortDescription('seguimiento'), helpText:'Ver las preguntas en las que más fallas dentro de esta asignatura. La lista se actualiza automáticamente con cada intento.', purple:true, onSelect:function(){ renderWeakScreen(); } });
   els.modeMenu.appendChild(weakBtn);
 }
+function hidePracticePicker(){ els.practicePickerPanel.style.display='none'; els.practiceCaseList.innerHTML=''; }
+function getPracticeCardTitle(c, index){ var raw=(c && c.title ? String(c.title) : ('Caso práctico '+(index+1))); raw=raw.replace(/\s+/g,' ').trim(); if(raw.length>58) raw=raw.slice(0,55).trim()+'…'; return raw; }
+
 function renderPracticePicker(){ var data=currentData(); if(!data || !data.practicalCases || !data.practicalCases.length){ var pendingMsg='Esta asignatura todavía no tiene casos prácticos cargados.'; alert(pendingMsg); return; } els.practiceCaseList.innerHTML=''; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i], btn=document.createElement('button'); btn.className='mode-card'; btn.type='button'; var cardTitle=getPracticeCardTitle(c, i); btn.innerHTML='<div class="badge mode">'+escapeHtml(c.block||('Caso '+(i+1)))+'</div><h3>'+escapeHtml(cardTitle)+'</h3><p class="small">'+c.questions.length+' preguntas de práctica disponibles.</p>'; (function(index){ btn.addEventListener('click', function(){ startPracticeCase(index); }); })(i); els.practiceCaseList.appendChild(btn); }
   els.practicePickerPanel.style.display='block';
   setTimeout(function(){ try{ els.practicePickerPanel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ els.practicePickerPanel.scrollIntoView(); } }, 50);

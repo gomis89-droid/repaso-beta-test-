@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'registro-mobile-tabs-v3-modeclean1';
+const CACHE_VERSION = 'mode-clean-v2';
 const CORE_ASSETS = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', event => {
