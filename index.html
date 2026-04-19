@@ -9,8 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TSEI">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <title>Repaso TSEI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -997,6 +998,7 @@ body.quiz-active{}
   <div class="tb-actions toolbar">
     <button class="btn ghost small" id="homeTopBtn" style="display:none;">&#x2190; Inicio</button>
     <button class="btn ghost small" id="progressBtn">&#x1F4CA; Registro</button>
+    <button class="btn ghost small" id="syncTopBtn" title="Sincronizar progreso con la nube" aria-label="Sincronizar progreso">&#x21BB; Sincronizar</button>
     <button class="btn ghost small" id="shareRegistryTopBtn" style="display:none;">&#x2197; Compartir</button>
     <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar tema" title="Cambiar tema">&#x1F319;</button>
     <!-- authControls injected here by JS -->
@@ -1049,6 +1051,11 @@ body.quiz-active{}
         <button class="btn primary" id="helpBackBtn">&#x2190; Volver al inicio</button>
       </div>
       <div class="help-stack">
+        <div class="help-card" style="background:linear-gradient(135deg,color-mix(in oklab,var(--p1) 14%,var(--card)),color-mix(in oklab,var(--p3) 14%,var(--card)));border:1px solid color-mix(in oklab,var(--p3) 35%,transparent);">
+          <div class="badge mode" style="background:color-mix(in oklab,var(--p1) 22%,transparent);color:var(--p1);">👋 Un mensaje</div>
+          <h3>Hola, gracias por pasarte</h3>
+          <div class="small">Esta es una app que he hecho para estudiar mi FP. La uso yo a diario, así que está pensada desde dentro, con los modos y el registro que a mí me van bien.<br><br>Si te sirve para estudiar lo tuyo, adelante, es toda tuya. Si ves algún fallo, algo raro o se te ocurre alguna mejora, me encantaría que me lo dijeras para arreglarlo.<br><br>Gracias por usarla 💜</div>
+        </div>
         <div class="help-card">
           <div class="badge mode">Visión general</div>
           <h3>Qué puedes hacer en la app</h3>
@@ -1483,7 +1490,7 @@ var screens = {
   home: document.getElementById('screen-home'), help: document.getElementById('screen-help'), menu: document.getElementById('screen-menu'), quiz: document.getElementById('screen-quiz'), results: document.getElementById('screen-results'), list: document.getElementById('screen-list'), weak: document.getElementById('screen-weak'), progress: document.getElementById('screen-progress'), share: document.getElementById('screen-share')
 };
 var els = {
-  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
+  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), syncTopBtn: document.getElementById('syncTopBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
 };
 var progressStore = loadProgress();
 var METRIC_DEFS = [
@@ -1556,7 +1563,8 @@ function buildWeakQuestionMap(sub){
   }
   return out;
 }
-function getWeakQuestionPool(data){ if(!state.subject) return []; var sub=progressStore[state.subject.short] || emptySubject(); var map=buildWeakQuestionMap(sub); var refs=[]; for(var k in map){ if(map[k] && (map[k].wrong||0)>0) refs.push(map[k]); } refs.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); var lookup=buildQuestionLookups(data), out=[], seen={}; for(var i=0;i<refs.length;i++){ var ref=refs[i]||{}; var exactKey=(ref.section||'')+'||'+(ref.q||''); var full=lookup.byExact[exactKey] || lookup.byQ[ref.q||'']; if(!full) continue; var cloned=cloneData(full); cloned.block='Bloque 1 — Más falladas'; var sig=questionSignature(cloned); if(seen[sig]) continue; seen[sig]=1; out.push(cloned); } return out; }
+function getWeakQuestionPool(data){ if(!state.subject) return []; var sub=progressStore[state.subject.short] || emptySubject(); var map=buildWeakQuestionMap(sub); var refs=[]; for(var k in map){ if(map[k] && (map[k].wrong||0)>0) refs.push(map[k]); } refs.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); var lookup=buildQuestionLookups(data), out=[], seen={}; for(var i=0;i<refs.length;i++){ var ref=refs[i]||{}; var exactKey=(ref.section||'')+'||'+(ref.q||''); var full=lookup.byExact[exactKey] || lookup.byQ[ref.q||'']; if(!full) continue; if(full.type==='case') continue; /* sueltas de casos NO entran aquí; se agrupan en getWeakCasesRanking */ var cloned=cloneData(full); cloned.block='Bloque 1 — Más falladas'; var sig=questionSignature(cloned); if(seen[sig]) continue; seen[sig]=1; out.push(cloned); } return out; }
+function getWeakCasesRanking(data){ if(!state.subject || !data || !Array.isArray(data.practicalCases) || !data.practicalCases.length) return []; var sub=progressStore[state.subject.short] || emptySubject(); var map=buildWeakQuestionMap(sub); var scored=[]; for(var ci=0;ci<data.practicalCases.length;ci++){ var c=data.practicalCases[ci]; if(!c || !Array.isArray(c.questions)) continue; var wrongs=0, seenCount=0; var failedQs={}; for(var qi=0;qi<c.questions.length;qi++){ var q=c.questions[qi]; var entry=map[(c.title||'')+'||'+(q.q||'')]; if(!entry){ for(var mk in map){ if(map[mk] && map[mk].q===q.q){ entry=map[mk]; break; } } } if(entry){ wrongs += (entry.wrong||0); seenCount += (entry.seen||0); if((entry.wrong||0)>0) failedQs[q.q]=entry.wrong||0; } } if(wrongs>0) scored.push({caseIndex:ci, caseRef:c, wrongs:wrongs, seen:seenCount, failedQs:failedQs}); } scored.sort(function(a,b){ if(b.wrongs!==a.wrongs) return b.wrongs-a.wrongs; return b.seen-a.seen; }); return scored; }
 function buildReviewOptionsHtml(item, selectedIndex, showSelectedWrong){ var html=''; if(!item || !item.options || !item.options.length) return html; for(var k=0;k<item.options.length;k++){ var cls='review-option'; var suffix=''; if(k===item.correct){ cls+=' correct'; suffix=' <strong>✓ Correcta</strong>'; } if(showSelectedWrong && typeof selectedIndex==='number' && selectedIndex===k && k!==item.correct){ cls+=' wrong'; suffix=' <strong>✗ Tu respuesta</strong>'; } html+='<div class="'+cls+'">'+escapeHtml(item.options[k])+suffix+'</div>'; } return html; }
 function showScreen(name){ for(var k in screens){ if(screens[k]) screens[k].className='screen'; } if(screens[name]) screens[name].className='screen active'; var isHome=name==='home'; els.homeTopBtn.style.display=isHome?'none':'inline-flex'; els.progressBtn.style.display=(name==='progress')?'none':'inline-flex'; els.shareRegistryTopBtn.style.display='none'; if(els.themeBtn) els.themeBtn.style.display=isHome?'inline-flex':'none'; if(els.authControls) els.authControls.style.display=isHome?'inline-flex':'none'; if(document.body){ document.body.classList.toggle('quiz-active',name==='quiz'); } }
 function getModeScoreStats(sub, mode){
@@ -1797,7 +1805,7 @@ function startPracticeCase(caseIndex){ var data=currentData(); if(!data || !data
   state.mode='practicas'; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); var qs=c.questions.slice(); state.sessionItems=[]; for(var j=0;j<qs.length;j++) state.sessionItems.push(enrichCaseQuestion(qs[j], c, 'Test de prácticas')); hidePracticePicker(); renderQuestion(); showScreen('quiz');
 }
 
-function makeExamBlock(data, mode){ var bank=getExamBank(data, mode); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isIPE=state.subject && state.subject.short==='IPE II'; var isOptativo=state.subject && state.subject.short==='Optativo'; var isDigital=state.subject && state.subject.short==='Digitalización'; var bankLabel=(mode==='examen1')?'Bloque 1 — Examen 1':(isSost?'Examen':'Bloque 1 — Cuestionario'); if(mode==='examenTotal'){ if(isSost || isDigital){ var total10=10; var totalItems10=[]; var seen10={}; var weakPool10=getWeakQuestionPool(data); var weakQs10=uniqueSample(weakPool10, 6, seen10); var w10; for(w10=0;w10<weakQs10.length;w10++){ var weakItem=cloneData(weakQs10[w10]); weakItem.block='Bloque 1 — Más falladas'; totalItems10.push(weakItem); } var combinedPool=[]; var generalPool=(data.questionBank||[]); var specialPool=(data.exam1QuestionBank||[]); var j; for(j=0;j<generalPool.length;j++){ combinedPool.push(enrichBankQuestion(generalPool[j], 'Bloque 2 — Banco general')); } for(j=0;j<specialPool.length;j++){ combinedPool.push(enrichBankQuestion(specialPool[j], 'Bloque 3 — Banco especial')); } var randomNeed10=Math.max(4, total10-totalItems10.length); var randomQs10=uniqueSample(combinedPool, randomNeed10, seen10); var r10; for(r10=0;r10<randomQs10.length;r10++){ totalItems10.push(cloneData(randomQs10[r10])); } if(totalItems10.length<total10){ var backupPool=[]; for(j=0;j<combinedPool.length;j++){ backupPool.push(cloneData(combinedPool[j])); } var backupQs=uniqueSample(backupPool, total10-totalItems10.length, seen10); for(j=0;j<backupQs.length;j++){ totalItems10.push(cloneData(backupQs[j])); } } return ensureUniqueSessionItems(totalItems10, total10, data, 'Bloque 2 — Banco general'); } var total=((isEnglish||isIPE||isOptativo)?20:30); var weakTarget=total===30?20:10; var totalItems=[]; var weakPool=getWeakQuestionPool(data); var seen={}; var weakQs=uniqueSample(weakPool, weakTarget, seen); for(var w=0;w<weakQs.length;w++){ totalItems.push(cloneData(weakQs[w])); } if(!isIPE && data.practicalCases && data.practicalCases.length){ var totalCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var totalCaseTarget=(isEnglish||isOptativo)?Math.min(6,totalCase.questions.length):6; var totalCaseQs=uniqueSample(totalCase.questions, totalCaseTarget, seen); for(var tc=0;tc<totalCaseQs.length;tc++){ totalItems.push(enrichCaseQuestion(totalCaseQs[tc], totalCase, 'Bloque 2 — Caso práctico')); } } var generalNeed=Math.max(0,total-totalItems.length); var generalQs=uniqueSample(data.questionBank||[], generalNeed, seen); for(var g=0;g<generalQs.length;g++){ totalItems.push(enrichBankQuestion(generalQs[g], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(totalItems, total, data, 'Bloque 3 — Banco general'); } if(mode==='examen1' && isSost){ var sostSpecialBank=(data.exam1QuestionBank||[]); var sostSeen={}; var sostItems=[]; var sostSpecialQs=uniqueSample(sostSpecialBank, 5, sostSeen); var sostGeneralQs=uniqueSample(data.questionBank||[], 5, sostSeen); var s; for(s=0;s<sostSpecialQs.length;s++){ sostItems.push(enrichBankQuestion(sostSpecialQs[s], 'Bloque 1 — Banco especial')); } for(s=0;s<sostGeneralQs.length;s++){ sostItems.push(enrichBankQuestion(sostGeneralQs[s], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(sostItems, 10, data, 'Bloque 2 — Banco general'); } if(mode==='examen1' && isDigital){ var digitalSpecialBank=(data.exam1QuestionBank||[]); var digitalSeen={}; var digitalItems=[]; var digitalSpecialQs=uniqueSample(digitalSpecialBank, 5, digitalSeen); var digitalGeneralQs=uniqueSample(data.questionBank||[], 5, digitalSeen); var d; for(d=0;d<digitalSpecialQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalSpecialQs[d], 'Bloque 1 — Banco especial')); } for(d=0;d<digitalGeneralQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalGeneralQs[d], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(digitalItems, 10, data, 'Bloque 2 — Banco general'); } if(!data.practicalCases || !data.practicalCases.length || isSost || isIPE){ var fallbackCount=isSost ? 10 : (isEnglish ? ENGLISH_EXAM_COUNT : (isIPE ? 20 : (isOptativo ? 20 : 30))); var fallback=uniqueSample(bank,fallbackCount,{}); var onlyBank=[]; for(var x=0;x<fallback.length;x++) onlyBank.push(enrichBankQuestion(fallback[x], MODES[mode].title)); return ensureUniqueSessionItems(onlyBank, fallbackCount, data, MODES[mode].title); } if(mode==='examen1' && isOptativo){ var optSpecialBank=(data.exam1QuestionBank||[]); var optSeen={}; var optItems=[]; var optSpecialQs=uniqueSample(optSpecialBank, 5, optSeen); var optCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var optCaseQs=uniqueSample(optCase.questions, optCase.questions.length, optSeen); var optGeneralCount=Math.max(0, 20-optSpecialQs.length-optCaseQs.length); var optGeneralQs=uniqueSample(data.questionBank||[], optGeneralCount, optSeen); var o; for(o=0;o<optSpecialQs.length;o++){ optItems.push(enrichBankQuestion(optSpecialQs[o], 'Bloque 1 — Banco especial')); } for(o=0;o<optCaseQs.length;o++){ optItems.push(enrichCaseQuestion(optCaseQs[o], optCase, 'Bloque 2 — Caso práctico')); } for(o=0;o<optGeneralQs.length;o++){ optItems.push(enrichBankQuestion(optGeneralQs[o], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(optItems, 20, data, 'Bloque 3 — Banco general'); } if(isEnglish || isOptativo){ var mixedTotal=isEnglish ? ENGLISH_EXAM_COUNT : 20; var mixedSeen={}; var mixedCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var mixedCaseQs=uniqueSample(mixedCase.questions, Math.min(6,mixedCase.questions.length), mixedSeen); var mixedBankCount=mixedTotal-mixedCaseQs.length; var mixedBlock1=uniqueSample(bank, mixedBankCount, mixedSeen); var mixedItems=[]; var e; for(e=0;e<mixedBlock1.length;e++){ mixedItems.push(enrichBankQuestion(mixedBlock1[e], 'Bloque 1 — Banco general')); } for(e=0;e<mixedCaseQs.length;e++){ mixedItems.push(enrichCaseQuestion(mixedCaseQs[e], mixedCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(mixedItems, mixedTotal, data, 'Bloque 1 — Banco general'); } if(mode==='examen1' && isPIICT){ var specialBank=(data.exam1QuestionBank||[]); var piictSeen={}; var specialQs=uniqueSample(specialBank, 10, piictSeen); var generalQs=uniqueSample(data.questionBank||[], 14, piictSeen); var piictCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var piictCaseQs=uniqueSample(piictCase.questions, Math.min(6,piictCase.questions.length), piictSeen); var piictItems=[]; var p; for(p=0;p<specialQs.length;p++){ piictItems.push(enrichBankQuestion(specialQs[p], 'Bloque 1 — Clase importante')); } for(p=0;p<generalQs.length;p++){ piictItems.push(enrichBankQuestion(generalQs[p], 'Bloque 1 — Banco general')); } for(p=0;p<piictCaseQs.length;p++){ piictItems.push(enrichCaseQuestion(piictCaseQs[p], piictCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(piictItems, 30, data, 'Bloque 1 — Banco general'); } var stdSeen={}; var block1=uniqueSample(bank,24,stdSeen); var examCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var caseQs=uniqueSample(examCase.questions, Math.min(6,examCase.questions.length), stdSeen); var items=[]; var i; for(i=0;i<block1.length;i++){ items.push(enrichBankQuestion(block1[i], bankLabel)); } for(i=0;i<caseQs.length;i++){ items.push(enrichCaseQuestion(caseQs[i], examCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(items, 30, data, bankLabel); }
+function makeExamBlock(data, mode){ var bank=getExamBank(data, mode); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isIPE=state.subject && state.subject.short==='IPE II'; var isOptativo=state.subject && state.subject.short==='Optativo'; var isDigital=state.subject && state.subject.short==='Digitalización'; var bankLabel=(mode==='examen1')?'Bloque 1 — Examen 1':(isSost?'Examen':'Bloque 1 — Cuestionario'); if(mode==='examenTotal'){ if(isSost || isDigital){ var total10=10; var totalItems10=[]; var seen10={}; var weakPool10=getWeakQuestionPool(data); var weakQs10=uniqueSample(weakPool10, 6, seen10); var w10; for(w10=0;w10<weakQs10.length;w10++){ var weakItem=cloneData(weakQs10[w10]); weakItem.block='Bloque 1 — Más falladas'; totalItems10.push(weakItem); } var combinedPool=[]; var generalPool=(data.questionBank||[]); var specialPool=(data.exam1QuestionBank||[]); var j; for(j=0;j<generalPool.length;j++){ combinedPool.push(enrichBankQuestion(generalPool[j], 'Bloque 2 — Banco general')); } for(j=0;j<specialPool.length;j++){ combinedPool.push(enrichBankQuestion(specialPool[j], 'Bloque 3 — Banco especial')); } var randomNeed10=Math.max(4, total10-totalItems10.length); var randomQs10=uniqueSample(combinedPool, randomNeed10, seen10); var r10; for(r10=0;r10<randomQs10.length;r10++){ totalItems10.push(cloneData(randomQs10[r10])); } if(totalItems10.length<total10){ var backupPool=[]; for(j=0;j<combinedPool.length;j++){ backupPool.push(cloneData(combinedPool[j])); } var backupQs=uniqueSample(backupPool, total10-totalItems10.length, seen10); for(j=0;j<backupQs.length;j++){ totalItems10.push(cloneData(backupQs[j])); } } return ensureUniqueSessionItems(totalItems10, total10, data, 'Bloque 2 — Banco general'); } var total=((isEnglish||isIPE||isOptativo)?20:30); var weakTarget=total===30?20:10; var totalItems=[]; var weakPool=getWeakQuestionPool(data); var seen={}; var weakQs=uniqueSample(weakPool, weakTarget, seen); for(var w=0;w<weakQs.length;w++){ totalItems.push(cloneData(weakQs[w])); } if(!isIPE && data.practicalCases && data.practicalCases.length){ var weakCasesRanking=getWeakCasesRanking(data); var totalCase, caseBlockLabel; if(weakCasesRanking.length>0){ totalCase=weakCasesRanking[0].caseRef; caseBlockLabel='Bloque 2 — Caso práctico más fallado'; } else { totalCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; caseBlockLabel='Bloque 2 — Caso práctico'; } var totalCaseTarget=Math.min(6,totalCase.questions.length); var caseFailedMap=(weakCasesRanking.length>0 && weakCasesRanking[0].failedQs) ? weakCasesRanking[0].failedQs : {}; var orderedCaseQs=totalCase.questions.slice().sort(function(a,b){ return (caseFailedMap[b.q]||0)-(caseFailedMap[a.q]||0); }); var totalCaseQs=[]; for(var oq=0; oq<orderedCaseQs.length && totalCaseQs.length<totalCaseTarget; oq++){ var _sigCq=questionSignature(orderedCaseQs[oq]); if(seen[_sigCq]) continue; seen[_sigCq]=1; totalCaseQs.push(orderedCaseQs[oq]); } for(var tc=0;tc<totalCaseQs.length;tc++){ totalItems.push(enrichCaseQuestion(totalCaseQs[tc], totalCase, caseBlockLabel)); } } var generalNeed=Math.max(0,total-totalItems.length); var generalQs=uniqueSample(data.questionBank||[], generalNeed, seen); for(var g=0;g<generalQs.length;g++){ totalItems.push(enrichBankQuestion(generalQs[g], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(totalItems, total, data, 'Bloque 3 — Banco general'); } if(mode==='examen1' && isSost){ var sostSpecialBank=(data.exam1QuestionBank||[]); var sostSeen={}; var sostItems=[]; var sostSpecialQs=uniqueSample(sostSpecialBank, 5, sostSeen); var sostGeneralQs=uniqueSample(data.questionBank||[], 5, sostSeen); var s; for(s=0;s<sostSpecialQs.length;s++){ sostItems.push(enrichBankQuestion(sostSpecialQs[s], 'Bloque 1 — Banco especial')); } for(s=0;s<sostGeneralQs.length;s++){ sostItems.push(enrichBankQuestion(sostGeneralQs[s], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(sostItems, 10, data, 'Bloque 2 — Banco general'); } if(mode==='examen1' && isDigital){ var digitalSpecialBank=(data.exam1QuestionBank||[]); var digitalSeen={}; var digitalItems=[]; var digitalSpecialQs=uniqueSample(digitalSpecialBank, 5, digitalSeen); var digitalGeneralQs=uniqueSample(data.questionBank||[], 5, digitalSeen); var d; for(d=0;d<digitalSpecialQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalSpecialQs[d], 'Bloque 1 — Banco especial')); } for(d=0;d<digitalGeneralQs.length;d++){ digitalItems.push(enrichBankQuestion(digitalGeneralQs[d], 'Bloque 2 — Banco general')); } return ensureUniqueSessionItems(digitalItems, 10, data, 'Bloque 2 — Banco general'); } if(!data.practicalCases || !data.practicalCases.length || isSost || isIPE){ var fallbackCount=isSost ? 10 : (isEnglish ? ENGLISH_EXAM_COUNT : (isIPE ? 20 : (isOptativo ? 20 : 30))); var fallback=uniqueSample(bank,fallbackCount,{}); var onlyBank=[]; for(var x=0;x<fallback.length;x++) onlyBank.push(enrichBankQuestion(fallback[x], MODES[mode].title)); return ensureUniqueSessionItems(onlyBank, fallbackCount, data, MODES[mode].title); } if(mode==='examen1' && isOptativo){ var optSpecialBank=(data.exam1QuestionBank||[]); var optSeen={}; var optItems=[]; var optSpecialQs=uniqueSample(optSpecialBank, 5, optSeen); var optCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var optCaseQs=uniqueSample(optCase.questions, optCase.questions.length, optSeen); var optGeneralCount=Math.max(0, 20-optSpecialQs.length-optCaseQs.length); var optGeneralQs=uniqueSample(data.questionBank||[], optGeneralCount, optSeen); var o; for(o=0;o<optSpecialQs.length;o++){ optItems.push(enrichBankQuestion(optSpecialQs[o], 'Bloque 1 — Banco especial')); } for(o=0;o<optCaseQs.length;o++){ optItems.push(enrichCaseQuestion(optCaseQs[o], optCase, 'Bloque 2 — Caso práctico')); } for(o=0;o<optGeneralQs.length;o++){ optItems.push(enrichBankQuestion(optGeneralQs[o], 'Bloque 3 — Banco general')); } return ensureUniqueSessionItems(optItems, 20, data, 'Bloque 3 — Banco general'); } if(isEnglish || isOptativo){ var mixedTotal=isEnglish ? ENGLISH_EXAM_COUNT : 20; var mixedSeen={}; var mixedCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var mixedCaseQs=uniqueSample(mixedCase.questions, Math.min(6,mixedCase.questions.length), mixedSeen); var mixedBankCount=mixedTotal-mixedCaseQs.length; var mixedBlock1=uniqueSample(bank, mixedBankCount, mixedSeen); var mixedItems=[]; var e; for(e=0;e<mixedBlock1.length;e++){ mixedItems.push(enrichBankQuestion(mixedBlock1[e], 'Bloque 1 — Banco general')); } for(e=0;e<mixedCaseQs.length;e++){ mixedItems.push(enrichCaseQuestion(mixedCaseQs[e], mixedCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(mixedItems, mixedTotal, data, 'Bloque 1 — Banco general'); } if(mode==='examen1' && isPIICT){ var specialBank=(data.exam1QuestionBank||[]); var piictSeen={}; var specialQs=uniqueSample(specialBank, 10, piictSeen); var generalQs=uniqueSample(data.questionBank||[], 14, piictSeen); var piictCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var piictCaseQs=uniqueSample(piictCase.questions, Math.min(6,piictCase.questions.length), piictSeen); var piictItems=[]; var p; for(p=0;p<specialQs.length;p++){ piictItems.push(enrichBankQuestion(specialQs[p], 'Bloque 1 — Clase importante')); } for(p=0;p<generalQs.length;p++){ piictItems.push(enrichBankQuestion(generalQs[p], 'Bloque 1 — Banco general')); } for(p=0;p<piictCaseQs.length;p++){ piictItems.push(enrichCaseQuestion(piictCaseQs[p], piictCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(piictItems, 30, data, 'Bloque 1 — Banco general'); } var stdSeen={}; var block1=uniqueSample(bank,24,stdSeen); var examCase=data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; var caseQs=uniqueSample(examCase.questions, Math.min(6,examCase.questions.length), stdSeen); var items=[]; var i; for(i=0;i<block1.length;i++){ items.push(enrichBankQuestion(block1[i], bankLabel)); } for(i=0;i<caseQs.length;i++){ items.push(enrichCaseQuestion(caseQs[i], examCase, 'Bloque 2 — Caso práctico')); } return ensureUniqueSessionItems(items, 30, data, bankLabel); }
 function enrichBankQuestion(q, block){ return { type:'bank', block:block, section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||'' }; }
 function enrichCaseQuestion(q, c, block){ return { type:'case', block:block, caseTitle:c.title, caseStatement:c.statement, section:c.title||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:c.block||'' }; }
 function startMode(mode){ var data=currentData(); if(!data) return; state.selectedPracticeCaseIndex=null; if(mode==='examenPersonalizado'){ renderCustomPicker(); return; } if(mode==='practicas'){ renderPracticePicker(); return; } hidePracticePicker(); state.mode=mode; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); if(mode==='cuestionario'){ var questionCount=10; var bank=uniqueSample(data.questionBank,questionCount,{}); state.sessionItems=[]; for(var i=0;i<bank.length;i++) state.sessionItems.push(enrichBankQuestion(bank[i], 'Cuestionario rápido')); state.sessionItems=ensureUniqueSessionItems(state.sessionItems, questionCount, data, 'Cuestionario rápido'); } else { state.sessionItems=makeExamBlock(data, mode); } renderQuestion(); showScreen('quiz'); }
@@ -2363,8 +2371,8 @@ function bindProgressChartChips(){
   var wrap=document.getElementById('progressChartChips'); if(!wrap || wrap.__bound) return; wrap.__bound=1;
   wrap.addEventListener('click', function(ev){ var b=ev.target.closest('.r-chip'); if(!b) return; var m=b.getAttribute('data-metric'); if(!m) return; progressChartMetric=m; var chips=wrap.querySelectorAll('.r-chip'); for(var i=0;i<chips.length;i++) chips[i].classList.toggle('active', chips[i]===b); var short=state.progressSubject; if(short && progressStore[short]) renderProgressSparkline(progressStore[short]); });
 }
-function renderWeak(sub){ els.weakQuestionsList.innerHTML=''; var map=buildWeakQuestionMap(sub||emptySubject()); var arr=[]; for(var k in map){ if(map[k] && (map[k].wrong||0)>0) arr.push(map[k]); } arr.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); if(!arr.length){ els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas.</div>'; return 0; } var data=currentData()||{}; var lookup=buildQuestionLookups(data); for(var i=0;i<Math.min(10,arr.length);i++){ var it=arr[i], row=document.createElement('div'); row.className='weak-item'; var exactKey=(it.section||'')+'||'+(it.q||''); var full=lookup.byExact[exactKey] || lookup.byQ[it.q||''] || it; var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>'; html+=buildReviewOptionsHtml(full, null, false); row.innerHTML=html; els.weakQuestionsList.appendChild(row); } return arr.length; }
-function renderWeakScreen(){ if(!state.subject) return; var short=state.subject.short; var sub=progressStore[short] || emptySubject(); progressStore[short]=sub; els.weakSubjectTitle.textContent=subjectDisplayName(state.subject); var totalWeak=renderWeak(sub); els.weakCountInfo.textContent=totalWeak ? ('Mostrando '+Math.min(10,totalWeak)+' preguntas con más fallos.') : 'Aún no hay preguntas falladas registradas en esta asignatura.'; showScreen('weak'); }
+function renderWeak(sub){ els.weakQuestionsList.innerHTML=''; var map=buildWeakQuestionMap(sub||emptySubject()); var data=currentData()||{}; var lookup=buildQuestionLookups(data); var arr=[]; for(var k in map){ if(!map[k] || (map[k].wrong||0)<=0) continue; var exactKey=(map[k].section||'')+'||'+(map[k].q||''); var full=lookup.byExact[exactKey] || lookup.byQ[map[k].q||'']; if(full && full.type==='case') continue; /* casos se agrupan en la sección de casos */ arr.push(map[k]); } arr.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); var weakCases=getWeakCasesRanking(data); if(!arr.length && !weakCases.length){ els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas.</div>'; return {questions:0, cases:0}; } if(arr.length){ var h1=document.createElement('div'); h1.className='weak-section-title'; h1.innerHTML='<h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:var(--ink);">Preguntas más falladas</h3>'; els.weakQuestionsList.appendChild(h1); for(var i=0;i<Math.min(10,arr.length);i++){ var it=arr[i], row=document.createElement('div'); row.className='weak-item'; var exactKey2=(it.section||'')+'||'+(it.q||''); var full2=lookup.byExact[exactKey2] || lookup.byQ[it.q||''] || it; var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>'; html+=buildReviewOptionsHtml(full2, null, false); row.innerHTML=html; els.weakQuestionsList.appendChild(row); } } if(weakCases.length){ var h2=document.createElement('div'); h2.className='weak-section-title'; h2.style.marginTop='22px'; h2.innerHTML='<h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:var(--ink);">Casos prácticos más fallados</h3>'; els.weakQuestionsList.appendChild(h2); for(var j=0;j<Math.min(5,weakCases.length);j++){ var wc=weakCases[j]; var c=wc.caseRef; var qCount=(c.questions||[]).length; var failedCount=Object.keys(wc.failedQs||{}).length; var crow=document.createElement('div'); crow.className='weak-item'; var stmt=c.statement?String(c.statement):''; var stmtShort=stmt.length>180?(stmt.substring(0,180)+'…'):stmt; crow.innerHTML='<strong>'+escapeHtml(c.title||'Caso práctico')+'</strong>'+'<div class="small" style="margin-top:6px;">'+wc.wrongs+' fallos totales · '+failedCount+' de '+qCount+' preguntas falladas</div>'+(stmt?'<div class="small" style="margin-top:8px;opacity:.7;">'+escapeHtml(stmtShort)+'</div>':''); els.weakQuestionsList.appendChild(crow); } } return {questions:arr.length, cases:weakCases.length}; }
+function renderWeakScreen(){ if(!state.subject) return; var short=state.subject.short; var sub=progressStore[short] || emptySubject(); progressStore[short]=sub; els.weakSubjectTitle.textContent=subjectDisplayName(state.subject); var result=renderWeak(sub); var parts=[]; if(result.questions>0) parts.push(Math.min(10,result.questions)+' pregunta'+(result.questions===1?'':'s')); if(result.cases>0) parts.push(Math.min(5,result.cases)+' caso'+(result.cases===1?'':'s')+' práctico'+(result.cases===1?'':'s')); els.weakCountInfo.textContent=parts.length ? ('Mostrando '+parts.join(' · ')+' con más fallos.') : 'Aún no hay preguntas falladas registradas en esta asignatura.'; showScreen('weak'); }
 function renderProgressSwitch(){ /* legacy no-op (new UI uses renderProgressSubjectList) */ }
 function getAvailableSubjects(){ var out=[]; for(var i=0;i<SUBJECTS.length;i++){ if(SUBJECTS[i].available) out.push(SUBJECTS[i]); } return out; }
 function renderMetricShareUI(){ /* legacy no-op */ }
@@ -2608,6 +2616,51 @@ function initExamCountdown(){
 function init(){ createAuthUi(); updateAuthUi(); setupFirebase(); applySavedTheme(); renderSubjects(); initExamCountdown();
   var brandHome=document.getElementById('brandHome'); if(brandHome){ brandHome.addEventListener('click', function(){ resetHome(); }); }
   els.progressBtn.addEventListener('click', function(){ if(state.subject && state.subject.short){ state.progressSubject=state.subject.short; } else if(!state.progressSubject){ state.progressSubject=(getAvailableSubjects()[0] ? getAvailableSubjects()[0].short : 'PIICT'); } renderProgress(); });
+
+  /* ── SINCRONIZACIÓN MANUAL + AUTO ── */
+  var syncBtnOriginalHtml='';
+  async function doManualSync(){
+    if(!els.syncTopBtn) return;
+    if(syncBtnOriginalHtml==='') syncBtnOriginalHtml=els.syncTopBtn.innerHTML;
+    if(!authReady || !auth || !db){
+      els.syncTopBtn.innerHTML='&#x26A0; Firebase no listo';
+      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2200);
+      return;
+    }
+    if(!auth.currentUser){
+      els.syncTopBtn.innerHTML='&#x26A0; Inicia sesión con Google';
+      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2600);
+      return;
+    }
+    els.syncTopBtn.disabled=true;
+    els.syncTopBtn.innerHTML='&#x21BB; Sincronizando...';
+    try{
+      await saveProgressToCloud(true);
+      await applyCloudProgress(auth.currentUser);
+      els.syncTopBtn.innerHTML='&#x2705; Sincronizado';
+    }catch(e){
+      console.error('Sync manual falló:',e);
+      els.syncTopBtn.innerHTML='&#x274C; Error';
+    }finally{
+      setTimeout(function(){ els.syncTopBtn.disabled=false; els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },1800);
+    }
+  }
+  if(els.syncTopBtn) els.syncTopBtn.addEventListener('click', doManualSync);
+
+  /* Auto-sync al ocultar pestaña / cerrar app (rescata los últimos 700ms del debounce) */
+  function flushSyncIfPossible(){
+    try{
+      if(typeof saveLocalProgress==='function') saveLocalProgress();
+      if(authReady && auth && auth.currentUser && db){
+        saveProgressToCloud(true);
+      }
+    }catch(e){}
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='hidden') flushSyncIfPossible();
+  });
+  window.addEventListener('pagehide', flushSyncIfPossible);
+  window.addEventListener('beforeunload', flushSyncIfPossible);
   if(els.authActionBtn) els.authActionBtn.addEventListener('click', function(){ if(state.authUser) signOutGoogle(); else signInWithGoogle(); });
   els.listQuizBtn.addEventListener('click', function(){ renderQuestionListScreen('cuestionario'); }); els.listPracticeBtn.addEventListener('click', function(){ renderQuestionListScreen('practicas'); }); if(els.listExam1Btn){ els.listExam1Btn.addEventListener('click', function(){ renderQuestionListScreen('examen1'); }); } els.listBackBtn.addEventListener('click', backSubject); els.listHomeBtn.addEventListener('click', resetHome); if(els.weakBackBtn) els.weakBackBtn.addEventListener('click', backSubject); if(els.weakHomeBtn) els.weakHomeBtn.addEventListener('click', resetHome);
   els.practiceRandomBtn.addEventListener('click', function(){ startPracticeCase(null); }); els.practiceBackBtn.addEventListener('click', hidePracticePicker);
@@ -3856,12 +3909,167 @@ init();
 })();
 </script>
 
+<!-- ========== Welcome modal (install + login) ========== -->
+<style>
+#welcomeModal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(8,6,18,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:20px;}
+#welcomeModal.show{display:flex;}
+#welcomeModal .wm-card{background:linear-gradient(135deg,#1a0f2e,#120920);border:1px solid rgba(168,85,247,.35);border-radius:20px;padding:26px 22px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);color:#f4f0ff;font-family:"Bricolage Grotesque","Space Grotesk",system-ui,sans-serif;text-align:center;}
+#welcomeModal .wm-emoji{font-size:48px;line-height:1;margin-bottom:10px;}
+#welcomeModal h2{margin:0 0 6px;font-size:22px;font-weight:800;background:linear-gradient(90deg,#ff7a45,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#welcomeModal p{margin:0 0 18px;color:#b8aed8;font-size:14px;line-height:1.5;}
+#welcomeModal .wm-btns{display:flex;flex-direction:column;gap:10px;}
+#welcomeModal button{font:inherit;cursor:pointer;border:none;padding:12px 16px;border-radius:12px;font-weight:700;font-size:14px;transition:transform .1s, filter .15s;}
+#welcomeModal button:hover{filter:brightness(1.1);}
+#welcomeModal button:active{transform:scale(.98);}
+#welcomeModal .wm-primary{background:linear-gradient(90deg,#ff7a45,#a855f7);color:#fff;}
+#welcomeModal .wm-secondary{background:rgba(255,255,255,.08);color:#f4f0ff;border:1px solid rgba(255,255,255,.12);}
+#welcomeModal .wm-ghost{background:transparent;color:#9b92c4;font-size:12px;padding:6px;}
+#swUpdateToast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1a0f2e,#120920);border:1px solid rgba(168,85,247,.45);color:#f4f0ff;padding:12px 16px;border-radius:12px;font-family:"Bricolage Grotesque","Space Grotesk",system-ui,sans-serif;font-size:13px;display:none;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+#swUpdateToast.show{display:flex;}
+#swUpdateToast button{background:linear-gradient(90deg,#ff7a45,#a855f7);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;}
+</style>
+
+<div id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle">
+  <div class="wm-card">
+    <div class="wm-emoji">&#128169;</div>
+    <h2 id="wmTitle">¡Mucha mierda!</h2>
+    <p id="wmDesc">Instala la app en tu dispositivo e inicia sesión con Google para sincronizar tu progreso entre móvil, tablet y ordenador.</p>
+    <div class="wm-btns">
+      <button type="button" class="wm-primary" id="wmInstallBtn" style="display:none;">📲 Instalar la app</button>
+      <button type="button" class="wm-primary" id="wmLoginBtn">🔐 Iniciar sesión con Google</button>
+      <button type="button" class="wm-secondary" id="wmLaterBtn">Ahora no</button>
+      <button type="button" class="wm-ghost" id="wmNeverBtn">No volver a mostrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="swUpdateToast">
+  <span>Hay una versión nueva disponible</span>
+  <button type="button" id="swUpdateBtn">Actualizar</button>
+</div>
+
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js')
-      .catch(function(err){ console.log('SW no registrado:', err); });
+/* ================= Service Worker con auto-update ================= */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(refreshing) return;
+    refreshing=true;
+    window.location.reload();
   });
-}
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      function showUpdateToast(worker){
+        var toast=document.getElementById('swUpdateToast');
+        var btn=document.getElementById('swUpdateBtn');
+        if(!toast||!btn) return;
+        toast.classList.add('show');
+        btn.onclick=function(){
+          toast.classList.remove('show');
+          if(worker) worker.postMessage({type:'SKIP_WAITING'});
+        };
+      }
+      // Hay uno esperando al cargar
+      if(reg.waiting) showUpdateToast(reg.waiting);
+      // Nuevo SW detectado
+      reg.addEventListener('updatefound', function(){
+        var nw=reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', function(){
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            showUpdateToast(nw);
+          }
+        });
+      });
+      // Comprueba actualizaciones al volver a la pestaña
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState==='visible'){ try{ reg.update(); }catch(e){} }
+      });
+      // Y cada 30 min si sigue abierta
+      setInterval(function(){ try{ reg.update(); }catch(e){} }, 30*60*1000);
+    }).catch(function(err){ console.log('SW no registrado:', err); });
+  });
+})();
+
+/* ================= Modal bienvenida (install + login) ================= */
+(function(){
+  var modal=document.getElementById('welcomeModal');
+  var installBtn=document.getElementById('wmInstallBtn');
+  var loginBtn=document.getElementById('wmLoginBtn');
+  var laterBtn=document.getElementById('wmLaterBtn');
+  var neverBtn=document.getElementById('wmNeverBtn');
+  var desc=document.getElementById('wmDesc');
+  var deferredPrompt=null;
+
+  // Capturar evento de instalación (Chrome/Edge/Android)
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt=e;
+    if(installBtn) installBtn.style.display='';
+  });
+
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone===true;
+  }
+  function isLoggedIn(){
+    try{ return !!(window.firebase && firebase.auth && firebase.auth().currentUser); }catch(e){ return false; }
+  }
+  function hide(){ if(modal) modal.classList.remove('show'); }
+  function show(){
+    if(!modal) return;
+    // Ajusta texto según lo que falte
+    var needInstall=!isStandalone();
+    var needLogin=!isLoggedIn();
+    if(needInstall && needLogin){
+      desc.textContent='Instala la app en tu dispositivo e inicia sesión con Google para sincronizar tu progreso entre móvil, tablet y ordenador.';
+    }else if(needInstall){
+      desc.textContent='Instala la app en tu dispositivo para tenerla a un toque desde la pantalla de inicio.';
+      loginBtn.style.display='none';
+    }else if(needLogin){
+      desc.textContent='Inicia sesión con Google para sincronizar tu progreso entre dispositivos.';
+      installBtn.style.display='none';
+    }else{
+      return; // nada que ofrecer
+    }
+    modal.classList.add('show');
+  }
+
+  if(installBtn) installBtn.addEventListener('click', async function(){
+    if(!deferredPrompt){ alert('Para instalar: abre el menú del navegador y pulsa "Añadir a pantalla de inicio" o "Instalar app".'); return; }
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt=null;
+    installBtn.style.display='none';
+    hide();
+  });
+  if(loginBtn) loginBtn.addEventListener('click', function(){
+    hide();
+    try{
+      if(typeof signInWithGoogle==='function'){ signInWithGoogle(); return; }
+    }catch(e){}
+    // Fallback: pulsa el botón de login del header
+    var hdr=document.getElementById('googleLoginBtn')||document.getElementById('loginBtn');
+    if(hdr) hdr.click();
+  });
+  if(laterBtn) laterBtn.addEventListener('click', function(){
+    hide();
+    try{ sessionStorage.setItem('wmDismissed','1'); }catch(e){}
+  });
+  if(neverBtn) neverBtn.addEventListener('click', function(){
+    hide();
+    try{ localStorage.setItem('wmNever','1'); }catch(e){}
+  });
+
+  // Mostrar al arrancar, con un retardo para que Firebase pueda decidir el authState
+  window.addEventListener('load', function(){
+    try{ if(localStorage.getItem('wmNever')==='1') return; }catch(e){}
+    try{ if(sessionStorage.getItem('wmDismissed')==='1') return; }catch(e){}
+    setTimeout(function(){
+      if(!isStandalone() || !isLoggedIn()) show();
+    }, 1500);
+  });
+})();
 </script>
 </body></html>

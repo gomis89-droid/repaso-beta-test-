@@ -1,9 +1,16 @@
-const CACHE_VERSION = 'registro-gif-fix-v1';
-const CORE_ASSETS = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE_VERSION = 'casos-fallados-v4';
+const CORE_ASSETS = ['./','./index.html','./manifest.json','./icons/icon-32.png','./icons/icon-180.png','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(CORE_ASSETS)));
-  self.skipWaiting();
+  // NOTA: ya NO hacemos skipWaiting aquí. Esperamos a que la página
+  // confirme (via postMessage) para no cambiar assets a mitad de sesión.
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', event => {
