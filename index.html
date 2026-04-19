@@ -772,15 +772,17 @@ textarea.share-preview:focus{outline:none;border-color:var(--p3)}
 .mode-card.purple:hover{box-shadow:0 8px 28px rgba(124,58,237,.45)}
 .mode-card.purple .small,.mode-card.purple .badge.mode{color:rgba(255,255,255,.75);background:rgba(255,255,255,.14)}
 .mode-card-icon{width:100%;height:44px;display:flex;align-items:center;justify-content:flex-start;font-size:32px;line-height:1;margin-bottom:4px}
+.mode-card-wrap{display:grid;gap:6px}
+.mode-info-row{display:flex;justify-content:flex-end;margin-bottom:4px}
+.mode-info-btn{width:28px;height:28px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:absolute;top:12px;right:12px;z-index:3;box-shadow:0 4px 12px rgba(0,0,0,.18)}
 .mode-card-wrap{position:relative;display:grid;gap:8px}
 .mode-card.compact{min-height:168px;padding:18px 18px 16px}
 .mode-card.compact .mode-card-icon{height:58px;font-size:44px;margin-bottom:2px}
 .mode-card.compact h3{font-size:20px;line-height:1.05}
 .mode-card.compact .badge.mode{align-self:flex-start;margin-top:2px}
 .mode-card.compact .mode-cta{margin-top:auto;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.mode-card.compact.purple .mode-cta{color:rgba(255,255,255,.8)}
-.mode-info-btn{position:absolute;top:12px;right:12px;width:30px;height:30px;border:none;border-radius:999px;background:color-mix(in oklab,var(--p3) 70%,var(--card));color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;box-shadow:0 6px 14px rgba(0,0,0,.18)}
-.mode-help-box{display:none;padding:12px 14px;border-radius:14px;background:var(--paper-2);border:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--ink-2)}
+.mode-card.compact.purple .mode-cta{color:rgba(255,255,255,.82)}
+.mode-help-box{display:none;padding:14px 16px;border-radius:16px;background:var(--paper-2);border:1px solid var(--line);color:var(--ink-2);font-size:13px;line-height:1.45}
 .mode-help-box.show{display:block}
 .mode-card-wrap.purple .mode-help-box{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.92)}
 .menu{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:16px}
@@ -1675,7 +1677,6 @@ var isOptativo=state.subject && state.subject.short==='Optativo';
 var isDigital=state.subject && state.subject.short==='Digitalización';
 
 function buildModeCard(modeKey, title, desc, extra){
-  var mode=MODES[modeKey]||{};
   var wrap=document.createElement('div');
   wrap.className='mode-card-wrap'+((extra&&extra.purple)?' purple':'');
   var btn=document.createElement('button');
@@ -1708,6 +1709,7 @@ function buildModeCard(modeKey, title, desc, extra){
     try{ els.modeMenu.querySelectorAll('.mode-help-box.show').forEach(function(node){ if(node!==help) node.classList.remove('show'); }); }catch(e){}
     help.classList.toggle('show', shouldShow);
   });
+
   return wrap;
 }
 
