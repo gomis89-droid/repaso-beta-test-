@@ -898,6 +898,202 @@ body.quiz-active{}
 .share-chip:hover{border-color:var(--p3)}
 .share-chip.active{background:linear-gradient(90deg,var(--p1),var(--p3));border-color:transparent;color:#fff}
 .r-title-gradient{background:linear-gradient(90deg,var(--p1),var(--p3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:var(--font-display);font-weight:900}
+
+/* ========== REGISTRO MOBILE TUNE-UP ========== */
+@media(max-width:760px){
+  #screen-progress{padding-top:6px}
+  #screen-progress .share-float-wrap{
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  #screen-progress .share-float-wrap h2{
+    font-size:clamp(18px,7vw,32px)!important;
+    line-height:1.05;
+  }
+  #progressLastPlayed{
+    width:100%;
+    font-size:10px;
+    line-height:1.55;
+  }
+  #screen-progress .r-grid{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  #screen-progress .r-left,
+  #screen-progress .r-right{
+    display:contents;
+  }
+  #progressSubjectList{order:1}
+  #screen-progress .r-hero-chart{order:2}
+  #progressKpiList{order:3}
+  #progressStreakCard{order:4}
+  #screen-progress .r-right .r-section:nth-of-type(1){order:5}
+  #screen-progress .r-right .r-section:nth-of-type(2){order:6}
+  #screen-progress .r-right .r-section:nth-of-type(3){order:7}
+
+  #progressSubjectList{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:10px;
+    overflow-x:auto;
+    padding:12px;
+    margin-bottom:0;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  #progressSubjectList::-webkit-scrollbar{display:none}
+  #progressSubjectList .subj-list-title{
+    flex:0 0 100%;
+    padding:2px 4px 0;
+  }
+  #progressSubjectList .subj-row{
+    flex:0 0 auto;
+    margin:0;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:var(--paper-2);
+    scroll-snap-align:start;
+  }
+  #progressSubjectList .subj-row.active{
+    background:linear-gradient(90deg,var(--p1),var(--p3));
+    border-color:transparent;
+    box-shadow:0 6px 18px color-mix(in oklab,var(--p3) 24%,transparent);
+  }
+  #progressSubjectList .subj-item{
+    flex:0 0 auto;
+    padding:12px 16px;
+    white-space:nowrap;
+    font-size:15px;
+    line-height:1;
+  }
+  #progressSubjectList .subj-share{
+    display:none;
+  }
+
+  #progressKpiList{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    padding:12px;
+  }
+  #progressKpiList .item{
+    display:block;
+    padding:14px 12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:var(--paper-2);
+  }
+  #progressKpiList .item:last-child{
+    border-bottom:1px solid var(--line);
+  }
+  #progressKpiList .l{
+    display:block;
+    margin-bottom:8px;
+    font-size:10px;
+    line-height:1.3;
+  }
+  #progressKpiList .v{
+    display:block;
+    font-size:26px;
+    line-height:1;
+  }
+
+  #progressStreakCard{
+    margin-top:0;
+    padding:14px 16px;
+  }
+  #progressStreakCard .v{
+    font-size:24px;
+  }
+
+  #screen-progress .r-hero-chart,
+  #screen-progress .r-section{
+    padding:16px;
+    margin-bottom:0;
+  }
+  #screen-progress .r-hero-chart .head{
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  #screen-progress .r-hero-chart h3,
+  #screen-progress .r-section h3{
+    font-size:15px;
+  }
+  #screen-progress .r-hero-chart .chart-chips{
+    width:100%;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:2px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #screen-progress .r-hero-chart .chart-chips::-webkit-scrollbar{display:none}
+  #screen-progress .r-chip{
+    flex:0 0 auto;
+    white-space:nowrap;
+    padding:7px 12px;
+  }
+  #screen-progress .r-sparkline{
+    min-height:170px;
+    padding:10px;
+  }
+  #screen-progress .r-bars7 .bars{
+    gap:8px;
+    height:108px;
+    margin-top:14px;
+    padding:0 2px;
+  }
+  #screen-progress .r-bars7 .day-labels{
+    gap:8px;
+    padding:0 2px;
+  }
+  #screen-progress .r-bars7 .day-labels span{
+    font-size:12px;
+  }
+  #screen-progress .r-bars7 .week-lbl{
+    font-size:11px;
+  }
+
+  #screen-progress .exam-table{
+    min-width:620px;
+    font-size:12px;
+  }
+  #screen-progress .exam-table th,
+  #screen-progress .exam-table td{
+    padding:10px 10px;
+  }
+  #screen-progress .exam-table .tipo{
+    font-size:13px;
+  }
+
+  #screen-progress .mode-row{
+    padding:12px;
+  }
+  #screen-progress .mode-row .stats{
+    width:100%;
+    font-size:12px;
+  }
+
+  #screen-progress .sess-row{
+    grid-template-columns:1fr;
+    gap:6px;
+    padding:12px 10px;
+  }
+  #screen-progress .sess-row .when{
+    font-size:11px;
+  }
+}
+@media(max-width:420px){
+  #progressKpiList{
+    grid-template-columns:1fr;
+  }
+  #screen-progress .r-sparkline{
+    min-height:160px;
+  }
+}
+
 </style>
 </head>
 <body>
