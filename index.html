@@ -774,17 +774,7 @@ textarea.share-preview:focus{outline:none;border-color:var(--p3)}
 .mode-card-icon{width:100%;height:44px;display:flex;align-items:center;justify-content:flex-start;font-size:32px;line-height:1;margin-bottom:4px}
 .mode-card-wrap{display:grid;gap:6px}
 .mode-info-row{display:flex;justify-content:flex-end;margin-bottom:4px}
-.mode-info-btn{width:28px;height:28px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:absolute;top:12px;right:12px;z-index:3;box-shadow:0 4px 12px rgba(0,0,0,.18)}
-.mode-card-wrap{position:relative;display:grid;gap:8px}
-.mode-card.compact{min-height:168px;padding:18px 18px 16px}
-.mode-card.compact .mode-card-icon{height:58px;font-size:44px;margin-bottom:2px}
-.mode-card.compact h3{font-size:20px;line-height:1.05}
-.mode-card.compact .badge.mode{align-self:flex-start;margin-top:2px}
-.mode-card.compact .mode-cta{margin-top:auto;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.mode-card.compact.purple .mode-cta{color:rgba(255,255,255,.82)}
-.mode-help-box{display:none;padding:14px 16px;border-radius:16px;background:var(--paper-2);border:1px solid var(--line);color:var(--ink-2);font-size:13px;line-height:1.45}
-.mode-help-box.show{display:block}
-.mode-card-wrap.purple .mode-help-box{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.92)}
+.mode-info-btn{width:26px;height:26px;border:none;border-radius:999px;background:var(--bad);color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .menu{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:16px}
 .gif-legend{display:grid;gap:10px;margin-top:14px}
 .gif-legend-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--paper-2)}
@@ -1663,83 +1653,30 @@ function renderSubjects(){
 function getModeTitleHtml(modeKey, title){ if(modeKey==='examen' || modeKey==='examen1' || modeKey==='examenTotal'){ var meta=getExamModeMeta(modeKey); return '<span class="mode-title-with-icon"><span class="mode-icon">'+meta.icon+'</span><span>'+escapeHtml(title)+'</span></span>'; } return escapeHtml(title); }
 function getModeCardIconHtml(modeKey){ var isExam=(modeKey==='examen'||modeKey==='examen1'||modeKey==='examenTotal'); var icon=(MODES[modeKey]&&MODES[modeKey].icon)||'📋'; return '<span class="mode-card-icon'+(isExam?' exam-icon':'')+'">'+icon+'</span>'; }
 function renderModeMenu(){ hidePracticePicker(); (function(){
-var headerSub='Selecciona cómo estudiar';
-if(state.subject && state.subject.short==='PIICT') headerSub='Banco + caso práctico + seguimiento';
-else if(state.subject && state.subject.short==='Inglés') headerSub='Banco, casos prácticos y exámenes';
-els.modeHeaderSub.textContent=headerSub;
-})();
-els.modeMenu.innerHTML='';
-var modeKeys=getAvailableModeKeys();
-var isSost=state.subject && state.subject.short==='Sostenibilidad';
-var isEnglish=state.subject && state.subject.short==='Inglés';
-var isPIICT=state.subject && state.subject.short==='PIICT';
-var isOptativo=state.subject && state.subject.short==='Optativo';
-var isDigital=state.subject && state.subject.short==='Digitalización';
-
-function buildModeCard(modeKey, title, desc, extra){
-  var wrap=document.createElement('div');
-  wrap.className='mode-card-wrap'+((extra&&extra.purple)?' purple':'');
-  var btn=document.createElement('button');
-  btn.type='button';
-  btn.className='mode-card compact'+((extra&&extra.purple)?' purple':'');
-  var cta=(extra&&extra.cta)||'Tocar para abrir';
-  btn.innerHTML=getModeCardIconHtml(modeKey)+'<div class="badge mode">'+escapeHtml(title)+'</div><h3>'+escapeHtml(title)+'</h3><div class="mode-cta">'+escapeHtml(cta)+'</div>';
-  btn.addEventListener('click', function(){
-    if(extra && typeof extra.onClick==='function') extra.onClick();
-    else startMode(modeKey);
-  });
-  wrap.appendChild(btn);
-
-  var infoBtn=document.createElement('button');
-  infoBtn.type='button';
-  infoBtn.className='mode-info-btn';
-  infoBtn.textContent='?';
-  infoBtn.setAttribute('aria-label','Más información sobre '+title);
-  wrap.appendChild(infoBtn);
-
-  var help=document.createElement('div');
-  help.className='mode-help-box';
-  help.textContent=desc;
-  wrap.appendChild(help);
-
-  infoBtn.addEventListener('click', function(ev){
-    ev.preventDefault();
-    ev.stopPropagation();
-    var shouldShow=!help.classList.contains('show');
-    try{ els.modeMenu.querySelectorAll('.mode-help-box.show').forEach(function(node){ if(node!==help) node.classList.remove('show'); }); }catch(e){}
-    help.classList.toggle('show', shouldShow);
-  });
-
-  return wrap;
-}
-
-for(var i=0;i<modeKeys.length;i++){
-  var key=modeKeys[i], mode=MODES[key], desc=mode.description;
-  if(isSost && key==='cuestionario') desc='10 preguntas aleatorias del banco general de Sostenibilidad.';
-  if(isSost && key==='practicas') desc='Casos prácticos de Sostenibilidad. Puedes elegir un caso concreto o dejar que salga uno aleatorio.';
-  if(isSost && key==='examen') desc='Examen de 10 preguntas del banco general con corrección por fórmula (los errores restan 1/6).';
-  if(isSost && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.';
-  if(isEnglish && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y hasta 6 de un único caso práctico. Si el caso tiene menos preguntas, se completa con banco general. Las incorrectas restan 1/4.';
-  if(isEnglish && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas, la parte del caso práctico igual que en el examen normal y el resto del banco general. Las incorrectas restan 1/4.';
-  if(isOptativo && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y 6 de un caso práctico. Las incorrectas restan 1/4.';
-  if(isOptativo && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas, la parte del caso práctico igual que en el examen normal y el resto del banco general. Las incorrectas restan 1/4.';
-  if(isOptativo && key==='examen1') desc='Examen 1 de 20 preguntas: 5 del banco de preguntas de clase especial 09/04/2026, 4 o 6 del caso práctico y el resto del banco general. Las incorrectas restan 1/4.';
-  if(state.subject && state.subject.short==='IPE II' && key==='examen') desc='Examen de 20 preguntas del banco general de IPE II con corrección por fórmula.';
-  if(state.subject && state.subject.short==='IPE II' && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas y, si no hay suficientes, el resto del banco general. Las incorrectas restan 1/4.';
-  if(isDigital && key==='cuestionario') desc='10 preguntas aleatorias del banco general de Digitalización.';
-  if(isDigital && key==='practicas') desc='Casos prácticos de Digitalización. Puedes elegir un caso concreto o dejar que salga uno aleatorio.';
-  if(isDigital && key==='examen') desc='Examen de 30 preguntas: 24 del banco general y 6 de un caso práctico. Las incorrectas restan 1/3.';
-  if(isDigital && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.';
-  if(isDigital && key==='examenTotal') desc='Examen Total de 30 preguntas: prioriza las más falladas, mantiene la parte del caso práctico y completa con banco general. Las incorrectas restan 1/3.';
-  if(isPIICT && key==='examen1') desc='Incluye un bloque especial con preguntas de la clase clave del 08/04/2026. En cada intento salen 10 aleatorias de ese bloque y el resto se completa con banco general y caso práctico.';
-  if((state.subject && !isSost && !isEnglish && !isOptativo && state.subject.short!=='IPE II') && key==='examenTotal') desc='Examen Total: se priorizan las preguntas más falladas, se mantiene la parte de caso práctico del examen normal y se completa con banco general sin repetir preguntas. Las incorrectas restan según el número total de preguntas.';
-  els.modeMenu.appendChild(buildModeCard(key, mode.title, desc, {cta:(key==='practicas'?'Elegir caso':(key==='examenPersonalizado'?'Configurar intento':'Tocar para abrir'))}));
-}
-
-var listDesc=(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del banco general y de los casos prácticos de Sostenibilidad.':(isOptativo?'Ver todas las preguntas del banco general y de los casos prácticos de Eficacia energética.':'Ver todas las preguntas del cuestionario o del test de prácticas.')));
-els.modeMenu.appendChild(buildModeCard('cuestionario','Consulta',listDesc,{purple:true,cta:'Abrir listado',onClick:function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); }}));
-els.modeMenu.appendChild(buildModeCard('examenPersonalizado','Seguimiento','Ver las preguntas en las que más fallas dentro de esta asignatura. La lista se actualiza automáticamente con cada intento.',{purple:true,cta:'Abrir seguimiento',onClick:function(){ renderWeakScreen(); }}));
-}
+  var s2=state.subject; if(!s2||!els.menuSubjectTitle) return;
+  var subP=(progressStore&&progressStore[s2.short])||emptySubject();
+  var exModes=getModeKeysForSubject(s2.short).filter(function(m){return typeof isExamModeForGif==='function'?isExamModeForGif(m):isExamMode(m);});
+  var bests=[];
+  for(var xi=0;xi<exModes.length;xi++){
+    var st=getModeScoreStats(subP, exModes[xi]);
+    if(st && typeof st.bestScore==='number' && !isNaN(st.bestScore)) bests.push(st.bestScore);
+  }
+  var gifHtml='';
+  if(bests.length){
+    var avg=bests.reduce(function(a,b){return a+b;},0)/bests.length;
+    var rx=(typeof getScoreReaction==='function')?getScoreReaction(avg):null;
+    if(rx && rx.src){
+      gifHtml='<img src="'+rx.src+'" alt="'+escapeHtml(rx.alt||'')+'" style="width:96px;height:96px;object-fit:cover;border-radius:18px;flex-shrink:0;box-shadow:0 4px 18px rgba(0,0,0,.18);" />';
+    }
+  }
+  els.menuSubjectTitle.style.textTransform='none';
+  els.menuSubjectTitle.style.letterSpacing='normal';
+  els.menuSubjectTitle.style.fontSize='';
+  els.menuSubjectTitle.style.fontWeight='';
+  els.menuSubjectTitle.innerHTML='<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'+gifHtml+'<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;"><span style="font-family:var(--font-display,inherit);font-size:28px;font-weight:800;letter-spacing:-.01em;line-height:1.1;color:'+(s2.color||'var(--p1)')+';">'+escapeHtml(s2.short)+'</span><span style="font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.3;">'+escapeHtml(subjectDisplayName(s2))+'</span></div></div>';
+})(); els.modeMenu.innerHTML=''; var modeKeys=getAvailableModeKeys(); var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; var isPIICT=state.subject && state.subject.short==='PIICT'; var isOptativo=state.subject && state.subject.short==='Optativo'; var isDigital=state.subject && state.subject.short==='Digitalización'; for(var i=0;i<modeKeys.length;i++){ var key=modeKeys[i], mode=MODES[key], desc=mode.description; if(isSost && key==='cuestionario') desc='10 preguntas aleatorias del banco general de Sostenibilidad.'; if(isSost && key==='practicas') desc='Casos prácticos de Sostenibilidad. Puedes elegir un caso concreto o dejar que salga uno aleatorio.'; if(isSost && key==='examen') desc='Examen de 10 preguntas del banco general con corrección por fórmula (los errores restan 1/6).'; if(isSost && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.'; if(isEnglish && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y hasta 6 de un único caso práctico. Si el caso tiene menos preguntas, se completa con banco general. Las incorrectas restan 1/4.'; if(isEnglish && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas, la parte del caso práctico igual que en el examen normal y el resto del banco general. Las incorrectas restan 1/4.'; if(isOptativo && key==='examen') desc='Examen de 20 preguntas: 14 del banco general y 6 de un caso práctico. Las incorrectas restan 1/4.'; if(isOptativo && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas, la parte del caso práctico igual que en el examen normal y el resto del banco general. Las incorrectas restan 1/4.'; if(isOptativo && key==='examen1') desc='Examen 1 de 20 preguntas: 5 del banco de preguntas de clase especial 09/04/2026, 4 o 6 del caso práctico y el resto del banco general. Las incorrectas restan 1/4.'; if(state.subject && state.subject.short==='IPE II' && key==='examen') desc='Examen de 20 preguntas del banco general de IPE II con corrección por fórmula.'; if(state.subject && state.subject.short==='IPE II' && key==='examenTotal') desc='Examen Total de 20 preguntas: 10 de las más falladas y, si no hay suficientes, el resto del banco general. Las incorrectas restan 1/4.'; if(isDigital && key==='cuestionario') desc='10 preguntas aleatorias del banco general de Digitalización.'; if(isDigital && key==='practicas') desc='Casos prácticos de Digitalización. Puedes elegir un caso concreto o dejar que salga uno aleatorio.'; if(isDigital && key==='examen') desc='Examen de 30 preguntas: 24 del banco general y 6 de un caso práctico. Las incorrectas restan 1/3.'; if(isDigital && key==='examen1') desc='Examen 1 de 10 preguntas: 5 del banco especial y 5 del banco general, todas aleatorias. Las incorrectas restan 1/6.'; if(isDigital && key==='examenTotal') desc='Examen Total de 30 preguntas: prioriza las más falladas, mantiene la parte del caso práctico y completa con banco general. Las incorrectas restan 1/3.'; if(isPIICT && key==='examen1') desc='Incluye un bloque especial con preguntas de la clase clave del 08/04/2026.'; if((state.subject && !isSost && !isEnglish && !isOptativo && state.subject.short!=='IPE II') && key==='examenTotal') desc='Examen Total: se priorizan las preguntas más falladas, se mantiene la parte de caso práctico del examen normal y se completa con banco general sin repetir preguntas. Las incorrectas restan según el número total de preguntas.'; if(isPIICT && key==='examen1'){ var wrap=document.createElement('div'); wrap.className='mode-card-wrap'; var btn=document.createElement('button'); btn.className='mode-card'; btn.innerHTML=getModeCardIconHtml(key)+'<div class="badge mode">'+mode.title+'</div><p class="small">'+desc+'</p>'; (function(modeKey){ btn.addEventListener('click', function(){ startMode(modeKey); }); })(key); var infoRow=document.createElement('div'); infoRow.className='mode-info-row'; var infoBtn=document.createElement('button'); infoBtn.type='button'; infoBtn.className='mode-info-btn'; infoBtn.textContent='?'; infoBtn.setAttribute('aria-label','Más información sobre Examen 1'); infoBtn.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); alert('Examen 1 de PIICT\n\nIncluye 30 preguntas preparadas en la clase importante del 08/04/2026. En cada intento salen 10 aleatorias de ese bloque. El resto del examen se completa con preguntas del banco general y con el caso práctico correspondiente.'); }); infoRow.appendChild(infoBtn); wrap.appendChild(btn); wrap.appendChild(infoRow); els.modeMenu.appendChild(wrap); continue; } var btn=document.createElement('button'); btn.className='mode-card'; btn.innerHTML=getModeCardIconHtml(key)+'<div class="badge mode">'+mode.title+'</div><p class="small">'+desc+'</p>'; (function(modeKey){ btn.addEventListener('click', function(){ startMode(modeKey); }); })(key); els.modeMenu.appendChild(btn); } var listBtn=document.createElement('button'); listBtn.className='mode-card purple'; listBtn.innerHTML='<span class="mode-card-icon">📚</span><div class="badge mode">Consulta</div><p class="small">'+(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del banco general y de los casos prácticos de Sostenibilidad.':(isOptativo?'Ver todas las preguntas del banco general y de los casos prácticos de Eficacia energética.':'Ver todas las preguntas del cuestionario o del test de prácticas.')))+'</p>'; listBtn.addEventListener('click', function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); }); els.modeMenu.appendChild(listBtn); var weakBtn=document.createElement('button'); weakBtn.className='mode-card purple'; weakBtn.innerHTML='<span class="mode-card-icon">🔥</span><div class="badge mode">Seguimiento</div><p class="small">Ver las preguntas en las que más fallas dentro de esta asignatura. La lista se actualiza automáticamente con cada intento.</p>'; weakBtn.addEventListener('click', function(){ renderWeakScreen(); }); els.modeMenu.appendChild(weakBtn); }
+function hidePracticePicker(){ els.practicePickerPanel.style.display='none'; els.practiceCaseList.innerHTML=''; }
+function getPracticeCardTitle(c, index){ var raw=(c && c.title ? String(c.title) : ('Caso práctico '+(index+1))); raw=raw.replace(/\s+/g,' ').trim(); if(raw.length>58) raw=raw.slice(0,55).trim()+'…'; return raw; }
 
 function renderPracticePicker(){ var data=currentData(); if(!data || !data.practicalCases || !data.practicalCases.length){ var pendingMsg='Esta asignatura todavía no tiene casos prácticos cargados.'; alert(pendingMsg); return; } els.practiceCaseList.innerHTML=''; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i], btn=document.createElement('button'); btn.className='mode-card'; btn.type='button'; var cardTitle=getPracticeCardTitle(c, i); btn.innerHTML='<div class="badge mode">'+escapeHtml(c.block||('Caso '+(i+1)))+'</div><h3>'+escapeHtml(cardTitle)+'</h3><p class="small">'+c.questions.length+' preguntas de práctica disponibles.</p>'; (function(index){ btn.addEventListener('click', function(){ startPracticeCase(index); }); })(i); els.practiceCaseList.appendChild(btn); }
   els.practicePickerPanel.style.display='block';
