@@ -751,6 +751,37 @@ textarea.share-preview:focus{outline:none;border-color:var(--p3)}
 .home-stat-row strong{color:var(--ink);font-weight:700}
 .home-stat-empty{font-size:12px;color:var(--ink-3);font-style:italic;padding:4px 0 0}
 .alert-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:var(--bad);color:#fff;font-size:12px;font-weight:900;flex-shrink:0}
+
+.help-disclaimer{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:18px 20px;
+  background:linear-gradient(135deg,
+    color-mix(in oklab,var(--p2) 18%,var(--card)),
+    color-mix(in oklab,var(--p1) 10%,var(--card)));
+  border:1px solid color-mix(in oklab,var(--p2) 30%,transparent);
+  border-radius:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+.help-disclaimer-icon{
+  width:40px;height:40px;flex:0 0 40px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:14px;
+  background:color-mix(in oklab,var(--p2) 28%,var(--card));
+  font-size:20px;
+}
+.help-disclaimer strong{
+  display:block;
+  margin-bottom:6px;
+  font-family:var(--font-display);
+  font-size:16px;
+  color:var(--ink);
+}
+.help-disclaimer .small{margin:0;color:var(--ink-2)}
+@media(max-width:640px){
+  .help-disclaimer{padding:16px;gap:12px}
+  .help-disclaimer-icon{width:36px;height:36px;flex-basis:36px;font-size:18px}
+}
+
 .help-stack{display:grid;gap:12px}
 .help-card{padding:20px;background:var(--card);border:1px solid var(--line);border-radius:18px}
 .help-card h3{margin:0 0 8px;font-family:var(--font-display);font-weight:700;font-size:15px}
@@ -1049,6 +1080,15 @@ body.quiz-active{}
         <button class="btn primary" id="helpBackBtn">&#x2190; Volver al inicio</button>
       </div>
       <div class="help-stack">
+
+        <div class="help-disclaimer">
+          <div class="help-disclaimer-icon">&#x1F4A1;</div>
+          <div>
+            <strong>Aviso</strong>
+            <div class="small">Esta es una aplicación que utilizo personalmente para estudiar. Si te resulta útil, eres totalmente bienvenido a usarla 🙂<br><br>Si encuentras algún fallo o algo que se pueda mejorar, tenlo en cuenta y, si puedes, házmelo saber.<br><br>Gracias por usarla.</div>
+          </div>
+        </div>
+
         <div class="help-card">
           <div class="badge mode">Visión general</div>
           <h3>Qué puedes hacer en la app</h3>
