@@ -9,8 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TSEI">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <title>Repaso TSEI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -700,6 +701,21 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;letter-spacing:-0.02
 .option:disabled{cursor:default;opacity:.6}
 .subject-switch{display:flex;gap:6px;flex-wrap:wrap}
 .subject-switch .btn.active{background:linear-gradient(135deg,var(--p1),var(--p3));color:#fff;border-color:transparent}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.subfilter{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.case-list{display:grid;gap:12px}
+.case-card{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper-2);cursor:pointer;transition:all .18s;text-align:left}
+.case-card:hover{transform:translateY(-2px);border-color:var(--p3);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.case-card .case-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.case-card h3{font-size:16px;margin:0;color:var(--ink)}
+.case-card .case-meta{font-size:12px;color:var(--ink-3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em}
+.case-card .case-desc{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.case-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.case-detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.case-detail-title{margin:0 0 6px;font-size:20px}
+.case-detail-statement{white-space:pre-wrap;line-height:1.7;font-size:14px;color:var(--ink-2);padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--paper-2);margin-bottom:16px}
+.weak-tab-panel{display:none}
+.weak-tab-panel.active{display:block}
 .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
 .checkbox-card{border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;background:var(--paper-2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;font-size:13.5px;min-height:44px}
 .checkbox-card:hover{border-color:var(--p3);background:color-mix(in oklab,var(--p3) 6%,var(--paper-2));z-index:2}
@@ -997,6 +1013,7 @@ body.quiz-active{}
   <div class="tb-actions toolbar">
     <button class="btn ghost small" id="homeTopBtn" style="display:none;">&#x2190; Inicio</button>
     <button class="btn ghost small" id="progressBtn">&#x1F4CA; Registro</button>
+    <button class="btn ghost small" id="syncTopBtn" title="Sincronizar progreso con la nube" aria-label="Sincronizar progreso">&#x21BB; Sincronizar</button>
     <button class="btn ghost small" id="shareRegistryTopBtn" style="display:none;">&#x2197; Compartir</button>
     <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar tema" title="Cambiar tema">&#x1F319;</button>
     <!-- authControls injected here by JS -->
@@ -1049,6 +1066,11 @@ body.quiz-active{}
         <button class="btn primary" id="helpBackBtn">&#x2190; Volver al inicio</button>
       </div>
       <div class="help-stack">
+        <div class="help-card" style="background:linear-gradient(135deg,color-mix(in oklab,var(--p1) 14%,var(--card)),color-mix(in oklab,var(--p3) 14%,var(--card)));border:1px solid color-mix(in oklab,var(--p3) 35%,transparent);">
+          <div class="badge mode" style="background:color-mix(in oklab,var(--p1) 22%,transparent);color:var(--p1);">👋 Un mensaje</div>
+          <h3>Hola, gracias por pasarte</h3>
+          <div class="small">Esta es una app que he hecho para estudiar mi FP. La uso yo a diario, así que está pensada desde dentro, con los modos y el registro que a mí me van bien.<br><br>Si te sirve para estudiar lo tuyo, adelante, es toda tuya. Si ves algún fallo, algo raro o se te ocurre alguna mejora, me encantaría que me lo dijeras para arreglarlo.<br><br>Gracias por usarla 💜</div>
+        </div>
         <div class="help-card">
           <div class="badge mode">Visión general</div>
           <h3>Qué puedes hacer en la app</h3>
@@ -1221,13 +1243,17 @@ body.quiz-active{}
           <div class="subtle" id="listCountInfo"></div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn ghost small" id="listQuizBtn">Cuestionario</button>
-          <button class="btn ghost small" id="listPracticeBtn">Prácticas</button>
-          <button class="btn ghost small" id="listExam1Btn" style="display:none;">Examen 1</button>
           <button class="btn ghost small" id="listBackBtn">&#x2190; Volver</button>
           <button class="btn ghost small" id="listHomeBtn">Inicio</button>
         </div>
       </div>
+      <div class="subtabs">
+        <button class="btn ghost small" id="listTopicsBtn">Temas</button>
+        <button class="btn ghost small" id="listEval1Btn">Repaso 1ª evaluación</button>
+        <button class="btn ghost small" id="listEval2Btn">Repaso 2ª evaluación</button>
+        <button class="btn ghost small" id="listCasesBtn">Casos prácticos</button>
+      </div>
+      <div id="listTopicFilterWrap" class="subfilter"></div>
       <div id="questionListWrap"></div>
     </div>
   </section>
@@ -1245,11 +1271,16 @@ body.quiz-active{}
           <button class="btn ghost small" id="weakHomeBtn">Inicio</button>
         </div>
       </div>
-      <div id="weakTabsBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-        <button class="share-chip active" id="weakTabQuestionsBtn" type="button">Preguntas más falladas</button>
-        <button class="share-chip" id="weakTabCasesBtn" type="button">Casos prácticos más fallados</button>
+      <div class="subtabs">
+        <button class="btn ghost small" id="weakQuestionsTabBtn">Preguntas más falladas</button>
+        <button class="btn ghost small" id="weakCasesTabBtn">Casos prácticos más fallados</button>
       </div>
-      <div id="weakQuestionsList"></div>
+      <div id="weakQuestionsPanel" class="weak-tab-panel active">
+        <div id="weakQuestionsList"></div>
+      </div>
+      <div id="weakCasesPanel" class="weak-tab-panel">
+        <div id="weakCasesList"></div>
+      </div>
     </div>
   </section>
 
@@ -1482,12 +1513,12 @@ var db = null;
 var authReady = false;
 var cloudSyncInFlight = false;
 var saveCloudTimer = null;
-var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario', weakTab:'questions' };
+var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'temas', listTopicFilter:'all', weakViewType:'questions' };
 var screens = {
   home: document.getElementById('screen-home'), help: document.getElementById('screen-help'), menu: document.getElementById('screen-menu'), quiz: document.getElementById('screen-quiz'), results: document.getElementById('screen-results'), list: document.getElementById('screen-list'), weak: document.getElementById('screen-weak'), progress: document.getElementById('screen-progress'), share: document.getElementById('screen-share')
 };
 var els = {
-  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
+  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), syncTopBtn: document.getElementById('syncTopBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listTopicsBtn: document.getElementById('listTopicsBtn'), listEval1Btn: document.getElementById('listEval1Btn'), listEval2Btn: document.getElementById('listEval2Btn'), listCasesBtn: document.getElementById('listCasesBtn'), listTopicFilterWrap: document.getElementById('listTopicFilterWrap'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), weakQuestionsTabBtn: document.getElementById('weakQuestionsTabBtn'), weakCasesTabBtn: document.getElementById('weakCasesTabBtn'), weakQuestionsPanel: document.getElementById('weakQuestionsPanel'), weakCasesPanel: document.getElementById('weakCasesPanel'), weakCasesList: document.getElementById('weakCasesList'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
 };
 var progressStore = loadProgress();
 var METRIC_DEFS = [
@@ -1726,7 +1757,7 @@ function renderModeMenu(){ hidePracticePicker(); (function(){
   var s2=state.subject; if(!s2||!els.menuSubjectTitle) return;
   var subP=(progressStore&&progressStore[s2.short])||emptySubject();
   var topGif='';
-  try{ var avg=getSubjectAverageBestExamScore(s2.short); var reaction=getSubjectReaction(avg); if(reaction) topGif='<img src="'+reaction+'" alt="Reacción de estudio" style="width:92px;height:92px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:var(--paper-2);">'; }catch(e){}
+  try{ var avg=getSubjectAverageBestExamScore(s2.short); var reaction=getSubjectReaction(avg); if(reaction && reaction.src) topGif='<img src="'+reaction.src+'" alt="'+escapeHtml(reaction.alt||'Reacción de estudio')+'" title="Media de mejores notas: '+avg.toFixed(2)+'" style="width:92px;height:92px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:var(--paper-2);">'; }catch(e){}
   var gifHtml=topGif||('<div style="width:92px;height:92px;border-radius:18px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;background:var(--paper-2);font-size:34px;">'+escapeHtml(s2.icon||'📘')+'</div>');
   els.menuSubjectTitle.style.textTransform='none';
   els.menuSubjectTitle.style.letterSpacing='normal';
@@ -1771,9 +1802,9 @@ function renderModeMenu(){ hidePracticePicker(); (function(){
     els.modeMenu.appendChild(card);
   }
   var listHelp=(isEnglish?'Ver todas las preguntas del banco y de los casos prácticos de Inglés Técnico.':(isSost?'Ver todas las preguntas del banco general y de los casos prácticos de Sostenibilidad.':(isOptativo?'Ver todas las preguntas del banco general y de los casos prácticos de Eficacia energética.':'Ver todas las preguntas del cuestionario o del test de prácticas.')));
-  var listBtn=buildModeCard({ title:'Consulta', iconHtml:'<span class="mode-card-icon">📚</span>', shortDesc:getModeShortDescription('consulta'), helpText:listHelp, purple:true, onSelect:function(){ state.listViewType='cuestionario'; renderQuestionListScreen('cuestionario'); } });
+  var listBtn=buildModeCard({ title:'Consulta', iconHtml:'<span class="mode-card-icon">📚</span>', shortDesc:getModeShortDescription('consulta'), helpText:listHelp, purple:true, onSelect:function(){ state.listViewType='temas'; state.listTopicFilter='all'; renderQuestionListScreen('temas'); } });
   els.modeMenu.appendChild(listBtn);
-  var weakBtn=buildModeCard({ title:'Seguimiento', iconHtml:'<span class="mode-card-icon">🔥</span>', shortDesc:getModeShortDescription('seguimiento'), helpText:'Ver las preguntas en las que más fallas dentro de esta asignatura. La lista se actualiza automáticamente con cada intento.', purple:true, onSelect:function(){ renderWeakScreen(); } });
+  var weakBtn=buildModeCard({ title:'Seguimiento', iconHtml:'<span class="mode-card-icon">🔥</span>', shortDesc:getModeShortDescription('seguimiento'), helpText:'Ver por separado las preguntas y los casos prácticos en los que más fallas dentro de esta asignatura.', purple:true, onSelect:function(){ renderWeakScreen(); } });
   els.modeMenu.appendChild(weakBtn);
 }
 function hidePracticePicker(){ els.practicePickerPanel.style.display='none'; els.practiceCaseList.innerHTML=''; }
@@ -1784,18 +1815,18 @@ function renderPracticePicker(){ var data=currentData(); if(!data || !data.pract
   setTimeout(function(){ try{ els.practicePickerPanel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ els.practicePickerPanel.scrollIntoView(); } }, 50);
 }
 
-function flattenPracticeQuestions(data){ var out=[]; if(!data || !data.practicalCases) return out; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i]; for(var j=0;j<c.questions.length;j++){ out.push({caseTitle:c.title||('Caso práctico '+(i+1)), block:c.block||'', section:c.title||'', q:c.questions[j].q, options:c.questions[j].options.slice(), correct:c.questions[j].correct}); } } return out; }
-function renderQuestionListScreen(type){ var data=currentData(); if(!data) return; var isSost=state.subject && state.subject.short==='Sostenibilidad'; var isEnglish=state.subject && state.subject.short==='Inglés'; state.listViewType=(type||'cuestionario'); els.listSubjectTitle.textContent=subjectDisplayName(state.subject); els.listQuizBtn.textContent=isEnglish?'Banco de preguntas':'Cuestionario rápido'; els.listQuizBtn.className='btn small'+(state.listViewType==='cuestionario'?' active':''); els.listPracticeBtn.style.display=(state.subject && getModeKeysForSubject(state.subject.short).indexOf('practicas')!==-1)?'inline-flex':'none'; els.listPracticeBtn.className='btn small'+(state.listViewType==='practicas'?' active':''); if(els.listExam1Btn){ els.listExam1Btn.style.display=(state.subject && getModeKeysForSubject(state.subject.short).indexOf('examen1')!==-1 && data.exam1QuestionBank && data.exam1QuestionBank.length)?'inline-flex':'none'; els.listExam1Btn.className='btn small'+(state.listViewType==='examen1'?' active':''); }
-  var items=[], title='';
-  if(state.listViewType==='practicas'){ items=flattenPracticeQuestions(data); title='Test de prácticas'; }
-  else if(state.listViewType==='examen1'){ items=(data.exam1QuestionBank||[]).map(function(q){ return {section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||''}; }); title='Examen 1'; }
-  else { items=(data.questionBank||[]).map(function(q){ return {section:q.section||'', q:q.q, options:q.options.slice(), correct:q.correct, tag:q.tag||''}; }); title='Cuestionario rápido'; }
-  els.listCountInfo.textContent=title+' · '+items.length+' preguntas disponibles.';
-  els.questionListWrap.innerHTML='';
-  if(!items.length){ els.questionListWrap.innerHTML='<div class="empty">No hay preguntas cargadas en este contenedor.</div>'; showScreen('list'); return; }
-  for(var i=0;i<items.length;i++){ var it=items[i], wrap=document.createElement('div'); wrap.className='question-list-item'; var meta=[]; if(it.section) meta.push(it.section); if(it.tag) meta.push(it.tag); if(it.caseTitle) meta.push(it.caseTitle); if(it.block) meta.push(it.block); var html='<div><strong>'+(i+1)+'. '+escapeHtml(it.q)+'</strong></div>'; if(meta.length) html+='<div class="small" style="margin-top:6px;">'+escapeHtml(meta.join(' · '))+'</div>'; html+='<ol type="A">'; for(var k=0;k<it.options.length;k++){ html+='<li class="'+(k===it.correct?'correct-answer':'')+'">'+escapeHtml(it.options[k])+(k===it.correct?' ✓':'')+'</li>'; } html+='</ol>'; wrap.innerHTML=html; els.questionListWrap.appendChild(wrap); }
-  showScreen('list');
-}
+function flattenPracticeQuestions(data){ var out=[]; if(!data || !data.practicalCases) return out; for(var i=0;i<data.practicalCases.length;i++){ var c=data.practicalCases[i]; for(var j=0;j<c.questions.length;j++){ out.push({type:'case', caseIndex:i, caseTitle:c.title||('Caso práctico '+(i+1)), caseStatement:c.statement||'', block:c.block||'', section:c.title||'', q:c.questions[j].q, options:c.questions[j].options.slice(), correct:c.questions[j].correct, tag:c.block||''}); } } return out; }
+function normalizeText(str){ return String(str||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function isEval1Text(str){ var t=normalizeText(str); return /(^|\b)(1a|1ª|primera|primer)\s*eval/.test(t) || /evaluacion\s*1/.test(t); }
+function isEval2Text(str){ var t=normalizeText(str); return /(^|\b)(2a|2ª|segunda|segundo)\s*eval/.test(t) || /evaluacion\s*2/.test(t); }
+function extractTopicLabel(item){ var candidates=[item&&item.tag,item&&item.section,item&&item.block]; for(var i=0;i<candidates.length;i++){ var raw=String(candidates[i]||'').replace(/\s+/g,' ').trim(); if(!raw) continue; var m=raw.match(/(Tema\s*\d+|Bloque\s*\d+|UT\s*\d+|Unidad\s*\d+)/i); if(m) return m[1].replace(/\s+/g,' ').trim(); if(!isEval1Text(raw) && !isEval2Text(raw) && raw.length<=40) return raw; } return ''; }
+function collectQuestionBuckets(data){ var out={temas:[], eval1:[], eval2:[], casos:(data&&data.practicalCases)||[]}; var i, item, meta, full; var questionBank=(data&&data.questionBank)||[]; var exam1Bank=(data&&data.exam1QuestionBank)||[]; for(i=0;i<questionBank.length;i++){ item=enrichBankQuestion(questionBank[i], ''); full={type:'bank', source:'questionBank', section:item.section||'', q:item.q, options:item.options.slice(), correct:item.correct, tag:item.tag||''}; meta=(full.section||'')+' '+(full.tag||''); if(isEval1Text(meta)) out.eval1.push(full); else if(isEval2Text(meta)) out.eval2.push(full); else out.temas.push(full); } for(i=0;i<exam1Bank.length;i++){ item=enrichBankQuestion(exam1Bank[i], ''); full={type:'bank', source:'exam1QuestionBank', section:item.section||'', q:item.q, options:item.options.slice(), correct:item.correct, tag:item.tag||''}; meta=(full.section||'')+' '+(full.tag||''); if(isEval2Text(meta)) out.eval2.push(full); else out.eval1.push(full); } return out; }
+function buildTopicFilters(items){ var order=[], seen={}; for(var i=0;i<items.length;i++){ var label=extractTopicLabel(items[i]); if(!label || seen[label]) continue; seen[label]=1; order.push(label); } return order; }
+function renderListTopicFilters(items){ if(!els.listTopicFilterWrap) return; els.listTopicFilterWrap.innerHTML=''; if(state.listViewType==='casos'){ return; } var filters=buildTopicFilters(items); if(!filters.length){ state.listTopicFilter='all'; return; } var allBtn=document.createElement('button'); allBtn.className='btn small'+((state.listTopicFilter==='all')?' active':''); allBtn.textContent='Todos'; allBtn.addEventListener('click', function(){ state.listTopicFilter='all'; renderQuestionListScreen(state.listViewType); }); els.listTopicFilterWrap.appendChild(allBtn); for(var i=0;i<filters.length;i++){ (function(label){ var btn=document.createElement('button'); btn.className='btn small'+((state.listTopicFilter===label)?' active':''); btn.textContent=label; btn.addEventListener('click', function(){ state.listTopicFilter=label; renderQuestionListScreen(state.listViewType); }); els.listTopicFilterWrap.appendChild(btn); })(filters[i]); } }
+function renderQuestionRows(items, target){ target.innerHTML=''; if(!items.length){ target.innerHTML='<div class="empty">No hay preguntas cargadas en este contenedor.</div>'; return; } for(var i=0;i<items.length;i++){ var it=items[i], wrap=document.createElement('div'); wrap.className='question-list-item'; var meta=[]; if(it.section) meta.push(it.section); if(it.tag) meta.push(it.tag); if(it.caseTitle) meta.push(it.caseTitle); if(it.block) meta.push(it.block); var html='<div><strong>'+(i+1)+'. '+escapeHtml(it.q)+'</strong></div>'; if(meta.length) html+='<div class="small" style="margin-top:6px;">'+escapeHtml(meta.join(' · '))+'</div>'; html+='<ol type="A">'; for(var k=0;k<it.options.length;k++){ html+='<li class="'+(k===it.correct?'correct-answer':'')+'">'+escapeHtml(it.options[k])+(k===it.correct?' ✓':'')+'</li>'; } html+='</ol>'; wrap.innerHTML=html; target.appendChild(wrap); } }
+function renderCaseDetail(caseData, target, options){ options=options||{}; target.innerHTML=''; var head=document.createElement('div'); head.className='case-detail-head'; var statsHtml=''; if(options.stats){ statsHtml='<div class="small">'+escapeHtml(options.stats)+'</div>'; } head.innerHTML='<div><div class="badge mode">'+escapeHtml(caseData.block||'Caso práctico')+'</div><h3 class="case-detail-title">'+escapeHtml(caseData.title||'Caso práctico')+'</h3>'+statsHtml+'</div>'; var actions=document.createElement('div'); actions.className='case-detail-actions'; if(options.backLabel){ var backBtn=document.createElement('button'); backBtn.className='btn small'; backBtn.textContent=options.backLabel; backBtn.addEventListener('click', options.onBack||function(){}); actions.appendChild(backBtn); } head.appendChild(actions); target.appendChild(head); var statement=document.createElement('div'); statement.className='case-detail-statement'; statement.textContent=caseData.statement||'Sin enunciado disponible.'; target.appendChild(statement); var qs=[]; for(var i=0;i<(caseData.questions||[]).length;i++){ qs.push({section:caseData.title||'', tag:caseData.block||'', q:caseData.questions[i].q, options:(caseData.questions[i].options||[]).slice(), correct:caseData.questions[i].correct}); } renderQuestionRows(qs, target); }
+function renderCaseCards(cases, target, onOpen, emptyText){ target.innerHTML=''; if(!cases || !cases.length){ target.innerHTML='<div class="empty">'+escapeHtml(emptyText||'No hay casos prácticos cargados.')+'</div>'; return; } var list=document.createElement('div'); list.className='case-list'; for(var i=0;i<cases.length;i++){ (function(caseItem,index){ var btn=document.createElement('button'); btn.type='button'; btn.className='case-card'; var desc=String(caseItem.statement||'').replace(/\s+/g,' ').trim(); if(desc.length>180) desc=desc.slice(0,177).trim()+'…'; btn.innerHTML='<div class="case-top"><div><div class="badge mode">'+escapeHtml(caseItem.block||('Caso '+(index+1)))+'</div><h3>'+escapeHtml(caseItem.title||('Caso práctico '+(index+1)))+'</h3></div><div class="case-meta">'+(caseItem.questions&&caseItem.questions.length?caseItem.questions.length+' preguntas':'')+(caseItem.wrong>0?' · '+caseItem.wrong+' fallos':'')+'</div></div><div class="case-desc">'+escapeHtml(desc||'Sin descripción disponible.')+'</div>'; btn.addEventListener('click', function(){ onOpen(caseItem, index); }); list.appendChild(btn); })(cases[i], i); } target.appendChild(list); }
+function renderQuestionListScreen(type){ var data=currentData(); if(!data) return; var buckets=collectQuestionBuckets(data); state.listViewType=(type||state.listViewType||'temas'); if(['temas','eval1','eval2','casos'].indexOf(state.listViewType)===-1) state.listViewType='temas'; els.listSubjectTitle.textContent=subjectDisplayName(state.subject); if(els.listTopicsBtn) els.listTopicsBtn.className='btn small'+(state.listViewType==='temas'?' active':''); if(els.listEval1Btn) els.listEval1Btn.className='btn small'+(state.listViewType==='eval1'?' active':''); if(els.listEval2Btn) els.listEval2Btn.className='btn small'+(state.listViewType==='eval2'?' active':''); if(els.listCasesBtn) els.listCasesBtn.className='btn small'+(state.listViewType==='casos'?' active':''); var items=[], title=''; if(state.listViewType==='eval1'){ items=buckets.eval1.slice(); title='Repaso 1ª evaluación'; } else if(state.listViewType==='eval2'){ items=buckets.eval2.slice(); title='Repaso 2ª evaluación'; } else if(state.listViewType==='casos'){ title='Casos prácticos'; els.listTopicFilterWrap.innerHTML=''; els.listCountInfo.textContent=title+' · '+buckets.casos.length+' casos disponibles.'; renderCaseCards(buckets.casos, els.questionListWrap, function(caseItem){ renderCaseDetail(caseItem, els.questionListWrap, {backLabel:'← Volver a casos', onBack:function(){ renderQuestionListScreen('casos'); }}); els.listCountInfo.textContent=(caseItem.title||'Caso práctico')+' · '+((caseItem.questions||[]).length||0)+' preguntas.'; }); showScreen('list'); return; } else { items=buckets.temas.slice(); title='Preguntas por temas'; } renderListTopicFilters(items); if(state.listTopicFilter!=='all'){ items=items.filter(function(it){ return extractTopicLabel(it)===state.listTopicFilter; }); } els.listCountInfo.textContent=title+' · '+items.length+' preguntas disponibles.'; renderQuestionRows(items, els.questionListWrap); showScreen('list'); }
 
 function startPracticeCase(caseIndex){ var data=currentData(); if(!data || !data.practicalCases || !data.practicalCases.length) return; var c = (typeof caseIndex==='number' && caseIndex>=0 && caseIndex<data.practicalCases.length) ? data.practicalCases[caseIndex] : data.practicalCases[Math.floor(Math.random()*data.practicalCases.length)]; state.selectedPracticeCaseIndex = caseIndex;
   state.mode='practicas'; state.currentIndex=0; state.answers=[]; state.currentAnswered=false; state.sessionStartedAt=(new Date()).getTime(); var qs=c.questions.slice(); state.sessionItems=[]; for(var j=0;j<qs.length;j++) state.sessionItems.push(enrichCaseQuestion(qs[j], c, 'Test de prácticas')); hidePracticePicker(); renderQuestion(); showScreen('quiz');
@@ -2034,7 +2065,7 @@ function renderAfterProgressRefresh(){
   renderSubjects();
   var progressScreen=document.getElementById('screen-progress');
   if(progressScreen && progressScreen.classList.contains('active') && state.progressSubject){ renderProgress(); }
-  if(document.getElementById('screen-list').classList.contains('active') && state.subject && state.mode){ renderQuestionListScreen(state.mode); }
+  if(document.getElementById('screen-list').classList.contains('active') && state.subject){ renderQuestionListScreen(state.listViewType); }
 }
 
 async function signInWithGoogle(){
@@ -2367,114 +2398,10 @@ function bindProgressChartChips(){
   var wrap=document.getElementById('progressChartChips'); if(!wrap || wrap.__bound) return; wrap.__bound=1;
   wrap.addEventListener('click', function(ev){ var b=ev.target.closest('.r-chip'); if(!b) return; var m=b.getAttribute('data-metric'); if(!m) return; progressChartMetric=m; var chips=wrap.querySelectorAll('.r-chip'); for(var i=0;i<chips.length;i++) chips[i].classList.toggle('active', chips[i]===b); var short=state.progressSubject; if(short && progressStore[short]) renderProgressSparkline(progressStore[short]); });
 }
-
-function getWeakCasesRanking(data, sub){
-  data=data||{};
-  sub=sub||emptySubject();
-  var cases=Array.isArray(data.practicalCases)?data.practicalCases:[];
-  if(!cases.length) return [];
-  var log=Array.isArray(sub.questionLog)?sub.questionLog:[];
-  if(!log.length) return [];
-  var caseMap={};
-  for(var i=0;i<cases.length;i++){
-    var c=cases[i]||{};
-    var title=String(c.title||('Caso práctico '+(i+1)));
-    caseMap[title]={caseRef:c, wrongs:0, failedQs:{}};
-  }
-  for(var j=0;j<log.length;j++){
-    var entry=log[j]||{};
-    var title=String(entry.section||'');
-    if(!caseMap[title]) continue;
-    if(entry.isCorrect) continue;
-    caseMap[title].wrongs++;
-    var qKey=String(entry.q||'');
-    caseMap[title].failedQs[qKey]=(caseMap[title].failedQs[qKey]||0)+1;
-  }
-  var out=[];
-  for(var k in caseMap){
-    if(caseMap[k].wrongs>0) out.push(caseMap[k]);
-  }
-  out.sort(function(a,b){ return (b.wrongs||0)-(a.wrongs||0); });
-  return out;
-}
-function renderWeakTabs(){
-  var qBtn=document.getElementById('weakTabQuestionsBtn');
-  var cBtn=document.getElementById('weakTabCasesBtn');
-  if(qBtn) qBtn.classList.toggle('active', state.weakTab!=='cases');
-  if(cBtn) cBtn.classList.toggle('active', state.weakTab==='cases');
-}
-function renderWeak(sub){
-  els.weakQuestionsList.innerHTML='';
-  var data=currentData()||{};
-  var lookup=buildQuestionLookups(data);
-  var map=buildWeakQuestionMap(sub||emptySubject());
-  var arr=[];
-  for(var k in map){
-    if(!map[k] || (map[k].wrong||0)<=0) continue;
-    var exactKey=(map[k].section||'')+'||'+(map[k].q||'');
-    var full=lookup.byExact[exactKey] || lookup.byQ[map[k].q||''];
-    if(full && full.type==='case') continue;
-    arr.push(map[k]);
-  }
-  arr.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); });
-  var weakCases=getWeakCasesRanking(data, sub);
-  renderWeakTabs();
-  var showCases = state.weakTab==='cases';
-  if(showCases){
-    if(!weakCases.length){
-      els.weakQuestionsList.innerHTML='<div class="empty">No hay casos prácticos fallados registrados en esta asignatura.</div>';
-      return {questions:arr.length, cases:0};
-    }
-    for(var j=0;j<Math.min(5,weakCases.length);j++){
-      var wc=weakCases[j];
-      var c=wc.caseRef||{};
-      var qCount=Array.isArray(c.questions)?c.questions.length:0;
-      var failedCount=Object.keys(wc.failedQs||{}).length;
-      var row=document.createElement('div');
-      row.className='weak-item';
-      var stmt=c.statement?String(c.statement):'';
-      var stmtShort=stmt.length>220?(stmt.substring(0,220)+'…'):stmt;
-      row.innerHTML='<strong>'+escapeHtml(c.title||('Caso práctico '+(j+1)))+'</strong>'
-        +'<div class="small" style="margin-top:6px;">'+wc.wrongs+' fallos totales · '+failedCount+' de '+qCount+' preguntas falladas</div>'
-        +(stmt?'<div class="small" style="margin-top:8px;opacity:.75;">'+escapeHtml(stmtShort)+'</div>':'');
-      els.weakQuestionsList.appendChild(row);
-    }
-    return {questions:arr.length, cases:weakCases.length};
-  }
-  if(!arr.length){
-    els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas en esta asignatura.</div>';
-    return {questions:0, cases:weakCases.length};
-  }
-  for(var i=0;i<Math.min(10,arr.length);i++){
-    var it=arr[i], row=document.createElement('div');
-    row.className='weak-item';
-    var exactKey2=(it.section||'')+'||'+(it.q||'');
-    var full2=lookup.byExact[exactKey2] || lookup.byQ[it.q||''] || it;
-    var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>';
-    html+=buildReviewOptionsHtml(full2, null, false);
-    row.innerHTML=html;
-    els.weakQuestionsList.appendChild(row);
-  }
-  return {questions:arr.length, cases:weakCases.length};
-}
-function renderWeakScreen(){
-  if(!state.subject) return;
-  var short=state.subject.short;
-  var sub=progressStore[short] || emptySubject();
-  progressStore[short]=sub;
-  els.weakSubjectTitle.textContent=subjectDisplayName(state.subject);
-  var result=renderWeak(sub);
-  if(state.weakTab==='cases'){
-    els.weakCountInfo.textContent=result.cases
-      ? ('Mostrando '+Math.min(5,result.cases)+' caso'+(result.cases===1?'':'s')+' práctico'+(result.cases===1?'':'s')+' con más fallos.')
-      : 'No hay casos prácticos fallados registrados en esta asignatura.';
-  } else {
-    els.weakCountInfo.textContent=result.questions
-      ? ('Mostrando '+Math.min(10,result.questions)+' preguntas con más fallos.')
-      : 'Aún no hay preguntas falladas registradas en esta asignatura.';
-  }
-  showScreen('weak');
-}
+function renderWeakQuestions(sub){ els.weakQuestionsList.innerHTML=''; var map=buildWeakQuestionMap(sub||emptySubject()); var arr=[]; for(var k in map){ if(map[k] && (map[k].wrong||0)>0) arr.push(map[k]); } arr.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); if(!arr.length){ els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas.</div>'; return 0; } var data=currentData()||{}; var lookup=buildQuestionLookups(data); for(var i=0;i<Math.min(10,arr.length);i++){ var it=arr[i], row=document.createElement('div'); row.className='weak-item'; var exactKey=(it.section||'')+'||'+(it.q||''); var full=lookup.byExact[exactKey] || lookup.byQ[it.q||''] || it; var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>'; html+=buildReviewOptionsHtml(full, null, false); row.innerHTML=html; els.weakQuestionsList.appendChild(row); } return arr.length; }
+function buildWeakCaseStats(sub, data){ var cases=(data&&data.practicalCases)||[]; var map=buildWeakQuestionMap(sub||emptySubject()); var out=[]; for(var i=0;i<cases.length;i++){ var c=cases[i], wrong=0, seen=0; for(var j=0;j<(c.questions||[]).length;j++){ var key=(c.title||'')+'||'+(c.questions[j].q||''); if(map[key]){ wrong+=(map[key].wrong||0); seen+=(map[key].seen||0); } } if(wrong>0){ out.push({title:c.title||('Caso práctico '+(i+1)), block:c.block||('Caso '+(i+1)), statement:c.statement||'', questions:c.questions||[], wrong:wrong, seen:seen}); } } out.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); return out; }
+function renderWeakCases(sub){ var data=currentData()||{}; var weakCases=buildWeakCaseStats(sub, data); renderCaseCards(weakCases, els.weakCasesList, function(caseItem){ renderCaseDetail(caseItem, els.weakCasesList, {backLabel:'← Volver a casos fallados', onBack:function(){ renderWeakScreen('cases'); }, stats:(caseItem.wrong||0)+' fallos acumulados'}); els.weakCountInfo.textContent=(caseItem.title||'Caso práctico')+' · '+(caseItem.wrong||0)+' fallos acumulados.'; }, 'Aún no hay casos prácticos fallados registrados.'); return weakCases.length; }
+function renderWeakScreen(viewType){ if(!state.subject) return; var short=state.subject.short; var sub=progressStore[short] || emptySubject(); progressStore[short]=sub; state.weakViewType=(viewType||state.weakViewType||'questions'); els.weakSubjectTitle.textContent=subjectDisplayName(state.subject); if(els.weakQuestionsTabBtn) els.weakQuestionsTabBtn.className='btn small'+(state.weakViewType==='questions'?' active':''); if(els.weakCasesTabBtn) els.weakCasesTabBtn.className='btn small'+(state.weakViewType==='cases'?' active':''); if(els.weakQuestionsPanel) els.weakQuestionsPanel.classList.toggle('active', state.weakViewType==='questions'); if(els.weakCasesPanel) els.weakCasesPanel.classList.toggle('active', state.weakViewType==='cases'); var totalWeakQuestions=renderWeakQuestions(sub); var totalWeakCases=renderWeakCases(sub); if(state.weakViewType==='cases'){ els.weakCountInfo.textContent=totalWeakCases ? ('Mostrando '+totalWeakCases+' casos prácticos con fallos acumulados.') : 'Aún no hay casos prácticos fallados registrados en esta asignatura.'; } else { els.weakCountInfo.textContent=totalWeakQuestions ? ('Mostrando '+Math.min(10,totalWeakQuestions)+' preguntas con más fallos.') : 'Aún no hay preguntas falladas registradas en esta asignatura.'; } showScreen('weak'); }
 function renderProgressSwitch(){ /* legacy no-op (new UI uses renderProgressSubjectList) */ }
 function getAvailableSubjects(){ var out=[]; for(var i=0;i<SUBJECTS.length;i++){ if(SUBJECTS[i].available) out.push(SUBJECTS[i]); } return out; }
 function renderMetricShareUI(){ /* legacy no-op */ }
@@ -2665,7 +2592,7 @@ function buildQuestionShareText(){
 }
 function buildActivityShareText(){ var sum=state.lastSummary; if(!sum) return ''; var lines=[]; lines.push('Asignatura: '+subjectDisplayShort(state.subject.short)); lines.push('Modo: '+MODES[state.mode].title); lines.push('Aciertos: '+sum.correct); lines.push('Errores: '+sum.wrong); lines.push('Sin contestar: '+sum.blank); if(typeof sum.score==='number') lines.push('Nota: '+sum.score.toFixed(2)); return lines.join('\n'); }
 function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function resetHome(){ state.subject=null; state.mode=null; state.sessionItems=[]; state.answers=[]; state.currentIndex=0; state.selectedPracticeCaseIndex=null; hidePracticePicker(); renderSubjects(); showScreen('home'); }
+function resetHome(){ state.subject=null; state.mode=null; state.sessionItems=[]; state.answers=[]; state.currentIndex=0; state.selectedPracticeCaseIndex=null; state.listViewType='temas'; state.listTopicFilter='all'; state.weakViewType='questions'; hidePracticePicker(); renderSubjects(); showScreen('home'); }
 function backSubject(){ hidePracticePicker(); if(state.subject){ renderModeMenu(); showScreen('menu'); } else resetHome(); }
 
 function toggleTheme(){
@@ -2718,8 +2645,53 @@ function initExamCountdown(){
 function init(){ createAuthUi(); updateAuthUi(); setupFirebase(); applySavedTheme(); renderSubjects(); initExamCountdown();
   var brandHome=document.getElementById('brandHome'); if(brandHome){ brandHome.addEventListener('click', function(){ resetHome(); }); }
   els.progressBtn.addEventListener('click', function(){ if(state.subject && state.subject.short){ state.progressSubject=state.subject.short; } else if(!state.progressSubject){ state.progressSubject=(getAvailableSubjects()[0] ? getAvailableSubjects()[0].short : 'PIICT'); } renderProgress(); });
+
+  /* ── SINCRONIZACIÓN MANUAL + AUTO ── */
+  var syncBtnOriginalHtml='';
+  async function doManualSync(){
+    if(!els.syncTopBtn) return;
+    if(syncBtnOriginalHtml==='') syncBtnOriginalHtml=els.syncTopBtn.innerHTML;
+    if(!authReady || !auth || !db){
+      els.syncTopBtn.innerHTML='&#x26A0; Firebase no listo';
+      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2200);
+      return;
+    }
+    if(!auth.currentUser){
+      els.syncTopBtn.innerHTML='&#x26A0; Inicia sesión con Google';
+      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2600);
+      return;
+    }
+    els.syncTopBtn.disabled=true;
+    els.syncTopBtn.innerHTML='&#x21BB; Sincronizando...';
+    try{
+      await saveProgressToCloud(true);
+      await applyCloudProgress(auth.currentUser);
+      els.syncTopBtn.innerHTML='&#x2705; Sincronizado';
+    }catch(e){
+      console.error('Sync manual falló:',e);
+      els.syncTopBtn.innerHTML='&#x274C; Error';
+    }finally{
+      setTimeout(function(){ els.syncTopBtn.disabled=false; els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },1800);
+    }
+  }
+  if(els.syncTopBtn) els.syncTopBtn.addEventListener('click', doManualSync);
+
+  /* Auto-sync al ocultar pestaña / cerrar app (rescata los últimos 700ms del debounce) */
+  function flushSyncIfPossible(){
+    try{
+      if(typeof saveLocalProgress==='function') saveLocalProgress();
+      if(authReady && auth && auth.currentUser && db){
+        saveProgressToCloud(true);
+      }
+    }catch(e){}
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='hidden') flushSyncIfPossible();
+  });
+  window.addEventListener('pagehide', flushSyncIfPossible);
+  window.addEventListener('beforeunload', flushSyncIfPossible);
   if(els.authActionBtn) els.authActionBtn.addEventListener('click', function(){ if(state.authUser) signOutGoogle(); else signInWithGoogle(); });
-  els.listQuizBtn.addEventListener('click', function(){ renderQuestionListScreen('cuestionario'); }); els.listPracticeBtn.addEventListener('click', function(){ renderQuestionListScreen('practicas'); }); if(els.listExam1Btn){ els.listExam1Btn.addEventListener('click', function(){ renderQuestionListScreen('examen1'); }); } els.listBackBtn.addEventListener('click', backSubject); els.listHomeBtn.addEventListener('click', resetHome); if(els.weakBackBtn) els.weakBackBtn.addEventListener('click', backSubject); if(els.weakHomeBtn) els.weakHomeBtn.addEventListener('click', resetHome); var weakTabQuestionsBtn=document.getElementById('weakTabQuestionsBtn'); var weakTabCasesBtn=document.getElementById('weakTabCasesBtn'); if(weakTabQuestionsBtn) weakTabQuestionsBtn.addEventListener('click', function(){ state.weakTab='questions'; if(state.subject) renderWeakScreen(); }); if(weakTabCasesBtn) weakTabCasesBtn.addEventListener('click', function(){ state.weakTab='cases'; if(state.subject) renderWeakScreen(); });
+  if(els.listTopicsBtn) els.listTopicsBtn.addEventListener('click', function(){ state.listTopicFilter='all'; renderQuestionListScreen('temas'); }); if(els.listEval1Btn) els.listEval1Btn.addEventListener('click', function(){ state.listTopicFilter='all'; renderQuestionListScreen('eval1'); }); if(els.listEval2Btn) els.listEval2Btn.addEventListener('click', function(){ state.listTopicFilter='all'; renderQuestionListScreen('eval2'); }); if(els.listCasesBtn) els.listCasesBtn.addEventListener('click', function(){ state.listTopicFilter='all'; renderQuestionListScreen('casos'); }); els.listBackBtn.addEventListener('click', backSubject); els.listHomeBtn.addEventListener('click', resetHome); if(els.weakQuestionsTabBtn) els.weakQuestionsTabBtn.addEventListener('click', function(){ renderWeakScreen('questions'); }); if(els.weakCasesTabBtn) els.weakCasesTabBtn.addEventListener('click', function(){ renderWeakScreen('cases'); }); if(els.weakBackBtn) els.weakBackBtn.addEventListener('click', backSubject); if(els.weakHomeBtn) els.weakHomeBtn.addEventListener('click', resetHome);
   els.practiceRandomBtn.addEventListener('click', function(){ startPracticeCase(null); }); els.practiceBackBtn.addEventListener('click', hidePracticePicker);
   var _resetBtn=document.getElementById('resetSubjectProgressBtn'); if(_resetBtn) _resetBtn.addEventListener('click', function(){ var short=state.progressSubject || (state.subject&&state.subject.short); if(!short) return; if(window.confirm('¿Seguro que quieres borrar todo el registro de '+subjectDisplayByShort(short)+'? Esta acción no se puede deshacer.')) resetSubjectProgress(short); });
   els.homeTopBtn.addEventListener('click', resetHome); els.homeBtn.addEventListener('click', resetHome); els.subjectBtn.addEventListener('click', backSubject); els.repeatBtn.addEventListener('click', function(){ startMode(state.mode); }); els.nextBtn.addEventListener('click', nextQuestion); els.exitBtn.addEventListener('click', function(){ if(window.confirm('¿Salir de la sesión? Perderás el progreso actual.')) resetHome(); }); els.themeBtn.addEventListener('click', toggleTheme); els.shareQuestionBtn.addEventListener('click', function(){ var txt=buildQuestionShareText(); if(txt) shareText(txt); }); els.shareActivityBtn.addEventListener('click', function(){ var txt=buildActivityShareText(); if(txt) shareText(txt); }); els.appHelpBtn.addEventListener('click', function(){ showScreen('help'); }); els.helpBackBtn.addEventListener('click', resetHome); els.toggleInfoBtn.addEventListener('click', function(){ els.sectionTag.style.display = els.sectionTag.style.display==='none' ? 'block' : 'none'; });
@@ -3966,12 +3938,167 @@ init();
 })();
 </script>
 
+<!-- ========== Welcome modal (install + login) ========== -->
+<style>
+#welcomeModal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(8,6,18,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:20px;}
+#welcomeModal.show{display:flex;}
+#welcomeModal .wm-card{background:linear-gradient(135deg,#1a0f2e,#120920);border:1px solid rgba(168,85,247,.35);border-radius:20px;padding:26px 22px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);color:#f4f0ff;font-family:"Bricolage Grotesque","Space Grotesk",system-ui,sans-serif;text-align:center;}
+#welcomeModal .wm-emoji{font-size:48px;line-height:1;margin-bottom:10px;}
+#welcomeModal h2{margin:0 0 6px;font-size:22px;font-weight:800;background:linear-gradient(90deg,#ff7a45,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#welcomeModal p{margin:0 0 18px;color:#b8aed8;font-size:14px;line-height:1.5;}
+#welcomeModal .wm-btns{display:flex;flex-direction:column;gap:10px;}
+#welcomeModal button{font:inherit;cursor:pointer;border:none;padding:12px 16px;border-radius:12px;font-weight:700;font-size:14px;transition:transform .1s, filter .15s;}
+#welcomeModal button:hover{filter:brightness(1.1);}
+#welcomeModal button:active{transform:scale(.98);}
+#welcomeModal .wm-primary{background:linear-gradient(90deg,#ff7a45,#a855f7);color:#fff;}
+#welcomeModal .wm-secondary{background:rgba(255,255,255,.08);color:#f4f0ff;border:1px solid rgba(255,255,255,.12);}
+#welcomeModal .wm-ghost{background:transparent;color:#9b92c4;font-size:12px;padding:6px;}
+#swUpdateToast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1a0f2e,#120920);border:1px solid rgba(168,85,247,.45);color:#f4f0ff;padding:12px 16px;border-radius:12px;font-family:"Bricolage Grotesque","Space Grotesk",system-ui,sans-serif;font-size:13px;display:none;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+#swUpdateToast.show{display:flex;}
+#swUpdateToast button{background:linear-gradient(90deg,#ff7a45,#a855f7);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;}
+</style>
+
+<div id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle">
+  <div class="wm-card">
+    <div class="wm-emoji">&#128169;</div>
+    <h2 id="wmTitle">¡Mucha mierda!</h2>
+    <p id="wmDesc">Instala la app en tu dispositivo e inicia sesión con Google para sincronizar tu progreso entre móvil, tablet y ordenador.</p>
+    <div class="wm-btns">
+      <button type="button" class="wm-primary" id="wmInstallBtn" style="display:none;">📲 Instalar la app</button>
+      <button type="button" class="wm-primary" id="wmLoginBtn">🔐 Iniciar sesión con Google</button>
+      <button type="button" class="wm-secondary" id="wmLaterBtn">Ahora no</button>
+      <button type="button" class="wm-ghost" id="wmNeverBtn">No volver a mostrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="swUpdateToast">
+  <span>Hay una versión nueva disponible</span>
+  <button type="button" id="swUpdateBtn">Actualizar</button>
+</div>
+
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js')
-      .catch(function(err){ console.log('SW no registrado:', err); });
+/* ================= Service Worker con auto-update ================= */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(refreshing) return;
+    refreshing=true;
+    window.location.reload();
   });
-}
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      function showUpdateToast(worker){
+        var toast=document.getElementById('swUpdateToast');
+        var btn=document.getElementById('swUpdateBtn');
+        if(!toast||!btn) return;
+        toast.classList.add('show');
+        btn.onclick=function(){
+          toast.classList.remove('show');
+          if(worker) worker.postMessage({type:'SKIP_WAITING'});
+        };
+      }
+      // Hay uno esperando al cargar
+      if(reg.waiting) showUpdateToast(reg.waiting);
+      // Nuevo SW detectado
+      reg.addEventListener('updatefound', function(){
+        var nw=reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', function(){
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            showUpdateToast(nw);
+          }
+        });
+      });
+      // Comprueba actualizaciones al volver a la pestaña
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState==='visible'){ try{ reg.update(); }catch(e){} }
+      });
+      // Y cada 30 min si sigue abierta
+      setInterval(function(){ try{ reg.update(); }catch(e){} }, 30*60*1000);
+    }).catch(function(err){ console.log('SW no registrado:', err); });
+  });
+})();
+
+/* ================= Modal bienvenida (install + login) ================= */
+(function(){
+  var modal=document.getElementById('welcomeModal');
+  var installBtn=document.getElementById('wmInstallBtn');
+  var loginBtn=document.getElementById('wmLoginBtn');
+  var laterBtn=document.getElementById('wmLaterBtn');
+  var neverBtn=document.getElementById('wmNeverBtn');
+  var desc=document.getElementById('wmDesc');
+  var deferredPrompt=null;
+
+  // Capturar evento de instalación (Chrome/Edge/Android)
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt=e;
+    if(installBtn) installBtn.style.display='';
+  });
+
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone===true;
+  }
+  function isLoggedIn(){
+    try{ return !!(window.firebase && firebase.auth && firebase.auth().currentUser); }catch(e){ return false; }
+  }
+  function hide(){ if(modal) modal.classList.remove('show'); }
+  function show(){
+    if(!modal) return;
+    // Ajusta texto según lo que falte
+    var needInstall=!isStandalone();
+    var needLogin=!isLoggedIn();
+    if(needInstall && needLogin){
+      desc.textContent='Instala la app en tu dispositivo e inicia sesión con Google para sincronizar tu progreso entre móvil, tablet y ordenador.';
+    }else if(needInstall){
+      desc.textContent='Instala la app en tu dispositivo para tenerla a un toque desde la pantalla de inicio.';
+      loginBtn.style.display='none';
+    }else if(needLogin){
+      desc.textContent='Inicia sesión con Google para sincronizar tu progreso entre dispositivos.';
+      installBtn.style.display='none';
+    }else{
+      return; // nada que ofrecer
+    }
+    modal.classList.add('show');
+  }
+
+  if(installBtn) installBtn.addEventListener('click', async function(){
+    if(!deferredPrompt){ alert('Para instalar: abre el menú del navegador y pulsa "Añadir a pantalla de inicio" o "Instalar app".'); return; }
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt=null;
+    installBtn.style.display='none';
+    hide();
+  });
+  if(loginBtn) loginBtn.addEventListener('click', function(){
+    hide();
+    try{
+      if(typeof signInWithGoogle==='function'){ signInWithGoogle(); return; }
+    }catch(e){}
+    // Fallback: pulsa el botón de login del header
+    var hdr=document.getElementById('googleLoginBtn')||document.getElementById('loginBtn');
+    if(hdr) hdr.click();
+  });
+  if(laterBtn) laterBtn.addEventListener('click', function(){
+    hide();
+    try{ sessionStorage.setItem('wmDismissed','1'); }catch(e){}
+  });
+  if(neverBtn) neverBtn.addEventListener('click', function(){
+    hide();
+    try{ localStorage.setItem('wmNever','1'); }catch(e){}
+  });
+
+  // Mostrar al arrancar, con un retardo para que Firebase pueda decidir el authState
+  window.addEventListener('load', function(){
+    try{ if(localStorage.getItem('wmNever')==='1') return; }catch(e){}
+    try{ if(sessionStorage.getItem('wmDismissed')==='1') return; }catch(e){}
+    setTimeout(function(){
+      if(!isStandalone() || !isLoggedIn()) show();
+    }, 1500);
+  });
+})();
 </script>
 </body></html>
