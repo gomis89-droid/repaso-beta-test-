@@ -1252,6 +1252,10 @@ body.quiz-active{}
           <button class="btn ghost small" id="weakHomeBtn">Inicio</button>
         </div>
       </div>
+      <div id="weakTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 18px;">
+        <button class="r-chip active" id="weakTabQuestions" type="button">Preguntas más falladas</button>
+        <button class="r-chip" id="weakTabCases" type="button">Casos prácticos más fallados</button>
+      </div>
       <div id="weakQuestionsList"></div>
     </div>
   </section>
@@ -1485,12 +1489,12 @@ var db = null;
 var authReady = false;
 var cloudSyncInFlight = false;
 var saveCloudTimer = null;
-var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario' };
+var state = { subject:null, mode:null, sessionItems:[], answers:[], currentIndex:0, currentAnswered:false, sessionStartedAt:0, progressSubject:'PIICT', lastSummary:null, selectedPracticeCaseIndex:null, listViewType:'cuestionario', weakView:'questions' };
 var screens = {
   home: document.getElementById('screen-home'), help: document.getElementById('screen-help'), menu: document.getElementById('screen-menu'), quiz: document.getElementById('screen-quiz'), results: document.getElementById('screen-results'), list: document.getElementById('screen-list'), weak: document.getElementById('screen-weak'), progress: document.getElementById('screen-progress'), share: document.getElementById('screen-share')
 };
 var els = {
-  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), syncTopBtn: document.getElementById('syncTopBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
+  subjectGrid: document.getElementById('subjectGrid'), modeMenu: document.getElementById('modeMenu'), menuSubjectTitle: document.getElementById('menuSubjectTitle'), quizSubjectTitle: document.getElementById('quizSubjectTitle'), modeBadge: document.getElementById('modeBadge'), blockInfo: document.getElementById('blockInfo'), counterInfo: document.getElementById('counterInfo'), progressBar: document.getElementById('progressBar'), sectionTag: document.getElementById('sectionTag'), questionText: document.getElementById('questionText'), optionsWrap: document.getElementById('optionsWrap'), nextBtn: document.getElementById('nextBtn'), exitBtn: document.getElementById('exitBtn'), casePanel: document.getElementById('casePanel'), caseTitle: document.getElementById('caseTitle'), caseStatement: document.getElementById('caseStatement'), resultsTitle: document.getElementById('resultsTitle'), scoreCard: document.getElementById('scoreCard'), scoreNumber: document.getElementById('scoreNumber'), scoreFormulaText: document.getElementById('scoreFormulaText'), scoreReactionGif: document.getElementById('scoreReactionGif'), statCorrect: document.getElementById('statCorrect'), statWrong: document.getElementById('statWrong'), statBlank: document.getElementById('statBlank'), mistakesWrap: document.getElementById('mistakesWrap'), repeatBtn: document.getElementById('repeatBtn'), subjectBtn: document.getElementById('subjectBtn'), homeBtn: document.getElementById('homeBtn'), homeTopBtn: document.getElementById('homeTopBtn'), bankCount: document.getElementById('bankCount'), caseCount: document.getElementById('caseCount'), themeBtn: document.getElementById('themeBtn'), progressBtn: document.getElementById('progressBtn'), syncTopBtn: document.getElementById('syncTopBtn'), shareRegistryTopBtn: document.getElementById('shareRegistryTopBtn'), shareQuestionBtn: document.getElementById('shareQuestionBtn'), shareActivityBtn: document.getElementById('shareActivityBtn'), appHelpBtn: document.getElementById('appHelpBtn'), helpBackBtn: document.getElementById('helpBackBtn'), toggleInfoBtn: document.getElementById('toggleInfoBtn'), listSubjectTitle: document.getElementById('listSubjectTitle'), listQuizBtn: document.getElementById('listQuizBtn'), listPracticeBtn: document.getElementById('listPracticeBtn'), listExam1Btn: document.getElementById('listExam1Btn'), listCountInfo: document.getElementById('listCountInfo'), questionListWrap: document.getElementById('questionListWrap'), listBackBtn: document.getElementById('listBackBtn'), listHomeBtn: document.getElementById('listHomeBtn'), weakSubjectTitle: document.getElementById('weakSubjectTitle'), weakCountInfo: document.getElementById('weakCountInfo'), weakBackBtn: document.getElementById('weakBackBtn'), weakHomeBtn: document.getElementById('weakHomeBtn'), weakTabQuestions: document.getElementById('weakTabQuestions'), weakTabCases: document.getElementById('weakTabCases'), progressSubjectSwitch: document.getElementById('progressSubjectSwitch'), progressSubjectTitle: document.getElementById('progressSubjectTitle'), progressLastPlayed: document.getElementById('progressLastPlayed'), overallSessions: document.getElementById('overallSessions'), overallAccuracy: document.getElementById('overallAccuracy'), overallFailure: document.getElementById('overallFailure'), overallAnswered: document.getElementById('overallAnswered'), overallTime: document.getElementById('overallTime'), overallDays: document.getElementById('overallDays'), examStatsGrid: document.getElementById('examStatsGrid'), modeProgressGrid: document.getElementById('modeProgressGrid'), shareSubjectOptions: document.getElementById('shareSubjectOptions'), shareMetricOptions: document.getElementById('shareMetricOptions'), selectAllMetricsBtn: document.getElementById('selectAllMetricsBtn'), shareMetricsNowBtn: document.getElementById('shareMetricsNowBtn'), downloadTxtBtn: document.getElementById('downloadTxtBtn'), sharePreviewBox: document.getElementById('sharePreviewBox'), weakQuestionsList: document.getElementById('weakQuestionsList'), practicePickerPanel: document.getElementById('practicePickerPanel'), practiceRandomBtn: document.getElementById('practiceRandomBtn'), practiceBackBtn: document.getElementById('practiceBackBtn'), practiceCaseList: document.getElementById('practiceCaseList'), resetSubjectProgressBtn: document.getElementById('resetSubjectProgressBtn')
 };
 var progressStore = loadProgress();
 var METRIC_DEFS = [
@@ -2371,380 +2375,93 @@ function bindProgressChartChips(){
   var wrap=document.getElementById('progressChartChips'); if(!wrap || wrap.__bound) return; wrap.__bound=1;
   wrap.addEventListener('click', function(ev){ var b=ev.target.closest('.r-chip'); if(!b) return; var m=b.getAttribute('data-metric'); if(!m) return; progressChartMetric=m; var chips=wrap.querySelectorAll('.r-chip'); for(var i=0;i<chips.length;i++) chips[i].classList.toggle('active', chips[i]===b); var short=state.progressSubject; if(short && progressStore[short]) renderProgressSparkline(progressStore[short]); });
 }
-function renderWeak(sub){ els.weakQuestionsList.innerHTML=''; var map=buildWeakQuestionMap(sub||emptySubject()); var data=currentData()||{}; var lookup=buildQuestionLookups(data); var arr=[]; for(var k in map){ if(!map[k] || (map[k].wrong||0)<=0) continue; var exactKey=(map[k].section||'')+'||'+(map[k].q||''); var full=lookup.byExact[exactKey] || lookup.byQ[map[k].q||'']; if(full && full.type==='case') continue; /* casos se agrupan en la sección de casos */ arr.push(map[k]); } arr.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); }); var weakCases=getWeakCasesRanking(data); if(!arr.length && !weakCases.length){ els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas.</div>'; return {questions:0, cases:0}; } if(arr.length){ var h1=document.createElement('div'); h1.className='weak-section-title'; h1.innerHTML='<h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:var(--ink);">Preguntas más falladas</h3>'; els.weakQuestionsList.appendChild(h1); for(var i=0;i<Math.min(10,arr.length);i++){ var it=arr[i], row=document.createElement('div'); row.className='weak-item'; var exactKey2=(it.section||'')+'||'+(it.q||''); var full2=lookup.byExact[exactKey2] || lookup.byQ[it.q||''] || it; var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>'; html+=buildReviewOptionsHtml(full2, null, false); row.innerHTML=html; els.weakQuestionsList.appendChild(row); } } if(weakCases.length){ var h2=document.createElement('div'); h2.className='weak-section-title'; h2.style.marginTop='22px'; h2.innerHTML='<h3 style="margin:0 0 10px;font-size:15px;font-weight:700;color:var(--ink);">Casos prácticos más fallados</h3>'; els.weakQuestionsList.appendChild(h2); for(var j=0;j<Math.min(5,weakCases.length);j++){ var wc=weakCases[j]; var c=wc.caseRef; var qCount=(c.questions||[]).length; var failedCount=Object.keys(wc.failedQs||{}).length; var crow=document.createElement('div'); crow.className='weak-item'; var stmt=c.statement?String(c.statement):''; var stmtShort=stmt.length>180?(stmt.substring(0,180)+'…'):stmt; crow.innerHTML='<strong>'+escapeHtml(c.title||'Caso práctico')+'</strong>'+'<div class="small" style="margin-top:6px;">'+wc.wrongs+' fallos totales · '+failedCount+' de '+qCount+' preguntas falladas</div>'+(stmt?'<div class="small" style="margin-top:8px;opacity:.7;">'+escapeHtml(stmtShort)+'</div>':''); els.weakQuestionsList.appendChild(crow); } } return {questions:arr.length, cases:weakCases.length}; }
-function renderWeakScreen(){ if(!state.subject) return; var short=state.subject.short; var sub=progressStore[short] || emptySubject(); progressStore[short]=sub; els.weakSubjectTitle.textContent=subjectDisplayName(state.subject); var result=renderWeak(sub); var parts=[]; if(result.questions>0) parts.push(Math.min(10,result.questions)+' pregunta'+(result.questions===1?'':'s')); if(result.cases>0) parts.push(Math.min(5,result.cases)+' caso'+(result.cases===1?'':'s')+' práctico'+(result.cases===1?'':'s')); els.weakCountInfo.textContent=parts.length ? ('Mostrando '+parts.join(' · ')+' con más fallos.') : 'Aún no hay preguntas falladas registradas en esta asignatura.'; showScreen('weak'); }
+function getWeakData(sub){
+  var safeSub=sub||emptySubject();
+  var map=buildWeakQuestionMap(safeSub);
+  var data=currentData()||{};
+  var lookup=buildQuestionLookups(data);
+  var questions=[];
+  for(var k in map){
+    if(!map[k] || (map[k].wrong||0)<=0) continue;
+    var exactKey=(map[k].section||'')+'||'+(map[k].q||'');
+    var full=lookup.byExact[exactKey] || lookup.byQ[map[k].q||''];
+    if(full && full.type==='case') continue;
+    questions.push(map[k]);
+  }
+  questions.sort(function(a,b){ return (b.wrong||0)-(a.wrong||0); });
+  var weakCases=getWeakCasesRanking(data);
+  return { questions:questions, cases:weakCases, lookup:lookup };
+}
+function updateWeakTabs(){
+  if(els.weakTabQuestions) els.weakTabQuestions.classList.toggle('active', state.weakView!=='cases');
+  if(els.weakTabCases) els.weakTabCases.classList.toggle('active', state.weakView==='cases');
+}
+function renderWeak(sub){
+  els.weakQuestionsList.innerHTML='';
+  var weak=getWeakData(sub);
+  var questions=weak.questions, weakCases=weak.cases, lookup=weak.lookup;
+  if(!questions.length && !weakCases.length){
+    els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas en esta asignatura.</div>';
+    return {questions:0, cases:0};
+  }
+  var view=(state.weakView==='cases')?'cases':'questions';
+  updateWeakTabs();
+  if(view==='cases'){
+    if(!weakCases.length){
+      els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay casos prácticos fallados registrados en esta asignatura.</div>';
+      return {questions:questions.length, cases:0};
+    }
+    for(var j=0;j<Math.min(5,weakCases.length);j++){
+      var wc=weakCases[j];
+      var c=wc.caseRef||{};
+      var qCount=(c.questions||[]).length;
+      var failedCount=Object.keys(wc.failedQs||{}).length;
+      var crow=document.createElement('div');
+      crow.className='weak-item';
+      var stmt=c.statement?String(c.statement):'';
+      var stmtShort=stmt.length>180?(stmt.substring(0,180)+'…'):stmt;
+      crow.innerHTML='<strong>'+escapeHtml(c.title||'Caso práctico')+'</strong>'
+        +'<div class="small" style="margin-top:6px;">'+wc.wrongs+' fallos totales · '+failedCount+' de '+qCount+' preguntas falladas</div>'
+        +(stmt?'<div class="small" style="margin-top:8px;opacity:.7;">'+escapeHtml(stmtShort)+'</div>':'');
+      els.weakQuestionsList.appendChild(crow);
+    }
+    return {questions:questions.length, cases:weakCases.length};
+  }
+  if(!questions.length){
+    els.weakQuestionsList.innerHTML='<div class="empty">Aún no hay preguntas falladas registradas en esta asignatura.</div>';
+    return {questions:0, cases:weakCases.length};
+  }
+  for(var i=0;i<Math.min(10,questions.length);i++){
+    var it=questions[i], row=document.createElement('div');
+    row.className='weak-item';
+    var exactKey2=(it.section||'')+'||'+(it.q||'');
+    var full2=lookup.byExact[exactKey2] || lookup.byQ[it.q||''] || it;
+    var html='<strong>'+escapeHtml(it.q)+'</strong><div class="small" style="margin-top:6px;">'+it.wrong+' fallos · '+escapeHtml(it.section||'')+(it.tag?' · '+escapeHtml(it.tag):'')+'</div>';
+    html+=buildReviewOptionsHtml(full2, null, false);
+    row.innerHTML=html;
+    els.weakQuestionsList.appendChild(row);
+  }
+  return {questions:questions.length, cases:weakCases.length};
+}
+function renderWeakScreen(){
+  if(!state.subject) return;
+  var short=state.subject.short;
+  var sub=progressStore[short] || emptySubject();
+  progressStore[short]=sub;
+  els.weakSubjectTitle.textContent=subjectDisplayName(state.subject);
+  var result=renderWeak(sub);
+  if(state.weakView==='cases'){
+    els.weakCountInfo.textContent=result.cases ? ('Mostrando '+Math.min(5,result.cases)+' caso'+(result.cases===1?'':'s')+' práctico'+(result.cases===1?'':'s')+' con más fallos.') : 'Aún no hay casos prácticos fallados registrados en esta asignatura.';
+  } else {
+    els.weakCountInfo.textContent=result.questions ? ('Mostrando '+Math.min(10,result.questions)+' pregunta'+(result.questions===1?'':'s')+' con más fallos.') : 'Aún no hay preguntas falladas registradas en esta asignatura.';
+  }
+  showScreen('weak');
+}
 function renderProgressSwitch(){ /* legacy no-op (new UI uses renderProgressSubjectList) */ }
 function getAvailableSubjects(){ var out=[]; for(var i=0;i<SUBJECTS.length;i++){ if(SUBJECTS[i].available) out.push(SUBJECTS[i]); } return out; }
 function renderMetricShareUI(){ /* legacy no-op */ }
 function bindMetricCheckboxes(){ /* legacy no-op */ }
-function selectedMetricKeys(){ var out=[], boxes=document.getElementsByName('metricShare'); for(var i=0;i<boxes.length;i++){ if(boxes[i].checked) out.push(boxes[i].value); } return out; }
-function formatMetricsText(subjectShort, keys, full){ var sub=progressStore[subjectShort]||emptySubject(); var ov=sub.overall; var answered=ov.answered; var acc=answered?(ov.correct/answered*100):0; var fail=answered?(ov.wrong/answered*100):0; var examen=getModeScoreStats(sub,'examen'); var examen1=getModeScoreStats(sub,'examen1'); var examenTotal=getModeScoreStats(sub,'examenTotal'); var lines=[]; lines.push('Asignatura: '+subjectShort); if(full) lines.push('');
-  var map={ sessions:'Sesiones: '+ov.sessions, accuracy:'% de acierto: '+acc.toFixed(1)+'%', failure:'% de fallo: '+fail.toFixed(1)+'%', answered:'Preguntas respondidas: '+ov.answered, time:'Tiempo total: '+Math.round(ov.totalTimeMs/60000)+' min', days:'Días de estudio: '+Object.keys(ov.days).length, examBestExamen:'Examen · Mejor nota: '+(typeof examen.bestScore==='number'?examen.bestScore.toFixed(2):'-'), examAvgExamen:'Examen · Nota media: '+(typeof examen.avgScore==='number'?examen.avgScore.toFixed(2):'-'), examLastExamen:'Examen · Última nota: '+(typeof examen.lastScore==='number'?examen.lastScore.toFixed(2):'-'), examBestExamen1:'Examen 1 · Mejor nota: '+(typeof examen1.bestScore==='number'?examen1.bestScore.toFixed(2):'-'), examAvgExamen1:'Examen 1 · Nota media: '+(typeof examen1.avgScore==='number'?examen1.avgScore.toFixed(2):'-'), examLastExamen1:'Examen 1 · Última nota: '+(typeof examen1.lastScore==='number'?examen1.lastScore.toFixed(2):'-'), examBestExamenTotal:'Examen total · Mejor nota: '+(typeof examenTotal.bestScore==='number'?examenTotal.bestScore.toFixed(2):'-'), examAvgExamenTotal:'Examen total · Nota media: '+(typeof examenTotal.avgScore==='number'?examenTotal.avgScore.toFixed(2):'-'), examLastExamenTotal:'Examen total · Última nota: '+(typeof examenTotal.lastScore==='number'?examenTotal.lastScore.toFixed(2):'-') };
-  for(var i=0;i<keys.length;i++){ if(map[keys[i]]) lines.push(map[keys[i]]); }
-  if(full){ lines.push(''); lines.push('Por secciones:'); var keys2=getModeKeysForSubject(subjectShort); for(var j=0;j<keys2.length;j++){ var mk=keys2[j], m=sub.modes[mk] || emptyMode(), a=m.answered?(m.correct/m.answered*100):0; lines.push('- '+MODES[mk].title+': '+m.sessions+' intentos · '+a.toFixed(1)+'% acierto'); } }
-  return lines.join('\n'); }
-
-/* ========== NEW SHARE SCREEN ========== */
-var SHARE_METRIC_GROUPS=[
-  {title:'Globales', items:[
-    {key:'g_sessions', label:'Sesiones totales', def:true},
-    {key:'g_accfail', label:'% Acierto / Fallo', def:true},
-    {key:'g_answered', label:'Preguntas respondidas', def:true},
-    {key:'g_time', label:'Tiempo total', def:true},
-    {key:'g_days', label:'Días activo', def:false},
-    {key:'g_streak', label:'Racha actual', def:false}
-  ]},
-  {title:'Estudio libre', items:[
-    {key:'f_cuestionario', label:'Cuestionario (sesiones · acierto)', def:true},
-    {key:'f_practicas', label:'Prácticas (sesiones · acierto)', def:true}
-  ]},
-  {title:'Exámenes — notas', items:[
-    {key:'en_examen1', label:'Examen 1 (todas las notas)', def:true},
-    {key:'en_examen', label:'Examen completo', def:false},
-    {key:'en_examenTotal', label:'Examen Total', def:false},
-    {key:'en_examenPersonalizado', label:'Examen Personalizado', def:true}
-  ]},
-  {title:'Resúmenes de examen', items:[
-    {key:'es_best', label:'Mejor nota', def:true},
-    {key:'es_avg', label:'Nota media', def:false},
-    {key:'es_last', label:'Última nota', def:false},
-    {key:'es_evo5', label:'Evolución (últimas 5)', def:false}
-  ]},
-  {title:'Histórico', items:[
-    {key:'h_last10', label:'Últimas 10 sesiones (fecha · modo · nota)', def:false}
-  ]}
-];
-function renderShareSubjectChips(){
-  var el=document.getElementById('shareSubjectChips'); if(!el) return;
-  var avail=getAvailableSubjects(); var html='';
-  for(var i=0;i<avail.length;i++){ var s=avail[i]; html+='<button type="button" class="share-chip'+(state.progressSubject===s.short?' active':'')+'" data-short="'+s.short+'">'+escapeHtml(subjectDisplayShort(s.short))+'</button>'; }
-  el.innerHTML=html;
-  var btns=el.querySelectorAll('.share-chip');
-  for(var j=0;j<btns.length;j++){ (function(btn){ btn.addEventListener('click', function(){ state.progressSubject=btn.getAttribute('data-short'); renderShareScreen(); }); })(btns[j]); }
-}
-function renderShareMetricGroups(){
-  var wrap=document.getElementById('shareMetricGroups'); if(!wrap) return;
-  // Preserve existing checked state on re-render
-  var prev={}; var existing=wrap.querySelectorAll('input[type=checkbox][data-share-key]'); for(var i=0;i<existing.length;i++){ prev[existing[i].getAttribute('data-share-key')]=existing[i].checked; }
-  var first=!existing.length;
-  var html='';
-  for(var g=0;g<SHARE_METRIC_GROUPS.length;g++){
-    var grp=SHARE_METRIC_GROUPS[g];
-    html+='<div class="cbox-group"><div class="g-title">'+escapeHtml(grp.title)+'</div><div class="cbox-grid">';
-    for(var k=0;k<grp.items.length;k++){ var it=grp.items[k]; var checked=first?it.def:!!prev[it.key]; html+='<label class="cbox"><input type="checkbox" data-share-key="'+it.key+'"'+(checked?' checked':'')+'> '+escapeHtml(it.label)+'</label>'; }
-    html+='</div></div>';
-  }
-  wrap.innerHTML=html;
-  var boxes=wrap.querySelectorAll('input[type=checkbox][data-share-key]');
-  for(var b=0;b<boxes.length;b++){ boxes[b].addEventListener('change', updateSharePreview); }
-}
-function getSelectedShareKeys(){ var out={}; var boxes=document.querySelectorAll('#shareMetricGroups input[type=checkbox][data-share-key]'); for(var i=0;i<boxes.length;i++){ if(boxes[i].checked) out[boxes[i].getAttribute('data-share-key')]=1; } return out; }
-function buildDetailedMetricsText(short, sel){
-  var sub=progressStore[short]||emptySubject(); var ov=sub.overall;
-  var answered=ov.answered||0; var acc=answered?(ov.correct/answered*100):0; var fail=answered?(ov.wrong/answered*100):0;
-  var lines=[];
-  lines.push('📊 Registro '+subjectDisplayShort(short));
-  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━');
-  // Globales
-  var gLines=[];
-  if(sel.g_sessions) gLines.push('  📝 Sesiones: '+(ov.sessions||0));
-  if(sel.g_accfail) gLines.push('  ✅ Acierto / Fallo: '+acc.toFixed(1)+'% / '+fail.toFixed(1)+'%');
-  if(sel.g_answered) gLines.push('  🔢 Preguntas: '+(ov.answered||0));
-  if(sel.g_time) gLines.push('  ⏱  Tiempo total: '+formatTimeHuman(ov.totalTimeMs||0));
-  if(sel.g_days) gLines.push('  📅 Días activo: '+Object.keys(ov.days||{}).length);
-  if(sel.g_streak) gLines.push('  🔥 Racha actual: '+computeStreak(sub)+' días');
-  if(gLines.length){ lines.push(''); lines.push('📈 General'); lines.push(gLines.join('\n')); }
-  // Estudio libre
-  var fLines=[];
-  if(sel.f_cuestionario){ var mc=(sub.modes&&sub.modes.cuestionario)||emptyMode(); var ac=mc.answered?(mc.correct/mc.answered*100):0; fLines.push('  · Cuestionario: '+(mc.sessions||0)+' sesiones · '+ac.toFixed(0)+'% acierto'); }
-  if(sel.f_practicas){ var mp=(sub.modes&&sub.modes.practicas)||emptyMode(); var ap=mp.answered?(mp.correct/mp.answered*100):0; fLines.push('  · Prácticas: '+(mp.sessions||0)+' sesiones · '+ap.toFixed(0)+'% acierto'); }
-  if(fLines.length){ lines.push(''); lines.push('📚 Estudio libre'); lines.push(fLines.join('\n')); }
-  // Exámenes - notas (por modo seleccionado)
-  var examModeMap={en_examen1:'examen1', en_examen:'examen', en_examenTotal:'examenTotal', en_examenPersonalizado:'examenPersonalizado'};
-  for(var ek in examModeMap){ if(!sel[ek]) continue; var mode=examModeMap[ek]; var availModes=getModeKeysForSubject(short); if(availModes.indexOf(mode)===-1) continue; var scores=getScoresForExamMode(sub, mode); var st=getModeScoreStats(sub, mode); var meta=getExamModeMeta(mode); if(!scores.length && !st.sessions){ lines.push(''); lines.push('🎯 '+meta.title+' (sin intentos)'); continue; }
-    lines.push('');
-    lines.push('🎯 '+meta.title+' ('+(st.sessions||0)+' intentos)');
-    if(scores.length){ var oldFirst=scores.slice().reverse(); var notes=oldFirst.map(function(s){ return s.toFixed(1); }).join(' · '); lines.push('  · Notas: '+notes); }
-    var summaryParts=[];
-    if(sel.es_best && typeof st.bestScore==='number') summaryParts.push('Mejor: '+st.bestScore.toFixed(1));
-    if(sel.es_avg && typeof st.avgScore==='number') summaryParts.push('Media: '+st.avgScore.toFixed(1));
-    if(sel.es_last && typeof st.lastScore==='number') summaryParts.push('Última: '+st.lastScore.toFixed(1));
-    if(sel.es_evo5){ var evo=scores.slice(0,5).reverse(); if(evo.length) summaryParts.push('Evolución: '+evo.map(function(s){return s.toFixed(1);}).join(' → ')); }
-    if(summaryParts.length) lines.push('  · '+summaryParts.join(' · '));
-  }
-  // If user selected summaries but no specific exam-modes, add an overall summary over all exam modes.
-  var anyExamModeSel=Object.keys(examModeMap).some(function(k){ return sel[k]; });
-  var anySummarySel=sel.es_best||sel.es_avg||sel.es_last||sel.es_evo5;
-  if(!anyExamModeSel && anySummarySel){
-    var combined=getCombinedExamStats(sub);
-    lines.push('');
-    lines.push('🎯 Exámenes (todos)');
-    var sp=[];
-    if(sel.es_best && typeof combined.bestScore==='number') sp.push('Mejor: '+combined.bestScore.toFixed(1));
-    var avg=combined.sessions?combined.totalScore/combined.sessions:null;
-    if(sel.es_avg && typeof avg==='number') sp.push('Media: '+avg.toFixed(1));
-    if(sel.es_last && typeof combined.lastScore==='number') sp.push('Última: '+combined.lastScore.toFixed(1));
-    if(sp.length) lines.push('  · '+sp.join(' · '));
-  }
-  // Histórico últimas 10
-  if(sel.h_last10){
-    var hist=(sub.history||[]).slice(0,10);
-    if(hist.length){
-      lines.push('');
-      lines.push('🕐 Últimas '+hist.length+' sesiones');
-      for(var hi=0;hi<hist.length;hi++){ var h=hist[hi]||{}; var pill=progressModePillLabel(h.mode); var when=progressRel(h.finishedAt); var sc=(isExamMode(h.mode) && typeof h.score==='number')?(' · Nota '+h.score.toFixed(1)):''; var pct=(typeof h.percent==='number')?(' · '+h.percent.toFixed(0)+'%'):''; lines.push('  · '+when+' — '+pill+sc+pct); }
-    }
-  }
-  return lines.join('\n');
-}
-function updateSharePreview(){
-  var el=document.getElementById('sharePreviewBox'); if(!el) return;
-  var short=state.progressSubject; var sel=getSelectedShareKeys();
-  var text=buildDetailedMetricsText(short, sel);
-  if(el.tagName==='PRE' || el.tagName==='DIV'){ el.textContent=text; } else { el.value=text; }
-}
-function renderShareScreen(){
-  renderShareSubjectChips();
-  renderShareMetricGroups();
-  updateSharePreview();
-}
-function getStudentName(forceAsk){ var name=''; try{ name=localStorage.getItem(NAME_KEY)||''; }catch(e){} if(forceAsk || !name){ name=window.prompt('Escribe tu nombre para compartir:', name||''); if(name){ try{ localStorage.setItem(NAME_KEY, name); }catch(e2){} } }
-  return name||''; }
-function shareText(text){ if(navigator.share){ navigator.share({text:text, title:'Repaso TSEI'}).catch(function(){}); return; }
-  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ alert('Texto copiado. Ya puedes pegarlo donde quieras.'); }).catch(function(){ fallbackCopy(text); }); return; }
-  fallbackCopy(text);
-}
-function fallbackCopy(text){ var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); alert('Texto copiado.'); }catch(e){ alert(text); } document.body.removeChild(ta); }
-function downloadText(filename, text){ var blob=new Blob([text], {type:'text/plain;charset=utf-8'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 100); }
-function detectQuestionOrigin(item){
-  var section=(item && item.section ? String(item.section) : '').toLowerCase();
-  var tag=(item && item.tag ? String(item.tag) : '').toLowerCase();
-  var block=(item && item.block ? String(item.block) : '').toLowerCase();
-
-  if(state.mode==='practicas') return 'Test de prácticas';
-  if(state.mode==='examen'){
-    if(block.indexOf('caso práctico')!==-1) return 'Examen · caso práctico';
-    return 'Examen';
-  }
-  if(state.mode==='examen1'){
-    if(block.indexOf('caso práctico')!==-1) return 'Examen 1 · caso práctico';
-    return 'Examen 1';
-  }
-  if(section.indexOf('1ª evaluación')!==-1 || section.indexOf('1a evaluación')!==-1 || section.indexOf('1ª eval')!==-1 || tag.indexOf('1ª eval')!==-1 || tag.indexOf('1a eval')!==-1){
-    return 'Cuestionario de 1ª evaluación';
-  }
-  if(section.indexOf('2ª evaluación')!==-1 || section.indexOf('2a evaluación')!==-1 || section.indexOf('2ª eval')!==-1 || tag.indexOf('2ª eval')!==-1 || tag.indexOf('2a eval')!==-1){
-    return 'Cuestionario de 2ª evaluación';
-  }
-  return 'Cuestionario por temas';
-}
-function buildQuestionShareText(){
-  var item=state.sessionItems[state.currentIndex];
-  if(!item) return '';
-  var lines=[];
-  lines.push('REPORTE DE POSIBLE ERROR EN PREGUNTA');
-  lines.push('');
-  lines.push('Asignatura: '+subjectDisplayShort(state.subject.short));
-  lines.push('Modo actual: '+MODES[state.mode].title);
-  lines.push('Origen de la pregunta: '+detectQuestionOrigin(item));
-  lines.push('Bloque: '+(item.block || '-'));
-  lines.push('Sección: '+(item.section || '-'));
-  lines.push('Etiqueta: '+(item.tag || '-'));
-  lines.push('Número en la sesión: '+(state.currentIndex+1)+' de '+state.sessionItems.length);
-  lines.push('');
-  lines.push('Pregunta: '+item.q);
-  lines.push('');
-  for(var i=0;i<item.options.length;i++){
-    lines.push((i+1)+'. '+item.options[i]);
-  }
-  lines.push('');
-  lines.push('Observación: Creo que esta pregunta o su respuesta correcta puede estar mal revisada.');
-  return lines.join('\n');
-}
-function buildActivityShareText(){ var sum=state.lastSummary; if(!sum) return ''; var lines=[]; lines.push('Asignatura: '+subjectDisplayShort(state.subject.short)); lines.push('Modo: '+MODES[state.mode].title); lines.push('Aciertos: '+sum.correct); lines.push('Errores: '+sum.wrong); lines.push('Sin contestar: '+sum.blank); if(typeof sum.score==='number') lines.push('Nota: '+sum.score.toFixed(2)); return lines.join('\n'); }
-function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function resetHome(){ state.subject=null; state.mode=null; state.sessionItems=[]; state.answers=[]; state.currentIndex=0; state.selectedPracticeCaseIndex=null; hidePracticePicker(); renderSubjects(); showScreen('home'); }
-function backSubject(){ hidePracticePicker(); if(state.subject){ renderModeMenu(); showScreen('menu'); } else resetHome(); }
-
-function toggleTheme(){
-  var isDark=document.body.classList.contains('dark');
-  document.body.classList.toggle('dark',!isDark);
-  if(document.documentElement) document.documentElement.classList.toggle('dark',!isDark);
-  try{ localStorage.setItem('tsei_theme',isDark?'light':'dark'); }catch(e){}
-  updateThemeFabIcon();
-}
-
-function getExamCountdownTarget(){
-  return new Date('2026-05-10T09:00:00+02:00');
-}
-var examCountdownTimer=null;
-function updateExamCountdown(){
-  var wrap=document.getElementById('examCountdown');
-  var daysEl=document.getElementById('examCountdownDays');
-  var hoursEl=document.getElementById('examCountdownHours');
-  var minutesEl=document.getElementById('examCountdownMinutes');
-  var statusEl=document.getElementById('examCountdownStatus');
-  if(!wrap || !daysEl || !hoursEl || !minutesEl) return;
-
-  var diff=getExamCountdownTarget().getTime()-Date.now();
-  if(diff<=0){
-    daysEl.textContent='0';
-    hoursEl.textContent='00';
-    minutesEl.textContent='00';
-    if(statusEl) statusEl.textContent='Los exámenes ya han empezado. Mucha mierda 🍀';
-    wrap.classList.add('is-live');
-    return;
-  }
-
-  wrap.classList.remove('is-live');
-  var totalMinutes=Math.floor(diff/60000);
-  var days=Math.floor(totalMinutes/(60*24));
-  var hours=Math.floor((totalMinutes%(60*24))/60);
-  var minutes=totalMinutes%60;
-
-  daysEl.textContent=String(days);
-  hoursEl.textContent=String(hours).padStart(2,'0');
-  minutesEl.textContent=String(minutes).padStart(2,'0');
-  if(statusEl) statusEl.textContent='Faltan '+days+' día'+(days===1?'':'s')+', '+hours+' hora'+(hours===1?'':'s')+' y '+minutes+' minuto'+(minutes===1?'':'s')+'.';
-}
-function initExamCountdown(){
-  updateExamCountdown();
-  if(examCountdownTimer) clearInterval(examCountdownTimer);
-  examCountdownTimer=setInterval(updateExamCountdown,1000);
-}
-
-function init(){ createAuthUi(); updateAuthUi(); setupFirebase(); applySavedTheme(); renderSubjects(); initExamCountdown();
-  var brandHome=document.getElementById('brandHome'); if(brandHome){ brandHome.addEventListener('click', function(){ resetHome(); }); }
-  els.progressBtn.addEventListener('click', function(){ if(state.subject && state.subject.short){ state.progressSubject=state.subject.short; } else if(!state.progressSubject){ state.progressSubject=(getAvailableSubjects()[0] ? getAvailableSubjects()[0].short : 'PIICT'); } renderProgress(); });
-
-  /* ── SINCRONIZACIÓN MANUAL + AUTO ── */
-  var syncBtnOriginalHtml='';
-  async function doManualSync(){
-    if(!els.syncTopBtn) return;
-    if(syncBtnOriginalHtml==='') syncBtnOriginalHtml=els.syncTopBtn.innerHTML;
-    if(!authReady || !auth || !db){
-      els.syncTopBtn.innerHTML='&#x26A0; Firebase no listo';
-      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2200);
-      return;
-    }
-    if(!auth.currentUser){
-      els.syncTopBtn.innerHTML='&#x26A0; Inicia sesión con Google';
-      setTimeout(function(){ els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },2600);
-      return;
-    }
-    els.syncTopBtn.disabled=true;
-    els.syncTopBtn.innerHTML='&#x21BB; Sincronizando...';
-    try{
-      await saveProgressToCloud(true);
-      await applyCloudProgress(auth.currentUser);
-      els.syncTopBtn.innerHTML='&#x2705; Sincronizado';
-    }catch(e){
-      console.error('Sync manual falló:',e);
-      els.syncTopBtn.innerHTML='&#x274C; Error';
-    }finally{
-      setTimeout(function(){ els.syncTopBtn.disabled=false; els.syncTopBtn.innerHTML=syncBtnOriginalHtml; },1800);
-    }
-  }
-  if(els.syncTopBtn) els.syncTopBtn.addEventListener('click', doManualSync);
-
-  /* Auto-sync al ocultar pestaña / cerrar app (rescata los últimos 700ms del debounce) */
-  function flushSyncIfPossible(){
-    try{
-      if(typeof saveLocalProgress==='function') saveLocalProgress();
-      if(authReady && auth && auth.currentUser && db){
-        saveProgressToCloud(true);
-      }
-    }catch(e){}
-  }
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState==='hidden') flushSyncIfPossible();
-  });
-  window.addEventListener('pagehide', flushSyncIfPossible);
-  window.addEventListener('beforeunload', flushSyncIfPossible);
-  if(els.authActionBtn) els.authActionBtn.addEventListener('click', function(){ if(state.authUser) signOutGoogle(); else signInWithGoogle(); });
-  els.listQuizBtn.addEventListener('click', function(){ renderQuestionListScreen('cuestionario'); }); els.listPracticeBtn.addEventListener('click', function(){ renderQuestionListScreen('practicas'); }); if(els.listExam1Btn){ els.listExam1Btn.addEventListener('click', function(){ renderQuestionListScreen('examen1'); }); } els.listBackBtn.addEventListener('click', backSubject); els.listHomeBtn.addEventListener('click', resetHome); if(els.weakBackBtn) els.weakBackBtn.addEventListener('click', backSubject); if(els.weakHomeBtn) els.weakHomeBtn.addEventListener('click', resetHome);
-  els.practiceRandomBtn.addEventListener('click', function(){ startPracticeCase(null); }); els.practiceBackBtn.addEventListener('click', hidePracticePicker);
-  var _resetBtn=document.getElementById('resetSubjectProgressBtn'); if(_resetBtn) _resetBtn.addEventListener('click', function(){ var short=state.progressSubject || (state.subject&&state.subject.short); if(!short) return; if(window.confirm('¿Seguro que quieres borrar todo el registro de '+subjectDisplayByShort(short)+'? Esta acción no se puede deshacer.')) resetSubjectProgress(short); });
-  els.homeTopBtn.addEventListener('click', resetHome); els.homeBtn.addEventListener('click', resetHome); els.subjectBtn.addEventListener('click', backSubject); els.repeatBtn.addEventListener('click', function(){ startMode(state.mode); }); els.nextBtn.addEventListener('click', nextQuestion); els.exitBtn.addEventListener('click', function(){ if(window.confirm('¿Salir de la sesión? Perderás el progreso actual.')) resetHome(); }); els.themeBtn.addEventListener('click', toggleTheme); els.shareQuestionBtn.addEventListener('click', function(){ var txt=buildQuestionShareText(); if(txt) shareText(txt); }); els.shareActivityBtn.addEventListener('click', function(){ var txt=buildActivityShareText(); if(txt) shareText(txt); }); els.appHelpBtn.addEventListener('click', function(){ showScreen('help'); }); els.helpBackBtn.addEventListener('click', resetHome); els.toggleInfoBtn.addEventListener('click', function(){ els.sectionTag.style.display = els.sectionTag.style.display==='none' ? 'block' : 'none'; });
-  els.shareRegistryTopBtn.addEventListener('click', function(){ if(!state.progressSubject){ state.progressSubject=(state.subject && state.subject.short) ? state.subject.short : (getAvailableSubjects()[0] ? getAvailableSubjects()[0].short : 'PIICT'); } showScreen('share'); renderShareScreen(); });
-  bindProgressChartChips();
-  var _shareBack=document.getElementById('shareBackBtn'); if(_shareBack) _shareBack.addEventListener('click', function(){ renderProgress(); });
-  var _selAll=document.getElementById('selectAllMetricsBtn'); if(_selAll) _selAll.addEventListener('click', function(){ var boxes=document.querySelectorAll('#shareMetricGroups input[type=checkbox][data-share-key]'); for(var i=0;i<boxes.length;i++) boxes[i].checked=true; updateSharePreview(); });
-  var _deselAll=document.getElementById('deselectAllMetricsBtn'); if(_deselAll) _deselAll.addEventListener('click', function(){ var boxes=document.querySelectorAll('#shareMetricGroups input[type=checkbox][data-share-key]'); for(var i=0;i<boxes.length;i++) boxes[i].checked=false; updateSharePreview(); });
-  var _shareNow=document.getElementById('shareMetricsNowBtn'); if(_shareNow) _shareNow.addEventListener('click', function(){ shareText(buildDetailedMetricsText(state.progressSubject, getSelectedShareKeys())); });
-  var _dl=document.getElementById('downloadTxtBtn'); if(_dl) _dl.addEventListener('click', function(){ downloadText('registro_'+state.progressSubject+'.txt', buildDetailedMetricsText(state.progressSubject, getSelectedShareKeys())); });
-  showScreen('home');
-}
-
-// ── EXAMEN PERSONALIZADO — config por asignatura (espeja el examen normal) ──
-var CUSTOM_EXAM_CONFIG = {
-  'PIICT':          {total:30, general:24, caseCount:6},
-  'TPIDA':          {total:30, general:24, caseCount:6},
-  'Inglés':         {total:20, general:14, caseCount:6},
-  'IPE II':         {total:20, general:20, caseCount:0},
-  'Optativo':       {total:20, general:14, caseCount:6},
-  'TPIE':           {total:30, general:24, caseCount:6},
-  'Digitalización': {total:30, general:24, caseCount:6},
-  'Sostenibilidad': {total:10, general:10, caseCount:0}
-};
-function getCustomExamConfig(short){ return CUSTOM_EXAM_CONFIG[short] || {total:20, general:20, caseCount:0}; }
-function isExamModeForGif(mode){ return mode==='examen' || mode==='examen1' || mode==='examenTotal'; }
-function renderCustomPicker(){
-  var data=currentData(); if(!data) return;
-  var s=state.subject; if(!s) return;
-  var cfg=getCustomExamConfig(s.short);
-  var bank=data.questionBank||[];
-  var secsMap={};
-  for(var i=0;i<bank.length;i++){ var sec=(bank[i]&&bank[i].section)||''; if(sec) secsMap[sec]=(secsMap[sec]||0)+1; }
-  var secs=Object.keys(secsMap).sort(function(a,b){
-    var ma=a.match(/TEMA\s+(\d+)/i), mb=b.match(/TEMA\s+(\d+)/i);
-    if(ma && mb) return parseInt(ma[1],10)-parseInt(mb[1],10);
-    if(ma) return -1; if(mb) return 1;
-    return a.localeCompare(b,'es');
-  });
-  var hasCase = cfg.caseCount>0 && data.practicalCases && data.practicalCases.length;
-  var html='<div class="card" style="padding:24px;">';
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">';
-  html+='<h3 style="margin:0;">🎯 Examen personalizado</h3>';
-  html+='<button class="btn ghost small" id="customBackBtn">&#x2190; Volver</button>';
-  html+='</div>';
-  html+='<div class="small" style="margin-bottom:14px;">'+cfg.total+' preguntas en total'+(hasCase?' ('+cfg.general+' del banco + '+cfg.caseCount+' del caso práctico)':'')+'. Misma penalización que el examen normal.</div>';
-  html+='<h4 style="margin:12px 0 8px;font-family:var(--font-display);font-size:15px;">Secciones del banco</h4>';
-  html+='<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn ghost small" id="customSelectAllBtn">Seleccionar todas</button><button class="btn ghost small" id="customClearBtn">Limpiar</button></div>';
-  if(!secs.length){
-    html+='<div class="empty">Este banco no tiene secciones etiquetadas.</div>';
-  } else {
-    html+='<div class="checkbox-grid" id="customSectionGrid">';
-    for(var k=0;k<secs.length;k++){
-      html+='<label class="checkbox-card" title="'+escapeHtml(secs[k])+'"><input type="checkbox" data-sec="'+escapeHtml(secs[k])+'" checked> <span class="cb-label">'+escapeHtml(secs[k])+'</span> <span class="small cb-count">('+secsMap[secs[k]]+')</span></label>';
-    }
-    html+='</div>';
-  }
-  if(hasCase){
-    html+='<h4 style="margin:18px 0 8px;font-family:var(--font-display);font-size:15px;">Caso práctico ('+cfg.caseCount+' preguntas)</h4>';
-    html+='<select id="customCaseSelect" class="btn ghost" style="padding:10px 14px;border-radius:14px;width:100%;max-width:100%;">';
-    html+='<option value="-1">🎲 Aleatorio</option>';
-    for(var c=0;c<data.practicalCases.length;c++){
-      html+='<option value="'+c+'">'+escapeHtml(getPracticeCardTitle(data.practicalCases[c], c))+'</option>';
-    }
-    html+='</select>';
-  }
-  html+='<div style="display:flex;justify-content:flex-end;margin-top:20px;"><button class="btn primary" id="customStartBtn">Empezar examen</button></div>';
-  html+='</div>';
-  var panel=document.getElementById('customPickerPanel');
-  if(!panel) return;
-  panel.innerHTML=html;
-  panel.style.display='block';
-  if(els.practicePickerPanel) els.practicePickerPanel.style.display='none';
-  setTimeout(function(){ try{ panel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ panel.scrollIntoView(); } }, 50);
-  document.getElementById('customBackBtn').addEventListener('click', hideCustomPicker);
-  var sa=document.getElementById('customSelectAllBtn');
-  if(sa) sa.addEventListener('click', function(){ var ns=panel.querySelectorAll('input[data-sec]'); for(var i=0;i<ns.length;i++) ns[i].checked=true; });
-  var cl=document.getElementById('customClearBtn');
-  if(cl) cl.addEventListener('click', function(){ var ns=panel.querySelectorAll('input[data-sec]'); for(var i=0;i<ns.length;i++) ns[i].checked=false; });
-  document.getElementById('customStartBtn').addEventListener('click', function(){
-    var selected=[], ns=panel.querySelectorAll('input[data-sec]:checked');
-    for(var i=0;i<ns.length;i++) selected.push(ns[i].getAttribute('data-sec'));
+function selectedMetricKeys(){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 c'));
     if(!selected.length && secs.length){ alert('Selecciona al menos una sección del banco.'); return; }
     var caseIdx=-1, cs=document.getElementById('customCaseSelect');
     if(cs) caseIdx=parseInt(cs.value,10);
